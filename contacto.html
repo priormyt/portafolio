@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nosotros | ANTE Estudio</title>
+  <style>
+    :root {
+      --text: #f5f5e9;           /* texto en blanco */
+      --accent: #f5f5e9;      /* hueso para acentos */
+    }
+    *,*::before,*::after{box-sizing:border-box;}
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: Helvetica, Arial, sans-serif;
+      /* Fondo fijo y ampliado para cubrir el área al animar */
+      background-image: url('img/Fondo2.jpg') !important;
+      background-repeat: no-repeat !important;
+      background-attachment: fixed !important;
+      background-size: 120% 150%;              /* escala inicial */
+      background-position: 50% 80%;            /* posición inicial */
+      /* Animación lenta y alternada */
+      animation: fondo-mueve 60s ease-in-out infinite alternate !important;
+      color: var(--text) !important;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+    a { color: inherit; text-decoration: none; }
+    header{
+      position:fixed;
+      top:0;
+      left:0;
+      width: 190px;
+      height:100vh;
+      padding:2.5rem 1rem 2rem;
+      display:flex;
+      flex-direction:column;
+      align-items:flex-start;
+      gap:2.5rem;
+      background: rgba(28, 28, 28, 1);
+      border:none;
+      pointer-events:none;
+      z-index:10;
+    }
+    header *{pointer-events:auto;}
+    nav ul{
+      list-style:none;
+      margin:0;
+      padding:0;
+      display:flex;
+      flex-direction:column;
+      gap:1.4rem;
+      width:100%;
+    }
+    nav a{
+      text-transform: uppercase;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: .05em;
+      background:none;
+      color: #f5f5e9;
+      padding: .65rem 1.4rem .65rem 1.6rem;
+      border-radius: 12px;
+      width: 100%;
+      text-align: left;
+      display: block;
+      transition:background .25s,color .25s,transform .25s,box-shadow .25s;
+      box-shadow: 0 0 6px rgba(0,0,0,0.25);
+    }
+    nav a:active{
+      transform: translateY(1px) scale(0.99);
+      box-shadow: 0 0 4px rgba(0,0,0,0.3);
+    }
+    nav a:hover{
+      background: #f5f5e9;
+      color: #111;
+      transform:translateX(4px) translateY(-2px) scale(1.12);
+      box-shadow: 0 6px 18px rgba(0,0,0,.25);
+    }
+    .fab {
+      display: none;
+    }
+
+    /* Contenido principal */
+    .contenido-nosotros {
+      margin-left: 210px;
+      padding: 3rem 2rem 2rem 2rem;
+      max-width: none;
+    }
+    .contenido-nosotros h1 {
+      font-size: 2.5rem;
+      color: var(--accent);
+      margin-bottom: 1.2rem;
+      letter-spacing: .08em;
+    }
+    .contenido-nosotros h2 {
+      color: var(--accent);
+      margin-top: 2.5rem;
+      margin-bottom: 1rem;
+      font-size: 1.4rem;
+      letter-spacing: .06em;
+    }
+    .contenido-nosotros p {
+      font-size: 1.15rem;
+      margin-bottom: 1.2rem;
+      color: var(--text);
+      line-height: 1.8;
+    }
+    .equipo {
+      display: flex;
+      gap: 2.5rem;
+      flex-wrap: wrap;
+      margin-top: 2rem;
+      margin-bottom: 2rem;
+    }
+    .miembro {
+      background: rgba(24,24,24,0.7);
+      border-radius: 12px;
+      padding: 1.2rem 1.5rem;
+      flex: 1 1 220px;
+      min-width: 220px;
+      max-width: 260px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.18);
+      color: var(--accent);
+      text-align: center;
+    }
+    .miembro h3 {
+      margin: 0.5rem 0 0.2rem 0;
+      font-size: 1.15rem;
+      color: var(--accent);
+      letter-spacing: .04em;
+    }
+    .miembro p {
+      color: #fff;
+      font-size: 1rem;
+      margin: 0.2rem 0 0 0;
+      line-height: 1.5;
+    }
+    @media (max-width: 900px) {
+      header {
+        position: sticky;
+        width: 100%;
+        height: auto;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 2vw;
+        border-right: none;
+        border-bottom: 1px solid rgba(255,255,255,.08);
+        gap: 1rem;
+      }
+      nav ul {
+        flex-direction: row;
+        gap: 1.2rem;
+        width: auto;
+      }
+      .fab {
+        display: flex;
+      }
+      .contenido-nosotros {
+        margin-left: 0;
+        padding: 2.5rem 1rem 1.5rem 1rem;
+        max-width: 100vw;
+      }
+      .equipo {
+        flex-direction: column;
+        gap: 1.2rem;
+      }
+    }
+
+    /* ===== Adaptación automática para móvil (<=768 px o UA móvil) ===== */
+body.mobile .fab{
+  position:fixed;
+  top:20px;
+  left:20px;
+  transform:none;
+  width:56px;
+  height:56px;
+  border-radius:50%;
+  background:var(--accent);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:1.5rem;
+  color:#111;
+  cursor:pointer;
+  z-index:20;
+  transition:transform .1s, box-shadow .25s;
+}
+body.mobile .fab {
+  background: var(--accent) !important; /* hueso/blanco */
+  color: #111 !important;               /* ícono oscuro */
+}
+body.mobile .fab.active {
+  background: #111 !important;          /* fondo negro cuando está activo */
+  color: var(--accent) !important;      /* ícono hueso/blanco */
+}
+body.mobile .fab:active{
+  transform: scale(0.97);
+}
+    body.mobile header{
+      width:100%;
+      height:0;
+      overflow:visible;
+      padding:0;
+      background:transparent;
+      border:none;
+    }
+
+
+body.mobile header nav{
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  position: fixed;
+  top: 90px;
+  left: 20px;
+  transform: none;
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  opacity: 0;
+  max-height: none;
+  overflow: visible;
+  transition: opacity .35s ease;
+}
+body.mobile header.open nav{
+  opacity: 1;
+  max-height: none;
+}
+    body.mobile header nav ul{
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1.2rem;
+      margin: 0;
+      padding: 0;
+      transform: translateY(-20px);
+      transition: transform .35s ease;
+    }
+    body.mobile header.open nav ul{
+      transform: translateY(0);
+    }
+    body.mobile header nav li{
+      transform: translateY(-20px);
+      opacity: 0;
+      transition: transform .35s ease, opacity .35s ease;
+    }
+    body.mobile header.open nav li{
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* === Sombra sutil solo para botones en menú móvil desplegable === */
+    body.mobile header.open nav a {
+      background: #111 !important;
+      color: #fff !important; /* Siempre blanco en móvil */
+      box-shadow: 0 0 6px rgba(0,0,0,0.25) !important;
+      border-radius: 12px;
+      padding: .65rem 1.4rem .65rem 1.6rem;
+      width: 100%;
+      text-align: left;
+      display: block;
+      transition: background .25s, color .25s, transform .25s, box-shadow .25s;
+    }
+    body.mobile header.open nav a:hover,
+    body.mobile header.open nav a:active {
+      background: #f5f5e9 !important;  /* hueso en hover */
+      color: #111 !important;
+      box-shadow: 0 0 8px rgba(0,0,0,0.35) !important;
+    }
+
+    @keyframes fondo-mueve {
+      100%   { background-position: 50% 80%; }
+      100% { background-position: 50% 20%; }
+    }
+
+    /* Asegura que el contenido sea legible */
+    .contenido-nosotros h1,
+    .contenido-nosotros h2 {
+      color: var(--accent) !important;
+    }
+    .contenido-nosotros p,
+    .contenido-nosotros li a,
+    .contenido-nosotros label,
+    .contenido-nosotros input,
+    .contenido-nosotros textarea,
+    .contenido-nosotros button {
+      color: var(--text) !important;
+    }
+    
+    .logo-float{
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    left: auto;
+    display: block;
+    width: auto;
+    min-width: 120px;
+    max-width: 300px;
+    height: auto;
+    box-shadow: none;
+    border-radius: 0;
+    background: transparent;
+    text-shadow:
+      0 2px 8px rgba(0,0,0,0.275),   /* sombra principal a la mitad */
+      0 0.5px 0.5px rgba(0,0,0,0.125),
+      0 0px 0px #000;
+    color: var(--accent);
+    font-family: "Marion", serif;
+    font-size: clamp(24px, 7vw, 60px);
+    white-space: nowrap;
+    letter-spacing: .09em;
+    text-decoration: none;
+    line-height: 1;
+    overflow: visible;
+    text-overflow: unset;
+    z-index: 120;
+    pointer-events: auto;
+    transition: transform .2s;
+  }
+  .logo-float:hover {
+    transform: translateY(-4px) scale(1.07);
+  }
+
+  /* Elimina el fondo de los campos de respuesta del formulario */
+.contenido-nosotros form input,
+.contenido-nosotros form textarea {
+  background-color: transparent !important;
+}
+.contenido-nosotros form button[type="submit"] {
+  background-color: transparent !important;
+  color: var(--text) !important;
+  box-shadow: none !important;
+}
+
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <ul>
+        <li><a href="index.html">Inicio</a></li>
+        <li><a href="galeria.html">Galería</a></li>
+        <li><a href="nosotros.html">Nosotros</a></li>
+        <li><a href="contacto.html">Contacto</a></li>
+        <li><a href="mas.html">Más</a></li>
+      </ul>
+    </nav>
+    <div id="menuBtn" class="fab">☰</div>
+  </header>
+  <main class="contenido-nosotros">
+    <h1>Contacto</h1>
+    <p>En <strong>ANTE Estudio Fotográfico</strong> estamos listos para ayudarte a crear imágenes profesionales que transmitan la esencia de tu marca, empresa o proyecto personal. Contáctanos para <em>agendar sesiones fotográficas</em>, solicitar <em>cotizaciones personalizadas</em> o conocer más sobre nuestro <em>portafolio de fotografía profesional en Ciudad de México</em>.</p>
+
+    <h2>Datos de contacto</h2>
+    <p><strong>Teléfono:</strong> <a href="tel:+525951220554">+52 (595) 122 0554</a></p>
+    <p><strong>Correo electrónico:</strong> <a href="mailto:contacto@anteestudio.com">contacto@anteestudio.com</a></p>
+    <p><strong>Ubicación:</strong> Foro Colibrí, Ciudad de México – Estudio fotográfico con equipo profesional</p>
+
+    <h2>Redes sociales</h2>
+    <p>Síguenos para conocer proyectos recientes, sesiones y promociones exclusivas:</p>
+    <ul>
+      <li><a href="https://instagram.com/anteestudio" target="_blank" rel="noopener">Instagram ANTE Estudio</a></li>
+      <li><a href="https://facebook.com/anteestudio" target="_blank" rel="noopener">Facebook ANTE Estudio</a></li>
+    </ul>
+
+    <h2>Agenda tu sesión</h2>
+    <p>Comparte con nosotros los detalles de tu proyecto y agenda tu sesión en nuestro estudio fotográfico en CDMX. Especialistas en <em>fotografía de retrato empresarial</em>, <em>fotografía de portafolio artístico</em> y <em>fotografía profesional de productos</em>.</p>
+
+    <h2>Formulario de contacto</h2>
+    <p>Completa el siguiente formulario y nuestro equipo se pondrá en contacto contigo a la brevedad.</p>
+    <form action="mailto:contacto@anteestudio.com" method="POST" enctype="text/plain" style="display:flex;flex-direction:column;gap:1rem;max-width:600px;">
+      <label for="nombre"><strong>Nombre completo</strong></label>
+      <input type="text" id="nombre" name="nombre" required placeholder="Escribe tu nombre" style="padding:.8rem;border-radius:8px;border:none;">
+      
+      <label for="email"><strong>Correo electrónico</strong></label>
+      <input type="email" id="email" name="email" required placeholder="ejemplo@correo.com" style="padding:.8rem;border-radius:8px;border:none;">
+      
+      <label for="telefono"><strong>Teléfono</strong></label>
+      <input type="tel" id="telefono" name="telefono" placeholder="+52 55 0000 0000" style="padding:.8rem;border-radius:8px;border:none;">
+      
+      <label for="mensaje"><strong>Mensaje</strong></label>
+      <textarea id="mensaje" name="mensaje" rows="5" required placeholder="Cuéntanos sobre tu proyecto o sesión" style="padding:.8rem;border-radius:8px;border:none;"></textarea>
+      
+      <button type="submit" style="padding:1rem;border:none;border-radius:8px;background:var(--accent);color:#111;font-weight:700;cursor:pointer;transition:background .3s;">Enviar</button>
+    </form>
+  </main>
+  <script>
+    // Detectar móvil y actualizar clase 'mobile' dinámica
+    function setDeviceClass(){
+      const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+                       || window.matchMedia('(max-width:768px)').matches;
+      document.body.classList.toggle('mobile', isMobile);
+    }
+    setDeviceClass();
+    window.addEventListener('resize', setDeviceClass);
+
+    // Botón flotante para menú móvil
+    const menuBtn = document.getElementById('menuBtn');
+    if(menuBtn){
+      menuBtn.addEventListener('click', ()=>{
+        const header = document.querySelector('header');
+        header.classList.toggle('open');
+        menuBtn.classList.toggle('active');
+      });
+    }
+
+    // Cerrar menú móvil automáticamente al INICIAR scroll
+    let lastScrollTop = 0;
+    window.addEventListener('scroll', () => {
+      if(document.body.classList.contains('mobile')){
+        const header = document.querySelector('header');
+        if(header.classList.contains('open')){
+          const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+          if(Math.abs(currentScroll - lastScrollTop) > 5){
+            header.classList.remove('open');
+            menuBtn.classList.remove('active');
+          }
+          lastScrollTop = currentScroll;
+        }
+      }
+    });
+</script>
+<a href="index.html" class="logo-float">A&nbsp;N&nbsp;T&nbsp;E</a>
+</body>
+</html>
