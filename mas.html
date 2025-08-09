@@ -286,7 +286,7 @@
   <video id="bgVideo" class="video-bg" autoplay muted loop playsinline preload="metadata" poster="img/Fondo3.jpg" style="position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:cover;z-index:-1;filter:brightness(0.7);">
     <source src="Dawn Timelapse Video.mp4" type="video/mp4">
   </video>
-  <img id="bgFallback" src="img/poster-mas.jpg" alt="Fondo estático" style="position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:cover;z-index:-1;filter:brightness(0.7);display:none;">
+  <img id="bgFallback" src="img/Fondo3.jpg" alt="" style="position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:cover;z-index:-1;filter:brightness(0.7);display:none;">
   <header>
     <nav>
       <ul>
@@ -349,7 +349,9 @@
     (function(){
       const video = document.getElementById('bgVideo');
       const fallback = document.getElementById('bgFallback');
-      const saveData = navigator.connection && navigator.connection.saveData;
+      const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+      const isSaveData = conn && conn.saveData;
+      const isLowNetwork = conn && (['slow-2g','2g'].includes(conn.effectiveType || '') || (conn.downlink && conn.downlink < 0.5) || (conn.rtt && conn.rtt > 800));
 
       function showFallback(){
         if (video) {
@@ -360,12 +362,26 @@
         if (fallback) fallback.style.display = 'block';
       }
 
+      // Asegurar que el fallback use el mismo archivo que el poster del video
+      if (fallback && video && video.getAttribute('poster')) {
+        fallback.src = video.getAttribute('poster');
+      }
+
       if (!video) return;
 
-      if (saveData) {
-        // Ahorro de datos activo: usar imagen estática
+      if (isSaveData || isLowNetwork) {
+        // Ahorro de datos activo o conexión lenta: usar imagen estática
         showFallback();
         return;
+      }
+
+      if (conn && typeof conn.addEventListener === 'function') {
+        conn.addEventListener('change', () => {
+          const nowLow = (['slow-2g','2g'].includes(conn.effectiveType || '') || (conn.downlink && conn.downlink < 0.5) || (conn.rtt && conn.rtt > 800));
+          if (conn.saveData || nowLow) {
+            showFallback();
+          }
+        });
       }
 
       // Asegurar flags de iOS
