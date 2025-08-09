@@ -84,19 +84,39 @@
 </head>
 <body>
   <section class="hero" aria-label="Logo ANTE">
-    <video autoplay muted loop playsinline class="hero-video">
+    <video autoplay muted loop playsinline preload="metadata" poster="imagenes/portada.jpg" class="hero-video">
       <source src="NubesTimelapse.mp4" type="video/mp4">
     </video>
     <a href="galeria.html" class="logo-text">ANTE</a>
   </section>
+</script>
   <script>
-    const logo = document.querySelector('.logo-text');
-    logo.addEventListener('mouseenter', () => {
-      logo.style.transform = 'scale(1.01)';
-    });
-    logo.addEventListener('mouseleave', () => {
-      logo.style.transform = 'scale(1)';
-    });
+    const video = document.querySelector('.hero-video');
+    if (video) {
+      // Garantizar flags antes de intentar play
+      video.muted = true;
+      video.playsInline = true;
+
+      const tryPlay = () => {
+        const p = video.play();
+        if (p && typeof p.then === 'function') {
+          p.catch(() => { /* iOS puede pedir gesto: reintenta en el primer toque */ });
+        }
+      };
+
+      tryPlay();
+
+      // Primer interacción táctil: reintenta
+      window.addEventListener('touchstart', function once() {
+        tryPlay();
+        window.removeEventListener('touchstart', once, { passive: true });
+      }, { passive: true });
+
+      // Al volver a la página
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) tryPlay();
+      });
+    }
   </script>
 </body>
 </html>

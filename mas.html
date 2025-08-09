@@ -283,7 +283,7 @@
   </style>
 </head>
 <body>
-  <video id="bgVideo" class="video-bg" autoplay muted loop playsinline style="position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:cover;z-index:-1;filter:brightness(0.7);">
+  <video id="bgVideo" class="video-bg" autoplay muted loop playsinline preload="metadata" poster="img/poster-mas.jpg" style="position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:cover;z-index:-1;filter:brightness(0.7);">
     <source src="Dawn Timelapse Video.mp4" type="video/mp4">
   </video>
   <header>
@@ -343,6 +343,32 @@
         }
       }
     });
+</script>
+  <script>
+    (function(){
+      const video = document.getElementById('bgVideo');
+      if (!video) return;
+      // Asegurar flags de iOS
+      video.muted = true;
+      video.playsInline = true;
+      const tryPlay = () => {
+        const p = video.play && video.play();
+        if (p && typeof p.then === 'function') {
+          p.catch(() => { /* iOS puede requerir gesto del usuario */ });
+        }
+      };
+      // Intento inicial
+      tryPlay();
+      // Reintento al primer toque
+      window.addEventListener('touchstart', function once(){
+        tryPlay();
+        window.removeEventListener('touchstart', once, { passive: true });
+      }, { passive: true });
+      // Reintento al volver a la pestaña
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) tryPlay();
+      });
+    })();
   </script>
 </body>
 </html>
