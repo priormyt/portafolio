@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- SEO básico -->
+  <meta name="description" content="Contacto de ANTE Estudio de Fotografía. Agenda sesiones de retrato empresarial, editorial y proyectos en Coyoacán, Ciudad de México. Respuesta rápida por WhatsApp o correo.">
+  <link rel="canonical" href="https://ante.mx/contacto.html">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <meta name="theme-color" content="#111111">
+
+  <!-- Favicon / App icons -->
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="favicon.png">
+  <link rel="apple-touch-icon" href="favicon.png">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="es_MX">
+  <meta property="og:site_name" content="ANTE Estudio de Fotografía">
+  <meta property="og:title" content="Contacto | ANTE Estudio de Fotografía">
+  <meta property="og:description" content="Contacto de ANTE Estudio de Fotografía. Agenda sesiones de retrato empresarial, editorial y proyectos en Coyoacán, Ciudad de México. Respuesta rápida por WhatsApp o correo.">
+  <meta property="og:url" content="https://ante.mx/contacto.html">
+  <meta property="og:image" content="https://ante.mx/favicon.png">
+  <meta property="og:image:alt" content="Logotipo de ANTE Estudio de Fotografía">
+
+  <!-- Twitter / X -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Contacto | ANTE Estudio de Fotografía">
+  <meta name="twitter:description" content="Contacto de ANTE Estudio de Fotografía. Agenda sesiones de retrato empresarial, editorial y proyectos en Coyoacán, Ciudad de México. Respuesta rápida por WhatsApp o correo.">
+  <meta name="twitter:image" content="https://ante.mx/favicon.png">
+  <meta name="twitter:image:alt" content="Logotipo de ANTE Estudio de Fotografía">
+  <title>Contacto | ANTE Estudio de Fotografía</title>
+  <style>
+    :root {
+      --text: #f5f5e9;           /* texto en blanco */
+      --accent: #f5f5e9;      /* hueso para acentos */
+    }
+    *,*::before,*::after{box-sizing:border-box;}
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: Helvetica, Arial, sans-serif;
+      /* Fondo fijo y ampliado para cubrir el área al animar */
+      background-image: url('img/Fondo2.jpg') !important;
+      background-repeat: no-repeat !important;
+      background-attachment: fixed !important;
+      background-size: 120% 150%;              /* escala inicial */
+      background-position: 50% 80%;            /* posición inicial */
+      /* Animación lenta y alternada */
+      animation: fondo-mueve 60s ease-in-out infinite alternate !important;
+      color: var(--text) !important;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+    a { color: inherit; text-decoration: none; }
+    header{
+      position:fixed;
+      top:0;
+      left:0;
+      width: 190px;
+      height:100vh;
+      padding:2.5rem 1rem 2rem;
+      display:flex;
+      flex-direction:column;
+      align-items:flex-start;
+      gap:2.5rem;
+      background: rgba(28, 28, 28, 1);
+      border:none;
+      pointer-events:none;
+      z-index:10;
+    }
+    header *{pointer-events:auto;}
+    nav ul{
+      list-style:none;
+      margin:0;
+      padding:0;
+      display:flex;
+      flex-direction:column;
+      gap:1.4rem;
+      width:100%;
+    }
+    nav a{
+      text-transform: uppercase;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: .05em;
+      background:none;
+      color: #f5f5e9;
+      padding: .65rem 1.4rem .65rem 1.6rem;
+      border-radius: 12px;
+      width: 100%;
+      text-align: left;
+      display: block;
+      transition:background .25s,color .25s,transform .25s,box-shadow .25s;
+      box-shadow: 0 0 6px rgba(0,0,0,0.25);
+    }
+    nav a:active{
+      transform: translateY(1px) scale(0.99);
+      box-shadow: 0 0 4px rgba(0,0,0,0.3);
+    }
+    nav a:hover{
+      background: #f5f5e9;
+      color: #111;
+      transform:translateX(4px) translateY(-2px) scale(1.12);
+      box-shadow: 0 6px 18px rgba(0,0,0,.25);
+    }
+    .fab {
+      display: none;
+    }
+
+    /* Contenido principal */
+    .contenido-nosotros {
+      margin-left: 210px;
+      padding: 3rem 2rem 2rem 2rem;
+      max-width: none;
+    }
+    .contenido-nosotros h1 {
+      font-size: 2.5rem;
+      color: var(--accent);
+      margin-bottom: 1.2rem;
+      letter-spacing: .08em;
+    }
+    .contenido-nosotros h2 {
+      color: var(--accent);
+      margin-top: 2.5rem;
+      margin-bottom: 1rem;
+      font-size: 1.4rem;
+      letter-spacing: .06em;
+    }
+    .contenido-nosotros p {
+      font-size: 1.15rem;
+      margin-bottom: 1.2rem;
+      color: var(--text);
+      line-height: 1.8;
+    }
+    .equipo {
+      display: flex;
+      gap: 2.5rem;
+      flex-wrap: wrap;
+      margin-top: 2rem;
+      margin-bottom: 2rem;
+    }
+    .miembro {
+      background: rgba(24,24,24,0.7);
+      border-radius: 12px;
+      padding: 1.2rem 1.5rem;
+      flex: 1 1 220px;
+      min-width: 220px;
+      max-width: 260px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.18);
+      color: var(--accent);
+      text-align: center;
+    }
+    .miembro h3 {
+      margin: 0.5rem 0 0.2rem 0;
+      font-size: 1.15rem;
+      color: var(--accent);
+      letter-spacing: .04em;
+    }
+    .miembro p {
+      color: #fff;
+      font-size: 1rem;
+      margin: 0.2rem 0 0 0;
+      line-height: 1.5;
+    }
+    @media (max-width: 900px) {
+      header {
+        position: sticky;
+        width: 100%;
+        height: auto;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 2vw;
+        border-right: none;
+        border-bottom: 1px solid rgba(255,255,255,.08);
+        gap: 1rem;
+      }
+      nav ul {
+        flex-direction: row;
+        gap: 1.2rem;
+        width: auto;
+      }
+      .fab {
+        display: flex;
+      }
+      .contenido-nosotros {
+        margin-left: 0;
+        padding: 2.5rem 1rem 1.5rem 1rem;
+        max-width: 100vw;
+      }
+      .equipo {
+        flex-direction: column;
+        gap: 1.2rem;
+      }
+    }
+
+    /* ===== Adaptación automática para móvil (<=768 px o UA móvil) ===== */
+body.mobile .fab{
+  position:fixed;
+  top:20px;
+  left:20px;
+  transform:none;
+  width:56px;
+  height:56px;
+  border-radius:50%;
+  background:var(--accent);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:1.5rem;
+  color:#111;
+  cursor:pointer;
+  z-index:20;
+  transition:transform .1s, box-shadow .25s;
+}
+body.mobile .fab {
+  background: var(--accent) !important; /* hueso/blanco */
+  color: #111 !important;               /* ícono oscuro */
+}
+body.mobile .fab.active {
+  background: #111 !important;          /* fondo negro cuando está activo */
+  color: var(--accent) !important;      /* ícono hueso/blanco */
+}
+body.mobile .fab:active{
+  transform: scale(0.97);
+}
+    body.mobile header{
+      width:100%;
+      height:0;
+      overflow:visible;
+      padding:0;
+      background:transparent;
+      border:none;
+    }
+
+
+body.mobile header nav{
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  position: fixed;
+  top: 90px;
+  left: 20px;
+  transform: none;
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  opacity: 0;
+  max-height: none;
+  overflow: visible;
+  transition: opacity .35s ease;
+  pointer-events: none;       /* nav cerrado NO capta clics */
+  visibility: hidden;         /* evita hit-testing (Safari/iOS) */
+}
+body.mobile header.open nav{
+  opacity: 1;
+  max-height: none;
+  pointer-events: auto;       /* nav abierto SÍ capta clics */
+  visibility: visible;        /* visible y clickable */
+  z-index: 50;                /* sobre el contenido */
+}
+    body.mobile header nav ul{
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1.2rem;
+      margin: 0;
+      padding: 0;
+      transform: translateY(-20px);
+      transition: transform .35s ease;
+    }
+    body.mobile header.open nav ul{
+      transform: translateY(0);
+    }
+    body.mobile header nav li{
+      transform: translateY(-20px);
+      opacity: 0;
+      transition: transform .35s ease, opacity .35s ease;
+    }
+    body.mobile header.open nav li{
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* === Sombra sutil solo para botones en menú móvil desplegable === */
+    body.mobile header.open nav a {
+      background: #111 !important;
+      color: #fff !important; /* Siempre blanco en móvil */
+      box-shadow: 0 0 6px rgba(0,0,0,0.25) !important;
+      border-radius: 12px;
+      padding: .65rem 1.4rem .65rem 1.6rem;
+      width: 100%;
+      text-align: left;
+      display: block;
+      transition: background .25s, color .25s, transform .25s, box-shadow .25s;
+    }
+    body.mobile header.open nav a:hover,
+    body.mobile header.open nav a:active {
+      background: #f5f5e9 !important;  /* hueso en hover */
+      color: #111 !important;
+      box-shadow: 0 0 8px rgba(0,0,0,0.35) !important;
+    }
+
+    @keyframes fondo-mueve {
+      100%   { background-position: 50% 80%; }
+      100% { background-position: 50% 20%; }
+    }
+
+    /* Asegura que el contenido sea legible */
+    .contenido-nosotros h1,
+    .contenido-nosotros h2 {
+      color: var(--accent) !important;
+    }
+    .contenido-nosotros p,
+    .contenido-nosotros li a,
+    .contenido-nosotros label,
+    .contenido-nosotros input,
+    .contenido-nosotros textarea,
+    .contenido-nosotros button {
+      color: var(--text) !important;
+    }
+    
+    .logo-float{
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    left: auto;
+    display: block;
+    width: auto;
+    min-width: 120px;
+    max-width: 300px;
+    height: auto;
+    box-shadow: none;
+    border-radius: 0;
+    background: transparent;
+    text-shadow:
+      0 2px 8px rgba(0,0,0,0.275),   /* sombra principal a la mitad */
+      0 0.5px 0.5px rgba(0,0,0,0.125),
+      0 0px 0px #000;
+    color: var(--accent);
+    font-family: "Marion", serif;
+    font-size: clamp(24px, 7vw, 60px);
+    white-space: nowrap;
+    letter-spacing: .09em;
+    text-decoration: none;
+    line-height: 1;
+    overflow: visible;
+    text-overflow: unset;
+    z-index: 120;
+    pointer-events: auto;
+    transition: transform .2s;
+  }
+  .logo-float:hover {
+    transform: translateY(-4px) scale(1.07);
+  }
+
+  /* Elimina el fondo de los campos de respuesta del formulario */
+.contenido-nosotros form input,
+.contenido-nosotros form textarea {
+  background-color: transparent !important;
+}
+.contenido-nosotros form button[type="submit"] {
+  background-color: transparent !important;
+  color: var(--text) !important;
+  box-shadow: none !important;
+}
+
+/* ===== Contact form styles ===== */
+.form-card{
+  display:flex;flex-direction:column;gap:1rem;max-width:680px;
+  background: rgba(17,17,17,.55);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius: 14px;
+  padding: 1.25rem 1.25rem 1.5rem;
+  box-shadow: 0 8px 28px rgba(0,0,0,.25);
+  backdrop-filter: blur(3px);
+}
+.field{display:flex;flex-direction:column;gap:.5rem}
+.field label{letter-spacing:.02em;color:var(--accent)}
+.field .req{color:#ffb3b3;font-weight:700}
+.field input,.field textarea{
+  padding:.9rem .95rem;border-radius:10px;border:1px solid rgba(255,255,255,.14);
+  background: rgba(0,0,0,.25); color: var(--text); outline:none;
+  transition: border .2s, box-shadow .2s, transform .08s;
+}
+.field input:focus,.field textarea:focus{border-color: var(--accent); box-shadow: 0 0 0 3px rgba(245,245,233,.15)}
+.field input:active,.field textarea:active{transform:scale(.998)}
+.field .help{opacity:.85}
+.field .error{color:#ffb3b3; min-height:1.1em}
+.meta-row{display:flex; align-items:center; justify-content:space-between}
+.counter{opacity:.8}
+
+.btn-primary{
+  padding:1rem 1.25rem; border:none; border-radius:12px; cursor:pointer;
+  background: var(--accent); color:#111; font-weight:800; letter-spacing:.03em;
+  transition: transform .12s, box-shadow .25s, background .25s; align-self:flex-start;
+}
+.btn-primary:hover{ transform: translateY(-2px); box-shadow:0 10px 24px rgba(0,0,0,.25)}
+.btn-primary:active{ transform: translateY(0); box-shadow:0 4px 12px rgba(0,0,0,.25)}
+.btn-primary[disabled]{opacity:.6; cursor:wait}
+
+/* Toast messages */
+.toast{ position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+  background: rgba(20,20,20,.92); color: var(--text); border:1px solid rgba(255,255,255,.12);
+  padding:.8rem 1rem; border-radius:10px; box-shadow:0 10px 24px rgba(0,0,0,.35); z-index: 9999;}
+.toast.success{ border-color: rgba(123, 255, 180, .6)}
+.toast.error{ border-color: rgba(255, 152, 152, .6)}
+
+/* Small shake for invalid */
+@keyframes shake{10%,90%{transform:translateX(-1px)}20%,80%{transform:translateX(2px)}30%,50%,70%{transform:translateX(-4px)}40%,60%{transform:translateX(4px)}}
+.is-invalid{ animation: shake .35s ease }
+
+@media (max-width: 900px){
+  .form-card{max-width: 100%;}
+}
+
+  /* Oculta y elimina estilos del formulario anterior */
+  form, .form-card, .field { display: none !important; }
+
+  /* Contacto minimalista y dinámico */
+  .contacto-min {
+    max-width: 720px;
+    padding: clamp(1rem, 3vw, 2rem);
+    margin: 2rem 0;
+    animation: floatY 6s ease-in-out infinite alternate;
+  }
+  .contact-links { display: flex; flex-direction: column; gap: 1rem; }
+  .link-lg {
+    display: inline-flex; align-items: center; gap: .6rem;
+    font-size: clamp(1.4rem, 3.5vw, 2.4rem);
+    font-weight: 700; letter-spacing: .04em;
+    color: var(--accent); text-decoration: none; position: relative;
+    transition: transform .2s ease;
+  }
+  .link-lg:hover { transform: translateY(-2px); }
+  .link-lg::after{
+    content:''; position:absolute; left:0; bottom:-4px; height:2px; width:100%;
+    background: currentColor; transform: scaleX(0); transform-origin: left;
+    transition: transform .35s ease; opacity:.9;
+  }
+  .link-lg:hover::after{ transform: scaleX(1); }
+
+  @keyframes floatY { from { transform: translateY(0) } to { transform: translateY(-6px) } }
+
+  /* Layout simétrico y tipografía proporcional */
+  .contenido-nosotros { padding: clamp(2rem, 5vw, 3rem) 2rem; }
+  .content-wrap {
+    max-width: 980px;
+    margin: 0 auto;
+    display: grid;
+    gap: clamp(1.2rem, 3vw, 2rem);
+  }
+  .hero { text-align: center; }
+  .hero h1 {
+    margin: 0;
+    font-size: clamp(2rem, 5vw, 3rem);
+    letter-spacing: .08em;
+    color: var(--accent);
+  }
+  .hero p {
+    margin: .5rem auto 0;
+    max-width: 60ch;
+    font-size: clamp(1rem, 2.2vw, 1.2rem);
+    color: var(--text);
+    opacity: .95;
+  }
+
+  /* Tarjetas de contacto (vidrio sutil) */
+  .contact-cards {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    gap: clamp(1rem, 3vw, 1.5rem);
+  }
+  .card {
+    background: rgba(17,17,17,.45);
+    border: 1px solid rgba(255,255,255,.08);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border-radius: 14px;
+    padding: clamp(1rem, 3vw, 1.5rem);
+    transition: transform .25s ease, box-shadow .25s ease, background .25s ease;
+  }
+  .card:hover { transform: translateY(-4px); box-shadow: 0 10px 24px rgba(0,0,0,.28); background: rgba(17,17,17,.52); }
+
+  .cta {
+    display: inline-flex; align-items: center; gap: .6rem;
+    font-size: clamp(1.2rem, 3.2vw, 1.6rem);
+    font-weight: 800; letter-spacing: .04em;
+    color: var(--accent); text-decoration: none; position: relative;
+  }
+  .cta::after{
+    content:''; position:absolute; left:0; bottom:-6px; height:2px; width:100%;
+    background: currentColor; transform: scaleX(0); transform-origin: left;
+    transition: transform .35s ease; opacity:.9;
+  }
+  .cta:hover::after{ transform: scaleX(1); }
+  .cta .icon{ font-size: 1.2em; filter: drop-shadow(0 2px 6px rgba(0,0,0,.25)); }
+
+  /* Aparición al hacer scroll (dinámico y sutil) */
+  .reveal { opacity: 0; transform: translateY(12px); }
+  .reveal.in { opacity: 1; transform: none; transition: opacity .6s ease, transform .6s ease; }
+
+  /* Homologa tamaño de links al del texto base */
+  .cta { 
+    font-size: clamp(1rem, 2.2vw, 1.1rem); 
+    font-weight: 600; /* más equilibrado */
+  }
+  /* Si aún existe .link-lg, iguala su tamaño al resto */
+  .link-lg { 
+    font-size: clamp(1rem, 2.2vw, 1.1rem) !important; 
+    font-weight: 600 !important;
+  }
+
+  /* Espaciado y legibilidad en FAQs */
+  .card.faq { padding: clamp(1.2rem, 3vw, 1.8rem); }
+  .faq-grid{
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    gap: clamp(.75rem, 2vw, 1rem);
+  }
+  .card.faq details{
+    background: rgba(17,17,17,.45);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 12px;
+    padding: .9rem 1rem;
+    transition: background .25s ease, box-shadow .25s ease, border-color .25s ease;
+    will-change: transform;
+  }
+  .card.faq details[open]{
+    background: rgba(17,17,17,.55);
+    border-color: rgba(255,255,255,.14);
+    box-shadow: 0 10px 24px rgba(0,0,0,.28);
+  }
+  .card.faq summary{
+    list-style: none;
+    cursor: pointer;
+    font-weight: 700;
+    letter-spacing: .03em;
+    color: var(--accent);
+    position: relative;
+    padding-right: 1.6rem;
+    outline: none;
+  }
+  .card.faq summary::-webkit-details-marker{ display:none; }
+  .card.faq summary::after{
+    content: '›';
+    position: absolute; right: .4rem; top: 0;
+    transform: rotate(90deg); opacity: .85;
+    transition: transform .25s ease, opacity .25s ease;
+  }
+  .card.faq details[open] summary::after{ transform: rotate(270deg); opacity: 1; }
+
+  /* Contenedor de respuesta con animación suave de altura */
+  .card.faq .answer{
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(6px);
+    transition:
+      max-height .35s ease,
+      opacity .35s ease,
+      transform .35s ease;
+    color: var(--text);
+  }
+  .card.faq details[open] .answer{
+    max-height: 40rem;      /* margen amplio para respuestas más largas */
+    opacity: 1;
+    transform: translateY(0);
+    margin-top: .5rem;
+  }
+
+  @media (max-width: 780px){
+    .faq-grid{ grid-template-columns: 1fr; }
+  }
+
+  /* Botón Aviso de Privacidad */
+  .legal-cta{ text-align:center; margin-top: clamp(1rem, 3vw, 2rem); }
+  .btn-legal{
+    display:inline-flex; align-items:center; justify-content:center;
+    padding:.85rem 1.1rem; border-radius:12px;
+    border:1px solid rgba(245,245,233,.35);
+    background: rgba(17,17,17,.35);
+    color: var(--accent); font-weight:700; letter-spacing:.04em;
+    backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+    transition: transform .2s, box-shadow .25s, background .25s, border-color .25s;
+  }
+  .btn-legal:hover{
+    transform: translateY(-2px);
+    background: rgba(17,17,17,.5);
+    border-color: rgba(245,245,233,.6);
+    box-shadow: 0 10px 24px rgba(0,0,0,.28);
+  }
+  .btn-legal:active{ transform: translateY(0); }
+
+  /* Evita que los links largos (WhatsApp, email, mapas) se salgan del cuadro */
+  .contact-cards .card { min-width: 0; }
+  .contact-cards .cta {
+    display: inline-flex;
+    flex-wrap: wrap;          /* permite saltos de línea dentro del enlace */
+    max-width: 100%;
+    white-space: normal;      /* permite envolver texto */
+    overflow-wrap: anywhere;  /* rompe palabras largas si es necesario */
+    word-break: break-word;   /* fallback */
+    line-break: loose;
+  }
+
+  /* En móvil, una sola columna para más espacio horizontal */
+  @media (max-width: 760px){
+    .contact-cards { grid-template-columns: 1fr; }
+    .contact-cards .card { padding: clamp(.9rem, 3.2vw, 1.2rem); }
+    .contact-cards .cta { font-size: clamp(1rem, 4vw, 1.1rem); }
+  }
+
+  /* Fade por scroll solo en bandas superior e inferior (sutil) */
+  .fade-scroll{
+    opacity: var(--fade, 1);
+    transform: translateY(calc((1 - var(--fade,1)) * 10px));
+    transition: opacity .12s linear, transform .16s ease-out;
+    will-change: opacity, transform;
+  }
+
+  /* === Grilla moderna 12 columnas === */
+    .grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: clamp(16px, 2.4vw, 28px); }
+    .span-12 { grid-column: 1 / -1; }
+    .span-7  { grid-column: span 7; }
+    .span-5  { grid-column: span 5; }
+    .span-6  { grid-column: span 6; }
+    @media (max-width: 900px){ .span-7, .span-5, .span-6 { grid-column: 1 / -1; } }
+
+    /* Tarjetas mínimas con detalle dinámico */
+    .card {
+      background: rgba(17,17,17,.6);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 14px;
+      padding: clamp(16px, 2.2vw, 28px);
+      box-shadow: 0 6px 18px rgba(0,0,0,.18);
+      transition: transform .25s ease, box-shadow .25s ease, background .25s ease;
+      backdrop-filter: blur(4px);
+    }
+    .card:hover{ transform: translateY(-4px); box-shadow: 0 10px 28px rgba(0,0,0,.28); background: rgba(17,17,17,.7); }
+
+    /* Tipografía y detalles */
+    .overline { text-transform: uppercase; letter-spacing: .18em; font-size: .78rem; color: rgba(245,245,233,.85); margin: 0 0 .25rem; display: block; }
+    
+    /* Separadores sutiles */
+    .divider { height:1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.18), transparent); margin: clamp(16px, 2vw, 24px) 0; }
+    
+  </style>
+  <!-- Datos estructurados: Organización -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "ANTE Estudio de Fotografía",
+    "url": "https://ante.mx/",
+    "logo": "https://ante.mx/favicon.png",
+    "contactPoint": [{
+      "@type": "ContactPoint",
+      "telephone": "+52-595-122-0554",
+      "contactType": "customer service",
+      "areaServed": "MX",
+      "availableLanguage": ["es"]
+    }],
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Av. del Convento, Coyoacán",
+      "addressLocality": "Ciudad de México",
+      "addressRegion": "CDMX",
+      "postalCode": "04120",
+      "addressCountry": "MX"
+    }
+  }
+  </script>
+
+  <!-- Datos estructurados: Miga de pan (Breadcrumb) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {"@type": "ListItem", "position": 1, "name": "Inicio", "item": "https://ante.mx/"},
+      {"@type": "ListItem", "position": 2, "name": "Contacto", "item": "https://ante.mx/contacto.html"}
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <nav>
+      <ul>
+        <li><a href="index.html">Inicio</a></li>
+        <li><a href="galeria.html">Galería</a></li>
+        <li><a href="nosotros.html">Nosotros</a></li>
+        <li><a href="contacto.html">Contacto</a></li>
+        <li><a href="mas.html">Más</a></li>
+      </ul>
+    </nav>
+    <div id="menuBtn" class="fab">☰</div>
+  </header>
+  <main class="contenido-nosotros">
+    <!-- Reemplazo del contenido por versión con estilo de cards -->
+    <div class="content-wrap">
+      <section class="hero reveal">
+        <h1>Contacto</h1>
+        <p>Hablemos. Respuesta rápida por teléfono o correo.</p>
+      </section>
+
+      <section class="grid">
+        <article class="card span-6 reveal">
+          <span class="overline">Contacto directo</span>
+          <!-- Link de WhatsApp -->
+          <a class="cta" href="https://wa.me/525951220554?text=Hola%20ANTE%2C%20me%20gustar%C3%ADa%20agendar%20una%20sesi%C3%B3n.">
+            WhatsApp · +52 (595) 122 0554
+          </a>
+        </article>
+        
+        <article class="card span-6 reveal">
+          <span class="overline">Correo</span>
+          <!-- Link de email -->
+          <a class="cta" href="mailto:contacto@ante.mx">
+            Escríbenos · contacto@ante.mx
+          </a>
+        </article>
+
+        <!-- Más formas de contacto y detalles -->
+        <article class="card span-6 reveal">
+          <span class="overline">Horario</span>
+          <p style="margin:.25rem 0;">Lunes a Viernes · 10:00–18:00</p>
+          <p style="margin:.25rem 0;">Sábado · 10:00–14:00</p>
+          <p style="margin:.25rem 0; opacity:.85;">Tiempo de respuesta: 24–48 h</p>
+        </article>
+
+        <article class="card span-6 reveal">
+          <span class="overline">Ubicación</span>
+          <p style="margin:.25rem 0;">Ciudad de México</p>
+        </article>
+
+        <div class="span-12 divider"></div>
+
+        <article class="card span-12 faq reveal">
+          <span class="overline">Preguntas frecuentes</span>
+          <div class="faq-grid">
+            <details>
+              <summary>¿Cómo reservo una sesión?</summary>
+              <div class="answer">Contáctanos por teléfono o correo con tu fecha ideal y tipo de sesión. Confirmamos disponibilidad y te enviamos los detalles.</div>
+            </details>
+
+            <details>
+              <summary>¿Cuánto tarda la entrega?</summary>
+              <div class="answer">Entrega digital en 3–5 días hábiles. Para impresiones o fotolibros, 7–10 días adicionales.</div>
+            </details>
+
+            <details>
+              <summary>¿Trabajan fuera de Teotihuacán?</summary>
+              <div class="answer">Sí. Cubrimos CDMX y Estado de México con costo de traslado. Otras ciudades bajo cotización.</div>
+            </details>
+
+            <details>
+              <summary>¿Incluye edición?</summary>
+              <div class="answer">Todas las fotografías entregadas incluyen edición de color y luz. Retoque fino disponible bajo solicitud.</div>
+            </details>
+
+            <details>
+              <summary>¿Cómo se realiza el pago?</summary>
+              <div class="answer">50% para reservar y 50% a la entrega. Aceptamos transferencia y tarjeta.</div>
+            </details>
+
+            <details>
+              <summary>¿Puedo reprogramar mi sesión?</summary>
+              <div class="answer">Sí, con 48 h de anticipación sin costo. Menos tiempo puede generar tarifa de reprogramación.</div>
+            </details>
+
+            <details>
+              <summary>¿Entregan archivos RAW?</summary>
+              <div class="answer">No entregamos RAW. Enviamos archivos en alta resolución, editados y listos para uso.</div>
+            </details>
+          </div>
+        </article>
+
+        <div class="span-12 divider"></div>
+        
+        <!-- Botón al Aviso de Privacidad -->
+        <article class="card span-12 reveal legal-cta">
+          <span class="overline">Información legal</span>
+          <a href="aviso-privacidad.html" class="btn-legal">Aviso de Privacidad</a>
+        </article>
+      </section>
+    </div>
+  </main>
+  <script>
+    // Detectar móvil y actualizar clase 'mobile' dinámica
+    function setDeviceClass(){
+      const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+                       || window.matchMedia('(max-width:768px)').matches;
+      document.body.classList.toggle('mobile', isMobile);
+    }
+    setDeviceClass();
+    window.addEventListener('resize', setDeviceClass);
+
+    // Botón flotante para menú móvil
+    const menuBtn = document.getElementById('menuBtn');
+    if(menuBtn){
+      menuBtn.addEventListener('click', ()=>{
+        const header = document.querySelector('header');
+        header.classList.toggle('open');
+        menuBtn.classList.toggle('active');
+      });
+    }
+
+    // Cerrar menú móvil automáticamente al INICIAR scroll
+    let lastScrollTop = 0;
+    window.addEventListener('scroll', () => {
+      if(document.body.classList.contains('mobile')){
+        const header = document.querySelector('header');
+        if(header.classList.contains('open')){
+          const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+          if(Math.abs(currentScroll - lastScrollTop) > 5){
+            header.classList.remove('open');
+            menuBtn.classList.remove('active');
+          }
+          lastScrollTop = currentScroll;
+        }
+      }
+    });
+
+    // Scroll reveal para .reveal
+    (function(){
+      const els = document.querySelectorAll('.reveal');
+      if (!('IntersectionObserver' in window) || !els.length) {
+        els.forEach(e => e.classList.add('in')); return;
+      }
+      const io = new IntersectionObserver((entries)=>{
+        entries.forEach(en => { if(en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); }});
+      }, { threshold: 0.12 });
+      els.forEach(e => io.observe(e));
+    })();
+
+    // FAQ interactiva con efecto FLIP (acordeón + desplazamiento suave)
+    (function(){
+      const grid = document.querySelector('.faq-grid');
+      if(!grid) return;
+      const items = Array.from(grid.querySelectorAll('details'));
+
+      items.forEach(d => {
+        const s = d.querySelector('summary');
+        if(!s) return;
+
+        s.addEventListener('click', (ev) => {
+          ev.preventDefault();
+
+          // 1) Medimos posiciones actuales (First)
+          const first = items.map(el => el.getBoundingClientRect());
+
+          // 2) Alternamos el abierto y cerramos el resto
+          const willOpen = !d.hasAttribute('open');
+          items.forEach(el => el.removeAttribute('open'));
+          if (willOpen) d.setAttribute('open','');
+
+          // 3) Forzamos layout y medimos nuevas posiciones (Last)
+          const last = items.map(el => el.getBoundingClientRect());
+
+          // 4) Animamos desplazamiento (Invert -> Play)
+          items.forEach((el, i) => {
+            const dy = first[i].top - last[i].top;
+            if (dy) {
+              el.animate(
+                [
+                  { transform: `translateY(${dy}px)` },
+                  { transform: 'translateY(0)' }
+                ],
+                { duration: 420, easing: 'cubic-bezier(.2,.7,.2,1)' }
+              );
+            }
+          });
+        });
+      });
+    })();
+
+    /* REEMPLAZA el bloque "Fade-on-scroll global" por este:
+       Limita el efecto a ~14% del alto en la parte superior e inferior. */
+    (function(){
+      let targets = [];
+      const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+
+      function collect(){
+        targets.forEach(el => el.classList.remove('fade-scroll'));
+        const isMobile = document.body.classList.contains('mobile');
+        const all = document.querySelectorAll('main *');
+
+        targets = Array.from(all).filter(el => {
+          if (el.closest('header')) return false;                          // nunca header
+          if (el.matches('.fab, .fab *, button, [role="button"]')) return false; // ignora FAB/botones
+          if (isMobile && el.matches('.cta, .btn-legal')) return false;    // en móvil ignora CTAs
+          
+          // Solo aplicar a elementos que podrían estar en los bordes
+          const rect = el.getBoundingClientRect();
+          const vh = window.innerHeight;
+          const edgeBand = vh * 0.08; // Reduce de 14% a 8% - más confinado a los bordes
+          
+          // Solo elementos que pueden estar en los bordes superior/inferior
+          if (rect.bottom < edgeBand * 2 || rect.top > vh - edgeBand * 2) {
+            return true;
+          }
+          return false;
+        });
+
+        targets.forEach(el => el.classList.add('fade-scroll'));
+        update();
+      }
+
+      let ticking = false;
+      function update(){
+        const vh = window.innerHeight;
+        const band = vh * 0.08;     // banda activa arriba/abajo (8% del viewport)
+        const minOpacity = 0.7;     // mayor opacidad mínima (menos desvanecimiento)
+        const topEdge = band;
+        const bottomEdge = vh - band;
+
+        targets.forEach(el => {
+          const r = el.getBoundingClientRect();
+          const center = r.top + r.height / 2;
+
+          let fade = 1;
+          if (center <= topEdge){
+            // Dentro de la banda superior
+            const t = clamp(center / band, 0, 1);
+            fade = minOpacity + t * (1 - minOpacity);
+          } else if (center >= bottomEdge){
+            // Dentro de la banda inferior
+            const t = clamp((vh - center) / band, 0, 1);
+            fade = minOpacity + t * (1 - minOpacity);
+          } else {
+            fade = 1; // zona central sin efecto
+          }
+          el.style.setProperty('--fade', fade.toFixed(3));
+        });
+        ticking = false;
+      }
+
+      function onScroll(){
+        if (!ticking){
+          ticking = true;
+          requestAnimationFrame(update);
+        }
+      }
+
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', collect, { passive: true });
+      window.addEventListener('orientationchange', collect);
+      collect();
+    })();
+  </script>
+  <a href="index.html" class="logo-float">A&nbsp;N&nbsp;T&nbsp;E</a>
+</body>
+</html>

@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Galería | ANTE Estudio</title>
+   <!-- Metadatos para SEO -->
+  <meta name="description" content="Explora la galería de ANTE Estudio Fotográfico: retratos, eventos y fotografía artística en alta calidad.">
+  <meta name="keywords" content="retratos empresariales, ciudad de méxico, cdmx, estudio de fotografía, estudio fotográfico, ANTE, retratos profesionales, fotografía artística, fotos para linkedin, sesions de fotos para redes sociales">
+  <meta name="author" content="ANTE Estudio Fotográfico">
+
+  <!-- Metadatos Open Graph -->
+  <meta property="og:title" content="Galería | ANTE Estudio Fotográfico">
+  <meta property="og:description" content="Explora la galería profesional de ANTE con retratos y fotografía artística.">
+  <meta property="og:image" content="https://tusitio.com/imagenes/galeria.jpg">
+  <meta property="og:url" content="https://tusitio.com/galeria.html">
+  <meta property="og:type" content="website">
+
+  <!-- Metadatos Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Galería | ANTE Estudio Fotográfico">
+  <meta name="twitter:description" content="Explora la galería de ANTE Estudio Fotográfico con retratos y fotografía artística.">
+  <meta name="twitter:image" content="https://tusitio.com/imagenes/galeria.jpg">
+  <style>
+    :root {
+      --bg: #111;
+      --text: #ffffff;
+      --accent: #f5f5e9;
+    }
+    *,*::before,*::after{box-sizing:border-box;}
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+    a { color: inherit; text-decoration: none; }
+    header{
+      position:fixed;
+      top:0;
+      left:0;
+      width:180px;          /* mantiene reserva de espacio */
+      height:100vh;
+      padding:2.5rem 1rem 2rem;
+      display:flex;
+      flex-direction:column;
+      align-items:flex-start;
+      gap:2.5rem;
+      background:transparent;          /* SIN fondo → fotos visibles */
+      border:none;                     /* sin borde lateral */
+      pointer-events:none;             /* deja pasar clics salvo en hijos */
+      z-index:10;
+    }
+    .logo {
+      height: 80px;
+      width: auto;
+      margin-bottom: 1.5rem;
+      display: block;
+      max-width: 100%;
+      object-fit: contain;
+    }
+    header *{pointer-events:auto;}   /* restaura clics en elementos internos */
+    nav ul{
+      list-style:none;
+      margin:0;
+      padding:0;
+      display:flex;
+      flex-direction:column;
+      gap:1.4rem;
+      width:100%;
+    }
+    nav a{
+      text-transform: uppercase;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: .05em;
+      background: #111;
+      color: var(--accent);
+      padding: .65rem 1.4rem .65rem 1.6rem;
+      border-radius: 12px;
+      width: 100%;
+      text-align: left;
+      display: block;
+      transition:background .25s,color .25s,transform .25s,box-shadow .25s;
+      box-shadow: 0 0 6px rgba(0,0,0,0.25); /* sombra suave alrededor */
+    }
+    nav a:active{
+      transform: translateY(1px) scale(0.99);
+      box-shadow: 0 0 4px rgba(0,0,0,0.3);
+    }
+    nav a:hover{
+      background: var(--accent);  /* vuelve a hueso */
+      color: #111;               /* texto negro */
+      transform:translateX(4px) translateY(-2px) scale(1.12);
+      box-shadow: 0 6px 18px rgba(0,0,0,.25);
+    }
+    .fab {
+      display: none; /* solo visible en móvil */
+    }
+
+    /* Galería ajustada para header lateral */
+    .gallery {
+      display: grid;
+      margin-left: 180px;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 2.5rem;
+      padding: 2rem 2vw;
+      justify-items: center;
+      align-items: center;
+      box-sizing: border-box;
+    }
+    .gallery img {
+      width: 100%;
+      max-width: 340px;
+      height: 48vh;
+      object-fit: cover;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      transition: filter .4s, transform .3s cubic-bezier(.23,1.02,.73,1.13);
+      cursor: pointer;
+    }
+    .gallery img:hover {
+      transform: scale(1.08);
+      z-index: 2;
+    }
+    @media (max-width: 1500px) {
+      .gallery {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+    @media (max-width: 1200px) {
+      .gallery {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+    @media (max-width: 900px) {
+      header {
+        position: sticky;
+        width: 100%;
+        height: auto;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 2vw;
+        border-right: none;
+        border-bottom: 1px solid rgba(255,255,255,.08);
+        gap: 1rem;
+      }
+      .logo {
+        height: 48px;
+        margin-bottom: 0;
+      }
+      nav ul {
+        flex-direction: row;
+        gap: 1.2rem;
+        width: auto;
+      }
+      .gallery {
+        margin-left: 0;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.2rem;
+        padding: 1rem 1vw;
+      }
+      .gallery img {
+        height: 30vh;
+      }
+      .fab {
+        display: flex;
+      }
+    }
+
+    /* ===== Adaptación automática para móvil (<=768 px o UA móvil) ===== */
+    body.mobile header{
+      width: 100%;
+      height: auto;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 2vw;
+      border-right: none;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    body.mobile nav ul{
+      flex-direction: row;
+      align-items: center;
+      gap: 1.2rem;          /* más espacio entre botones */
+      margin-left: 6rem;    /* más aire entre el FAB y el primer botón */
+      margin-bottom: 6rem;     /* más aire entre el FAB y el primer botón */
+    }
+    body.mobile .gallery{
+      margin-left: 0;        /* cancelar barra lateral */
+      margin-top: 0px;     /* despejar la altura del header (≈90 px + margen) */
+      grid-template-columns: 1fr 1fr 1fr; /* ahora 3 por fila */
+      gap: 1.2rem;
+      padding: 1rem 3vw;
+    }
+    body.mobile .gallery img{
+      aspect-ratio: 4 / 5;     /* mantiene proporción vertical */
+      width: 100%;             /* ocupa el ancho de la columna */
+      height: auto;            /* altura automática basada en ratio */
+      object-fit: cover;       /* recorta si es necesario */
+      border-radius: 12px;
+    }
+
+    /* === FAB y menú desplegable en móvil === */
+    body.mobile .logo{display:none;}
+
+body.mobile .fab{
+  position:fixed;
+  top:20px;
+  left:20px;
+  transform:none;
+  width:56px;
+  height:56px;
+  border-radius:50%;
+  background:var(--accent);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:1.5rem;
+  color:#111;
+  cursor:pointer;
+  z-index:20;
+  transition:transform .1s, box-shadow .25s;
+}
+body.mobile .fab.active {
+  background: #111;  /* fondo negro */
+  color: var(--accent); /* texto hueso */
+}
+body.mobile .fab:active{
+  transform: scale(0.97);
+}
+    body.mobile header{
+      width:100%;
+      height:0;
+      overflow:visible;
+      padding:0;
+      background:transparent;
+      border:none;
+    }
+
+
+body.mobile header nav{
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  position: fixed;
+  top: 90px;
+  left: 20px;
+  transform: none;
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  opacity: 0;
+  max-height: none;
+  overflow: visible;
+  transition: opacity .35s ease;
+  pointer-events: none;      /* nav cerrado NO capta clics */
+  visibility: hidden;        /* oculta para Safari/iOS y evita hit-testing */
+}
+body.mobile header.open nav{
+  opacity: 1;
+  max-height: none;
+  pointer-events: auto;      /* nav abierto SÍ capta clics */
+  visibility: visible;       /* visible y clickable */
+  z-index: 50;               /* sobre la galería y el FAB */
+}
+    body.mobile header nav ul{
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1.2rem;
+      margin: 0;
+      padding: 0;
+      transform: translateY(-20px);
+      transition: transform .35s ease;
+    }
+    body.mobile header.open nav ul{
+      transform: translateY(0);
+    }
+    body.mobile header nav li{
+      transform: translateY(-20px);
+      opacity: 0;
+      transition: transform .35s ease, opacity .35s ease;
+    }
+    body.mobile header.open nav li{
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* === Sombra sutil solo para botones en menú móvil desplegable === */
+    body.mobile header.open nav a {
+      box-shadow: 0 0 6px rgba(0,0,0,0.25); /* sombra sutil alrededor */
+    }
+    body.mobile header.open nav a:active {
+      box-shadow: 0 0 4px rgba(0,0,0,0.35);
+    }
+    body.mobile header.open nav a:hover {
+      box-shadow: 0 0 8px rgba(0,0,0,0.35);
+    }
+
+    /* === Logo flotante en esquina inferior derecha === */
+    .logo-float{
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      left: auto;
+      display: block;
+      width: auto;
+      min-width: 120px;
+      max-width: 300px;
+      height: auto;
+      /* Quitar sombra y fondo del rectángulo */
+      box-shadow: none;
+      border-radius: 0;
+      background: transparent;
+      /* Sombra individual para las letras */
+      text-shadow:
+        0 4px 16px rgba(0,0,0,0.55),
+        0 1px 1px rgba(0,0,0,0.25),
+        0 0px 0px #000;
+      color: var(--accent);
+      font-family: "Marion", serif;
+      font-size: clamp(24px, 7vw, 60px);
+      white-space: nowrap;
+      letter-spacing: .09em;
+      text-decoration: none;
+      line-height: 1;
+      overflow: visible;
+      text-overflow: unset;
+      z-index: 120;
+      pointer-events: auto;
+      transition: transform .2s;
+    }
+    .logo-float:hover {
+      transform: translateY(-4px) scale(1.07);
+    }
+
+    /* ===== Lightbox (imagen ampliada) ===== */
+    .lightbox{
+      position:fixed;
+      top:0;left:0;width:100%;height:100%;
+      display:flex;align-items:center;justify-content:center;
+      background:rgba(0,0,0,0.85);
+      backdrop-filter:blur(2px);
+      z-index:100;
+      opacity:0;
+      pointer-events:none;
+      transition:opacity .3s;
+    }
+    .lightbox.show{
+      opacity:1;
+      pointer-events:auto;
+    }
+    .lightbox img{
+      max-width:90%;
+      max-height:90%;
+      border-radius:10px;
+      box-shadow:0 4px 16px rgba(0,0,0,0.5);
+    }
+    .lightbox .close{
+      position:absolute;
+      top:1.2rem;
+      right:2rem;
+      font-size:2.5rem;
+      color:#ffffff;
+      cursor:pointer;
+      user-select:none;
+    }
+
+    /* Fade por scroll solo en bandas superior e inferior (sutil) */
+    .fade-scroll{
+      opacity: var(--fade, 1);
+      transform: translateY(calc((1 - var(--fade,1)) * 10px));
+      transition: opacity .12s linear, transform .16s ease-out;
+      will-change: opacity, transform;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <ul>
+        <li><a href="index.html">Inicio</a></li>
+        <li><a href="galeria.html">Galería</a></li>
+        <li><a href="nosotros.html">Nosotros</a></li>
+        <li><a href="contacto.html">Contacto</a></li>
+        <li><a href="mas.html">Más</a></li>
+      </ul>
+    </nav>
+    <div id="menuBtn" class="fab">☰</div>
+  </header>
+  <a href="index.html" class="logo-float">A&nbsp;N&nbsp;T&nbsp;E</a>
+  <section class="gallery" id="gallery"></section>
+  <!-- Lightbox modal -->
+  <div id="lightbox" class="lightbox">
+    <span class="close">&times;</span>
+    <img id="lightbox-img" src="" alt="">
+  </div>
+  <script>
+    // Detectar móvil y actualizar clase 'mobile' dinámica
+    function setDeviceClass(){
+      const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+                       || window.matchMedia('(max-width:768px)').matches;
+      document.body.classList.toggle('mobile', isMobile);
+    }
+    setDeviceClass();
+    window.addEventListener('resize', setDeviceClass);
+
+    // Botón flotante para menú móvil
+    const menuBtn = document.getElementById('menuBtn');
+    if(menuBtn){
+      menuBtn.addEventListener('click', ()=>{
+        const header = document.querySelector('header');
+        header.classList.toggle('open');
+        menuBtn.classList.toggle('active');
+      });
+    }
+
+    // Cerrar menú móvil automáticamente al INICIAR scroll
+    let lastScrollTop = 0;
+    window.addEventListener('scroll', () => {
+      if(document.body.classList.contains('mobile')){
+        const header = document.querySelector('header');
+        if(header.classList.contains('open')){
+          const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+          // Detecta si efectivamente se comenzó a desplazar
+          if(Math.abs(currentScroll - lastScrollTop) > 5){
+            header.classList.remove('open');
+            menuBtn.classList.remove('active');
+          }
+          lastScrollTop = currentScroll;
+        }
+      }
+    });
+
+    // Lista de imágenes: agrega aquí todos los archivos de la carpeta img
+    const images = [
+      {src: "img/Ricardo1.jpg", alt: "Retrato profesional México – foto de perfil elegante y profesional de abogado en la cdmx"},
+      {src: "img/Ricardo2.jpg", alt: "Retrato profesional CDMX – foto de perfil de redes sociales de abogado tomadas en un estudio profesional"},
+      {src: "img/Jona1.jpg",   alt: "Retrato profesional México – retrato para redes sociales de abogado con sesión de fotos en estudio en la ciudad de México"},
+      {src: "img/Jona3.jpg",   alt: "Retrato profesional México – foto formal para redes sociales de un aboga en la cdmx"},
+      {src: "img/Valeria1.jpg",alt: "Retrato profesional México – Foto profesional de perfil de redes sociales como linkedin, instagram y facebook para una abogada en la cdmx"},
+      {src: "img/MootMadrid2025_1.jpg",alt: "Retrato profesional México – Equipo Moot Madrid frente a la facultad de Derecho UNAM"},
+      {src: "img/MootMadrid2025_2.jpg",alt: "Retrato profesional México – Equipo Moot Madrid Facultad de Derecho"},
+      {src: "img/MootMadrid2025_3.jpg",alt: "Retrato profesional CDMX – Equipo Moot Madrid Facultad de Derecho casual"},
+      {src: "img/MootMadrid2025_4.jpg",alt: "Retrato profesional CDMX – Aguila de la Facultad de Derecho"},
+      {src: "img/MootMadrid2025_5.jpg",alt: "Retrato profesional CDMX – Equipo Moot Madrid frente a Biblioteca Central"},
+      {src: "img/MootMadrid2025_6.jpg",alt: "Retrato profesional CDMX – Equipo Moot Madrid frente a Biblioteca Central casual"},
+      {src: "img/Carlos1.jpg",alt: "Retrato profesional CDMX – Foto de perfil para redes sociales de abogado corporativo ciudad de méxico"},
+      {src: "img/Carlos2.jpg",alt: "Retrato profesional CDMX – Foto de perfil profesional de abogado litigante ciudad de méxico"},
+      {src: "img/Carlos3.jpg",alt: "Retrato profesional CDMX – Fotografía de perfil profesional para redes sociales de abogado en la cdmx"},
+      // Agrega aquí más imágenes si tienes más archivos en /img
+    ];
+    // Se asume que existe una versión miniatura en /img/thumb/ con el mismo nombre
+    const thumbPath = path => path.replace('img/', 'img/thumb/');
+    // Barajar imágenes (Fisher-Yates)
+    for (let i = images.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [images[i], images[j]] = [images[j], images[i]];
+    }
+    // Insertar imágenes en la galería
+    const gallery = document.getElementById('gallery');
+    const lightbox    = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightbox-img');
+    const closeBtn    = lightbox.querySelector('.close');
+    images.forEach(img => {
+      const el = document.createElement('img');
+      el.src = thumbPath(img.src);
+      el.onerror = () => { el.src = img.src; };
+      el.alt = img.alt;
+      el.loading = 'lazy';
+      gallery.appendChild(el);
+      el.addEventListener('click', () => {
+        lightboxImg.src = img.src;
+        lightboxImg.alt = img.alt;
+        lightbox.classList.add('show');
+      });
+    });
+    closeBtn.addEventListener('click', () => lightbox.classList.remove('show'));
+    lightbox.addEventListener('click', e => {
+      if(e.target === lightbox) lightbox.classList.remove('show');
+    });
+
+    // Fade-on-scroll global adaptado a galeria: aplica a imágenes y logo flotante
+    (function(){
+      let targets = [];
+      const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+
+      function collect(){
+        // Selecciona las imágenes de la galería (dinámicas) y el logo flotante
+        targets = Array.from(document.querySelectorAll('.gallery img, .logo-float'));
+        targets.forEach(el => el.classList.add('fade-scroll'));
+        update();
+      }
+
+      function update(){
+        const vh = window.innerHeight;
+        const band = vh * 0.14;     // banda activa arriba/abajo (~14% del viewport)
+        const minOpacity = 0.55;    // opacidad mínima en los bordes
+        const topEdge = band;
+        const bottomEdge = vh - band;
+
+        targets.forEach(el => {
+          // Evita afectar lightbox u overlays
+          if (el.closest('.lightbox')) return;
+          const r = el.getBoundingClientRect();
+          const center = r.top + r.height / 2;
+
+          let fade = 1;
+          if (center <= topEdge){
+            const t = clamp(center / band, 0, 1);
+            fade = minOpacity + t * (1 - minOpacity);
+          } else if (center >= bottomEdge){
+            const t = clamp((vh - center) / band, 0, 1);
+            fade = minOpacity + t * (1 - minOpacity);
+          } else {
+            fade = 1;
+          }
+          el.style.setProperty('--fade', fade.toFixed(3));
+        });
+      }
+
+      let ticking = false;
+      function onScroll(){
+        if (!ticking){
+          window.requestAnimationFrame(()=>{
+            update();
+            ticking = false;
+          });
+          ticking = true;
+        }
+      }
+      window.addEventListener('scroll', onScroll);
+      window.addEventListener('resize', collect);
+      collect();
+    })();
+  </script>
+</body>
+</html>

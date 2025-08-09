@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ANTE | Inicio</title>
+  <!-- Metadatos para SEO -->
+  <meta name="description" content="Bienvenido a ANTE Estudio Fotográfico. Descubre nuestro portafolio con retratos, fotografía artística y proyectos visuales de alta calidad.">
+  <meta name="keywords" content="fotografía, portafolio, estudio fotográfico, ANTE, retratos, fotos profesionales, arte visual">
+  <meta name="author" content="ANTE Estudio Fotográfico">
+
+  <!-- Metadatos para redes sociales (Open Graph / Facebook / WhatsApp) -->
+  <meta property="og:title" content="Inicio | ANTE Estudio Fotográfico">
+  <meta property="og:description" content="Explora el portafolio de ANTE Estudio Fotográfico con retratos y fotografía artística profesional.">
+  <meta property="og:image" content="https://tusitio.com/imagenes/portada.jpg">
+  <meta property="og:url" content="https://tusitio.com/index.html">
+  <meta property="og:type" content="website">
+
+  <!-- Metadatos para Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Inicio | ANTE Estudio Fotográfico">
+  <meta name="twitter:description" content="Bienvenido a ANTE Estudio Fotográfico. Descubre nuestro portafolio con retratos, fotografía artística y proyectos visuales.">
+  <meta name="twitter:image" content="https://tusitio.com/imagenes/portada.jpg">
+  <style>
+    :root {
+      --bg:#000000;
+      --bone:#f8f4e3;
+      font-family: "Marion", serif;
+    }
+    *,*::before,*::after {
+      box-sizing:border-box;
+    }
+    body {
+      margin:0;
+      background:var(--bg);
+      color:var(--bone);
+      font-family:"Marion", serif;
+    }
+    .hero {
+      width:100%;
+      height:100vh;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      position:relative;
+      overflow:hidden;
+      padding:2rem;
+    }
+    .hero-video {
+      position:absolute;
+      top:0;
+      left:0;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      z-index:-1;
+    }
+    .logo-text {
+      font-family:"Marion", serif;
+      color:var(--bone);
+      font-size:clamp(1rem, 7.5vw, 6rem);
+      letter-spacing:.2em;
+      text-align:center;
+      text-decoration:none;
+      display:inline-block;
+      transition:transform 0.2s ease;
+      cursor:pointer;
+    }
+    .menu-toggle {
+      display:block;
+      margin-top:1rem;
+      font-size:2rem;
+      background:none;
+      border:none;
+      color:var(--bone);
+      cursor:pointer;
+      transition:opacity .3s ease;
+    }
+    .menu-toggle:hover {
+      opacity:.7;
+    }
+  </style>
+</head>
+<body>
+  <section class="hero" aria-label="Logo ANTE">
+    <video autoplay muted loop playsinline preload="metadata" poster="imagenes/portada.jpg" class="hero-video">
+      <source src="NubesTimelapse.mp4" type="video/mp4">
+    </video>
+    <a href="galeria.html" class="logo-text">ANTE</a>
+  </section>
+</script>
+  <script>
+    const video = document.querySelector('.hero-video');
+    if (video) {
+      // Garantizar flags antes de intentar play
+      video.muted = true;
+      video.playsInline = true;
+
+      const tryPlay = () => {
+        const p = video.play();
+        if (p && typeof p.then === 'function') {
+          p.catch(() => { /* iOS puede pedir gesto: reintenta en el primer toque */ });
+        }
+      };
+
+      tryPlay();
+
+      // Primer interacción táctil: reintenta
+      window.addEventListener('touchstart', function once() {
+        tryPlay();
+        window.removeEventListener('touchstart', once, { passive: true });
+      }, { passive: true });
+
+      // Al volver a la página
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) tryPlay();
+      });
+    }
+  </script>
+</body>
+</html>

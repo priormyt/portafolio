@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Más | ANTE Estudio</title>
+  <!-- Metadatos para SEO -->
+  <meta name="description" content="Descubre más sobre ANTE Estudio Fotográfico: proyectos, colaboraciones y contenido adicional.">
+  <meta name="keywords" content="más, proyectos, colaboraciones, ANTE, fotografía, portafolio">
+  <meta name="author" content="ANTE Estudio Fotográfico">
+
+  <!-- Metadatos Open Graph -->
+  <meta property="og:title" content="Más | ANTE Estudio Fotográfico">
+  <meta property="og:description" content="Explora proyectos y colaboraciones adicionales de ANTE Estudio Fotográfico.">
+  <meta property="og:image" content="https://tusitio.com/imagenes/mas.jpg">
+  <meta property="og:url" content="https://tusitio.com/mas.html">
+  <meta property="og:type" content="website">
+
+  <!-- Metadatos Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Más | ANTE Estudio Fotográfico">
+  <meta name="twitter:description" content="Conoce proyectos y colaboraciones de ANTE Estudio Fotográfico.">
+  <meta name="twitter:image" content="https://tusitio.com/imagenes/mas.jpg">
+  <style>
+    :root {
+      --bg: #111;
+      --text: #ffffff;
+      --accent: #f5f5e9;
+    }
+    *,*::before,*::after{box-sizing:border-box;}
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+    a { color: inherit; text-decoration: none; }
+    header{
+      position:fixed;
+      top:0;
+      left:0;
+      width:180px;
+      height:100vh;
+      padding:2.5rem 1rem 2rem;
+      display:flex;
+      flex-direction:column;
+      align-items:flex-start;
+      gap:2.5rem;
+      background:transparent;
+      border:none;
+      pointer-events:none;
+      z-index:10;
+    }
+    header *{pointer-events:auto;}
+    nav ul{
+      list-style:none;
+      margin:0;
+      padding:0;
+      display:flex;
+      flex-direction:column;
+      gap:1.4rem;
+      width:100%;
+    }
+    nav a{
+      text-transform: uppercase;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: .05em;
+      background: none; /* Elimina el fondo */
+      color: var(--accent);
+      padding: .65rem 1.4rem .65rem 1.6rem;
+      border-radius: 12px;
+      width: 100%;
+      text-align: left;
+      display: block;
+      transition:color .25s,transform .25s,box-shadow .25s;
+      box-shadow: none; /* Elimina la sombra */
+      backdrop-filter: none; /* Elimina el efecto vidrio */
+      -webkit-backdrop-filter: none;
+    }
+    nav a:hover{
+      background: none;
+      color: #fff;
+      transform:translateX(4px) translateY(-2px) scale(1.12);
+      box-shadow: none;
+    }
+    nav a:active{
+      transform: translateY(1px) scale(0.99);
+      box-shadow: 0 0 4px rgba(0,0,0,0.3);
+    }
+    .fab {
+      display: none;
+    }
+
+    /* ===== Adaptación automática para móvil (<=768 px o UA móvil) ===== */
+
+    body.mobile nav ul{
+      flex-direction: row;
+      align-items: center;
+      gap: 1.2rem;
+      margin-left: 6rem;
+      margin-bottom: 6rem;
+    }
+    body.mobile .fab{
+      position:fixed;
+      top:20px;
+      left:20px;
+      transform:none;
+      width:56px;
+      height:56px;
+      border-radius:50%;
+      background:var(--accent);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:1.5rem;
+      color:#111;
+      cursor:pointer;
+      z-index:20;
+      transition:transform .1s, box-shadow .25s;
+    }
+    body.mobile .fab.active {
+      background: #111;
+      color: var(--accent);
+    }
+    body.mobile .fab:active{
+      transform: scale(0.97);
+    }
+    body.mobile header{
+      width:100%;
+      height:0;
+      overflow:visible;
+      padding:0;
+      background:transparent;
+      border:none;
+    }
+    body.mobile header nav{
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      position: fixed;
+      top: 90px;
+      left: 20px;
+      transform: none;
+      background: transparent;
+      padding: 0;
+      border-radius: 0;
+      opacity: 0;
+      max-height: none;
+      overflow: visible;
+      transition: opacity .35s ease;
+    }
+    body.mobile header.open nav{
+      opacity: 1;
+      max-height: none;
+    }
+    body.mobile header nav ul{
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1.2rem;
+      margin: 0;
+      padding: 0;
+      transform: translateY(-20px);
+      transition: transform .35s ease;
+    }
+    body.mobile header.open nav ul{
+      transform: translateY(0);
+    }
+    body.mobile header nav li{
+      transform: translateY(-20px);
+      opacity: 0;
+      transition: transform .35s ease, opacity .35s ease;
+    }
+    body.mobile header.open nav li{
+      transform: translateY(0);
+      opacity: 1;
+    }
+    body.mobile header.open nav a {
+      box-shadow: 0 0 6px rgba(0,0,0,0.25);
+    }
+    body.mobile header.open nav a:active {
+      box-shadow: 0 0 4px rgba(0,0,0,0.35);
+    }
+    body.mobile header.open nav a:hover {
+      box-shadow: 0 0 8px rgba(0,0,0,0.35);
+    }
+    body.mobile header nav a,
+    body.mobile header.open nav a {
+      background: none !important;
+      box-shadow: none !important;
+      color: var(--accent);
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      border: none !important;
+      transition: color .25s, transform .25s;
+    }
+    body.mobile header.open nav a:hover,
+    body.mobile header.open nav a:active {
+      background: none !important;
+      box-shadow: none !important;
+      color: #fff;
+    }
+    .logo-float{
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      left: auto;
+      display: block;
+      width: auto;
+      min-width: 120px;
+      max-width: 300px;
+      height: auto;
+      box-shadow: none;
+      border-radius: 0;
+      background: transparent;
+      text-shadow:
+        0 4px 16px rgba(0,0,0,0.55),
+        0 1px 1px rgba(0,0,0,0.25),
+        0 0px 0px #000;
+      color: var(--accent);
+      font-family: "Marion", serif;
+      font-size: clamp(24px, 7vw, 60px);
+      white-space: nowrap;
+      letter-spacing: .09em;
+      text-decoration: none;
+      line-height: 1;
+      overflow: visible;
+      text-overflow: unset;
+      z-index: 120;
+      pointer-events: auto;
+      transition: transform .2s;
+    }
+    .logo-float:hover {
+      transform: translateY(-4px) scale(1.07);
+    }
+
+    /* ===== Sección Foro Colibrí ===== */
+    .center-content{
+      position:absolute;
+      top:50%;
+      left:50%;
+      transform:translate(-50%, -50%);
+      display:flex;
+      flex-direction:row;          /* texto a la izquierda, logo‑enlace a la derecha */
+      align-items:center;
+      gap:clamp(1rem, 3vw, 2.5rem);
+      text-align:left;
+      z-index:200;
+      padding:0 20px;
+    }
+    @media (max-width: 768px) {
+      .center-content {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 1rem;
+        z-index: 200;
+      }
+      .center-content h1 {
+        text-align: center !important;
+        margin-bottom: .25rem;
+      }
+    }
+    .center-content h1{
+      margin:0;
+      font-size:clamp(1.5rem, 2.5vw, 3.5rem);
+      line-height:1.2;
+      text-align: right;
+    }
+    .foro-link{
+      display:inline-flex;
+      align-items:center;
+      gap: clamp(0.3rem, 1.5vw, 0.8rem);
+      font-size: clamp(1rem, 3vw, 1.5rem);
+      color:var(--accent);
+      text-decoration:none;
+      transition:color .25s;
+    }
+    .foro-link:hover{
+      color:#fff;
+      text-decoration:underline;
+    }
+    .foro-logo{
+      width: clamp(50px, 8vw, 100px);
+      height: clamp(50px, 8vw, 100px);
+      object-fit:cover;
+      border-radius:50%;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+      background: #fff;
+    }
+  </style>
+</head>
+<body>
+  <video id="bgVideo" class="video-bg" autoplay muted loop playsinline preload="metadata" poster="img/Fondo3.jpg" style="position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:cover;z-index:-1;filter:brightness(0.7);">
+    <source src="Dawn Timelapse Video.mp4" type="video/mp4">
+  </video>
+  <img id="bgFallback" src="img/Fondo3.jpg" alt="" style="position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:cover;z-index:-1;filter:brightness(0.7);display:none;">
+  <header>
+    <nav>
+      <ul>
+        <li><a href="index.html">Inicio</a></li>
+        <li><a href="galeria.html">Galería</a></li>
+        <li><a href="nosotros.html">Nosotros</a></li>
+        <li><a href="contacto.html">Contacto</a></li>
+        <li><a href="mas.html">Más</a></li>
+      </ul>
+    </nav>
+    <div id="menuBtn" class="fab">☰</div>
+  </header>
+  <a href="index.html" class="logo-float">A&nbsp;N&nbsp;T&nbsp;E</a>
+
+  <div class="center-content">
+    <h1>Renta de foro en la Ciudad de México</h1>
+    <a href="https://forocolibri.com" class="foro-link" target="_blank" rel="noopener">
+      <img src="img/Foro colibri.png" alt="Logo Foro Colibrí" class="foro-logo">
+      forocolibri.com
+    </a>
+  </div>
+  
+  <script>
+    // Detectar móvil y actualizar clase 'mobile' dinámica
+    function setDeviceClass(){
+      const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+                       || window.matchMedia('(max-width:768px)').matches;
+      document.body.classList.toggle('mobile', isMobile);
+    }
+    setDeviceClass();
+    window.addEventListener('resize', setDeviceClass);
+
+    // Botón flotante para menú móvil
+    const menuBtn = document.getElementById('menuBtn');
+    if(menuBtn){
+      menuBtn.addEventListener('click', ()=>{
+        const header = document.querySelector('header');
+        header.classList.toggle('open');
+        menuBtn.classList.toggle('active');
+      });
+    }
+
+    // Cerrar menú móvil automáticamente al INICIAR scroll
+    let lastScrollTop = 0;
+    window.addEventListener('scroll', () => {
+      if(document.body.classList.contains('mobile')){
+        const header = document.querySelector('header');
+        if(header.classList.contains('open')){
+          const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+          if(Math.abs(currentScroll - lastScrollTop) > 5){
+            header.classList.remove('open');
+            menuBtn.classList.remove('active');
+          }
+          lastScrollTop = currentScroll;
+        }
+      }
+    });
+</script>
+  <script>
+    (function(){
+      const video = document.getElementById('bgVideo');
+      const fallback = document.getElementById('bgFallback');
+      const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+      const isSaveData = conn && conn.saveData;
+      const isLowNetwork = conn && (['slow-2g','2g'].includes(conn.effectiveType || '') || (conn.downlink && conn.downlink < 0.5) || (conn.rtt && conn.rtt > 800));
+
+      function showFallback(){
+        if (video) {
+          video.pause();
+          video.removeAttribute('autoplay');
+          video.style.display = 'none';
+        }
+        if (fallback) fallback.style.display = 'block';
+      }
+
+      // Asegurar que el fallback use el mismo archivo que el poster del video
+      if (fallback && video && video.getAttribute('poster')) {
+        fallback.src = video.getAttribute('poster');
+      }
+
+      if (!video) return;
+
+      if (isSaveData || isLowNetwork) {
+        // Ahorro de datos activo o conexión lenta: usar imagen estática
+        showFallback();
+        return;
+      }
+
+      if (conn && typeof conn.addEventListener === 'function') {
+        conn.addEventListener('change', () => {
+          const nowLow = (['slow-2g','2g'].includes(conn.effectiveType || '') || (conn.downlink && conn.downlink < 0.5) || (conn.rtt && conn.rtt > 800));
+          if (conn.saveData || nowLow) {
+            showFallback();
+          }
+        });
+      }
+
+      // Asegurar flags de iOS
+      video.muted = true;
+      video.playsInline = true;
+
+      const tryPlay = () => {
+        const p = video.play && video.play();
+        if (p && typeof p.then === 'function') {
+          p.catch(() => { /* iOS puede requerir gesto del usuario */ });
+        }
+      };
+
+      // Intento inicial
+      tryPlay();
+
+      // Tras 1.5s, si no arranca, activar fallback (cubre Low Power Mode)
+      setTimeout(() => {
+        if (video.paused || video.readyState < 2) {
+          showFallback();
+        }
+      }, 1500);
+
+      // Reintento al primer toque si aún no se mostró el fallback
+      window.addEventListener('touchstart', function once(){
+        if (fallback && fallback.style.display !== 'block') {
+          tryPlay();
+        }
+        window.removeEventListener('touchstart', once, { passive: true });
+      }, { passive: true });
+
+      // Reintento al volver a la pestaña
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden && fallback && fallback.style.display !== 'block') {
+          tryPlay();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
