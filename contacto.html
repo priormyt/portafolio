@@ -449,8 +449,14 @@ body.mobile header.open nav{
       </div>
     </div>
 
+    <div class="field">
+      <label>
+        <input type="checkbox" id="privacidad" name="privacidad" required>
+        He leído y acepto el <a href="aviso-privacidad.html" target="_blank" rel="noopener">Aviso de Privacidad</a>
+      </label>
+      <small class="error" aria-live="polite"></small>
+    </div>
     <button type="submit" id="submitBtn" class="btn-primary">Enviar</button>
-    <p class="form-note">Al enviar, acepta el uso de sus datos para responder a su solicitud.</p>
   </div>
 </form>
 <div id="formToast" class="toast" role="status" aria-live="polite" aria-atomic="true" hidden></div>
@@ -503,6 +509,7 @@ body.mobile header.open nav{
   const btn = document.getElementById('submitBtn');
   const toast = document.getElementById('formToast');
   const counter = document.getElementById('msgCounter');
+  const privacidad = document.getElementById('privacidad');
   const maxLen = 1000;
 
   // Contador de caracteres
@@ -520,7 +527,7 @@ body.mobile header.open nav{
   }
   function validEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
 
-  [nombre,email,tel,msg].forEach(el=>{
+  [nombre,email,tel,msg,privacidad].forEach(el=>{
     if(!el) return;
     el.addEventListener('input', ()=> setError(el, ''));
   });
@@ -538,6 +545,7 @@ body.mobile header.open nav{
     if(!validEmail(email.value.trim())){ setError(email,'Correo inválido'); ok = false; }
     if(!msg.value.trim()){ setError(msg,'Escriba un mensaje'); ok = false; }
     if(msg.value.length > maxLen){ setError(msg,`Reduzca a ${maxLen} caracteres`); ok = false; }
+    if(!privacidad.checked){ setError(privacidad,'Debe aceptar el aviso de privacidad'); ok = false; }
     if(!ok){ e.preventDefault(); return; }
 
     if(FORM_ENDPOINT){
