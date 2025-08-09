@@ -336,6 +336,54 @@ body.mobile header.open nav{
   box-shadow: none !important;
 }
 
+/* ===== Contact form styles ===== */
+.form-card{
+  display:flex;flex-direction:column;gap:1rem;max-width:680px;
+  background: rgba(17,17,17,.55);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius: 14px;
+  padding: 1.25rem 1.25rem 1.5rem;
+  box-shadow: 0 8px 28px rgba(0,0,0,.25);
+  backdrop-filter: blur(3px);
+}
+.field{display:flex;flex-direction:column;gap:.5rem}
+.field label{letter-spacing:.02em;color:var(--accent)}
+.field .req{color:#ffb3b3;font-weight:700}
+.field input,.field textarea{
+  padding:.9rem .95rem;border-radius:10px;border:1px solid rgba(255,255,255,.14);
+  background: rgba(0,0,0,.25); color: var(--text); outline:none;
+  transition: border .2s, box-shadow .2s, transform .08s;
+}
+.field input:focus,.field textarea:focus{border-color: var(--accent); box-shadow: 0 0 0 3px rgba(245,245,233,.15)}
+.field input:active,.field textarea:active{transform:scale(.998)}
+.field .help{opacity:.85}
+.field .error{color:#ffb3b3; min-height:1.1em}
+.meta-row{display:flex; align-items:center; justify-content:space-between}
+.counter{opacity:.8}
+
+.btn-primary{
+  padding:1rem 1.25rem; border:none; border-radius:12px; cursor:pointer;
+  background: var(--accent); color:#111; font-weight:800; letter-spacing:.03em;
+  transition: transform .12s, box-shadow .25s, background .25s; align-self:flex-start;
+}
+.btn-primary:hover{ transform: translateY(-2px); box-shadow:0 10px 24px rgba(0,0,0,.25)}
+.btn-primary:active{ transform: translateY(0); box-shadow:0 4px 12px rgba(0,0,0,.25)}
+.btn-primary[disabled]{opacity:.6; cursor:wait}
+
+/* Toast messages */
+.toast{ position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+  background: rgba(20,20,20,.92); color: var(--text); border:1px solid rgba(255,255,255,.12);
+  padding:.8rem 1rem; border-radius:10px; box-shadow:0 10px 24px rgba(0,0,0,.35); z-index: 9999;}
+.toast.success{ border-color: rgba(123, 255, 180, .6)}
+.toast.error{ border-color: rgba(255, 152, 152, .6)}
+
+/* Small shake for invalid */
+@keyframes shake{10%,90%{transform:translateX(-1px)}20%,80%{transform:translateX(2px)}30%,50%,70%{transform:translateX(-4px)}40%,60%{transform:translateX(4px)}}
+.is-invalid{ animation: shake .35s ease }
+
+@media (max-width: 900px){
+  .form-card{max-width: 100%;}
+}
   </style>
 </head>
 <body>
@@ -372,21 +420,40 @@ body.mobile header.open nav{
 
     <h2>Formulario de contacto</h2>
     <p>Completa el siguiente formulario y nuestro equipo se pondrá en contacto contigo a la brevedad.</p>
-    <form action="mailto:contacto@anteestudio.com" method="POST" enctype="text/plain" style="display:flex;flex-direction:column;gap:1rem;max-width:600px;">
-      <label for="nombre"><strong>Nombre completo</strong></label>
-      <input type="text" id="nombre" name="nombre" required placeholder="Escribe tu nombre" style="padding:.8rem;border-radius:8px;border:none;">
-      
-      <label for="email"><strong>Correo electrónico</strong></label>
-      <input type="email" id="email" name="email" required placeholder="ejemplo@correo.com" style="padding:.8rem;border-radius:8px;border:none;">
-      
+    <form id="contactForm" action="mailto:contacto@anteestudio.com" method="POST" enctype="text/plain" novalidate>
+  <div class="form-card">
+    <div class="field">
+      <label for="nombre"><strong>Nombre completo</strong> <span class="req">*</span></label>
+      <input type="text" id="nombre" name="nombre" required placeholder="Tu nombre" autocomplete="name">
+      <small class="error" aria-live="polite"></small>
+    </div>
+
+    <div class="field">
+      <label for="email"><strong>Correo electrónico</strong> <span class="req">*</span></label>
+      <input type="email" id="email" name="email" required placeholder="ejemplo@correo.com" autocomplete="email">
+      <small class="error" aria-live="polite"></small>
+    </div>
+
+    <div class="field">
       <label for="telefono"><strong>Teléfono</strong></label>
-      <input type="tel" id="telefono" name="telefono" placeholder="+52 55 0000 0000" style="padding:.8rem;border-radius:8px;border:none;">
-      
-      <label for="mensaje"><strong>Mensaje</strong></label>
-      <textarea id="mensaje" name="mensaje" rows="5" required placeholder="Cuéntanos sobre tu proyecto o sesión" style="padding:.8rem;border-radius:8px;border:none;"></textarea>
-      
-      <button type="submit" style="padding:1rem;border:none;border-radius:8px;background:var(--accent);color:#111;font-weight:700;cursor:pointer;transition:background .3s;">Enviar</button>
-    </form>
+      <input type="tel" id="telefono" name="telefono" placeholder="+52 55 0000 0000" autocomplete="tel">
+      <small class="help">Opcional, pero útil si hay que coordinar detalles.</small>
+    </div>
+
+    <div class="field">
+      <label for="mensaje"><strong>Mensaje</strong> <span class="req">*</span></label>
+      <textarea id="mensaje" name="mensaje" rows="5" required placeholder="Cuéntanos sobre tu proyecto o sesión"></textarea>
+      <div class="meta-row">
+        <small class="error" aria-live="polite"></small>
+        <small class="counter" id="msgCounter">0/1000</small>
+      </div>
+    </div>
+
+    <button type="submit" id="submitBtn" class="btn-primary">Enviar</button>
+    <p class="form-note">Al enviar, acepta el uso de sus datos para responder a su solicitud.</p>
+  </div>
+</form>
+<div id="formToast" class="toast" role="status" aria-live="polite" aria-atomic="true" hidden></div>
   </main>
   <script>
     // Detectar móvil y actualizar clase 'mobile' dinámica
@@ -423,6 +490,83 @@ body.mobile header.open nav{
         }
       }
     });
+
+// ===== Contact form behavior =====
+(function(){
+  const FORM_ENDPOINT = "https://formspree.io/f/mgvzrokn";
+  const form = document.getElementById('contactForm');
+  if(!form) return;
+  const nombre = document.getElementById('nombre');
+  const email = document.getElementById('email');
+  const tel = document.getElementById('telefono');
+  const msg = document.getElementById('mensaje');
+  const btn = document.getElementById('submitBtn');
+  const toast = document.getElementById('formToast');
+  const counter = document.getElementById('msgCounter');
+  const maxLen = 1000;
+
+  // Contador de caracteres
+  function updateCount(){
+    const len = (msg.value||'').length; counter.textContent = `${len}/${maxLen}`;
+    if(len > maxLen){ counter.style.color = '#ffb3b3'; } else { counter.style.color = '' }
+  }
+  msg.addEventListener('input', updateCount); updateCount();
+
+  // Validación simple
+  function setError(input, message){
+    const small = input.closest('.field').querySelector('.error');
+    small.textContent = message || '';
+    if(message){ input.classList.add('is-invalid'); setTimeout(()=> input.classList.remove('is-invalid'), 400); }
+  }
+  function validEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+
+  [nombre,email,tel,msg].forEach(el=>{
+    if(!el) return;
+    el.addEventListener('input', ()=> setError(el, ''));
+  });
+
+  function showToast(text, kind){
+    if(!toast) return;
+    toast.textContent = text; toast.className = `toast ${kind||''}`; toast.hidden = false;
+    setTimeout(()=>{ toast.hidden = true; }, 3500);
+  }
+
+  form.addEventListener('submit', async (e)=>{
+    // Validaciones
+    let ok = true;
+    if(!nombre.value.trim()){ setError(nombre,'Ingrese su nombre'); ok = false; }
+    if(!validEmail(email.value.trim())){ setError(email,'Correo inválido'); ok = false; }
+    if(!msg.value.trim()){ setError(msg,'Escriba un mensaje'); ok = false; }
+    if(msg.value.length > maxLen){ setError(msg,`Reduzca a ${maxLen} caracteres`); ok = false; }
+    if(!ok){ e.preventDefault(); return; }
+
+    if(FORM_ENDPOINT){
+      e.preventDefault();
+      try{
+        btn.setAttribute('disabled','');
+        const payload = { nombre: nombre.value.trim(), email: email.value.trim(), telefono: tel.value.trim(), mensaje: msg.value.trim() };
+        const res = await fetch(FORM_ENDPOINT, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+        if(res.ok){
+          form.reset(); updateCount(); showToast('¡Gracias! Su mensaje fue enviado.', 'success');
+        }else{
+          showToast('No se pudo enviar. Intente más tarde.', 'error');
+        }
+      }catch(err){
+        showToast('Error de red. Revise su conexión.', 'error');
+      }finally{
+        btn.removeAttribute('disabled');
+      }
+    } else {
+      // Sin endpoint, usar mailto (fallback actual)
+      // No prevenimos el envío para que abra su cliente de correo
+    }
+  });
+
+  // Formato básico de teléfono (solo dígitos y +)
+  if(tel){
+    tel.addEventListener('input', ()=>{ tel.value = tel.value.replace(/[^+\d\s-]/g,''); });
+  }
+})();
 </script>
 <a href="index.html" class="logo-float">A&nbsp;N&nbsp;T&nbsp;E</a>
 </body>
