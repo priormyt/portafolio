@@ -286,6 +286,7 @@
   <video id="bgVideo" class="video-bg" autoplay muted loop playsinline preload="metadata" poster="img/poster-mas.jpg" style="position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:cover;z-index:-1;filter:brightness(0.7);">
     <source src="Dawn Timelapse Video.mp4" type="video/mp4">
   </video>
+  <img id="bgFallback" src="img/poster-mas.jpg" alt="Fondo estático" style="position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:cover;z-index:-1;filter:brightness(0.7);display:none;">
   <header>
     <nav>
       <ul>
@@ -347,26 +348,60 @@
   <script>
     (function(){
       const video = document.getElementById('bgVideo');
+      const fallback = document.getElementById('bgFallback');
+      const saveData = navigator.connection && navigator.connection.saveData;
+
+      function showFallback(){
+        if (video) {
+          video.pause();
+          video.removeAttribute('autoplay');
+          video.style.display = 'none';
+        }
+        if (fallback) fallback.style.display = 'block';
+      }
+
       if (!video) return;
+
+      if (saveData) {
+        // Ahorro de datos activo: usar imagen estática
+        showFallback();
+        return;
+      }
+
       // Asegurar flags de iOS
       video.muted = true;
       video.playsInline = true;
+
       const tryPlay = () => {
         const p = video.play && video.play();
         if (p && typeof p.then === 'function') {
           p.catch(() => { /* iOS puede requerir gesto del usuario */ });
         }
       };
+
       // Intento inicial
       tryPlay();
-      // Reintento al primer toque
+
+      // Tras 1.5s, si no arranca, activar fallback (cubre Low Power Mode)
+      setTimeout(() => {
+        if (video.paused || video.readyState < 2) {
+          showFallback();
+        }
+      }, 1500);
+
+      // Reintento al primer toque si aún no se mostró el fallback
       window.addEventListener('touchstart', function once(){
-        tryPlay();
+        if (fallback && fallback.style.display !== 'block') {
+          tryPlay();
+        }
         window.removeEventListener('touchstart', once, { passive: true });
       }, { passive: true });
+
       // Reintento al volver a la pestaña
       document.addEventListener('visibilitychange', () => {
-        if (!document.hidden) tryPlay();
+        if (!document.hidden && fallback && fallback.style.display !== 'block') {
+          tryPlay();
+        }
       });
     })();
   </script>
