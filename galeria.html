@@ -259,10 +259,15 @@ body.mobile header nav{
   max-height: none;
   overflow: visible;
   transition: opacity .35s ease;
+  pointer-events: none;      /* nav cerrado NO capta clics */
+  visibility: hidden;        /* oculta para Safari/iOS y evita hit-testing */
 }
 body.mobile header.open nav{
   opacity: 1;
   max-height: none;
+  pointer-events: auto;      /* nav abierto SÍ capta clics */
+  visibility: visible;       /* visible y clickable */
+  z-index: 50;               /* sobre la galería y el FAB */
 }
     body.mobile header nav ul{
       display: flex;
