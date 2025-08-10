@@ -106,6 +106,7 @@
     .gallery {
       display: grid;
       margin-left: 180px;
+      margin-top: 0;
       grid-template-columns: repeat(5, 1fr);
       gap: 2.5rem;
       padding: 2rem 2vw;
@@ -161,6 +162,7 @@
       }
       .gallery {
         margin-left: 0;
+        margin-top: 100px;
         grid-template-columns: 1fr 1fr;
         gap: 1.2rem;
         padding: 1rem 1vw;
@@ -176,13 +178,11 @@
     /* ===== Adaptación automática para móvil (<=768 px o UA móvil) ===== */
     body.mobile header{
       width: 100%;
-      height: auto;
-      flex-direction: row;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1rem 2vw;
-      border-right: none;
-      border-bottom: 1px solid rgba(255,255,255,.08);
+      height: 30px;
+      overflow: visible;
+      padding: 20px;
+      background: transparent;
+      border: none;
     }
     body.mobile nav ul{
       flex-direction: row;
@@ -193,7 +193,7 @@
     }
     body.mobile .gallery{
       margin-left: 0;        /* cancelar barra lateral */
-      margin-top: 0px;     /* despejar la altura del header (≈90 px + margen) */
+      margin-top: 80px;     /* despejar la altura del header (≈90 px + margen) */
       grid-template-columns: 1fr 1fr 1fr; /* ahora 3 por fila */
       gap: 1.2rem;
       padding: 1rem 3vw;

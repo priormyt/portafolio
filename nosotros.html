@@ -35,13 +35,31 @@
   <meta name="twitter:image" content="https://ante.mx/img/nosotros_og.jpg">
   
 
-  </script>
 
   
   <style>
+    /* Aparición al hacer scroll (dinámico y sutil) - Colocar ANTES de otros estilos reveal */
+    .reveal { 
+      opacity: 0; 
+      transform: translateY(12px); 
+    }
+    .reveal.in { 
+      opacity: 1; 
+      transform: none; 
+      transition: opacity .6s ease, transform .6s ease; 
+    }
+    
+    /* Asegurar que la animación sea suave y respete preferencias de movimiento reducido */
+    @media (prefers-reduced-motion: reduce){
+      .reveal, .reveal.in { 
+        opacity: 1 !important; 
+        transform: none !important; 
+        transition: none !important; 
+      }
+    }
     :root {
       --bg: #111;
-      --text: #ffffff;
+      --text: #f5f5e9;
       --accent: #f5f5e9;
     }
     *,*::before,*::after{box-sizing:border-box;}
@@ -115,8 +133,8 @@
     /* Contenido principal */
     .contenido-nosotros {
       margin-left: 210px;
-      padding: 3rem 2rem 2rem 2rem;
-      max-width: 900px;
+      padding: clamp(2rem, 5vw, 3rem) 2rem;
+      max-width: none;
     }
     .contenido-nosotros h1 {
       font-size: 2.5rem;
@@ -136,6 +154,13 @@
       margin-bottom: 1.2rem;
       color: var(--text);
       line-height: 1.8;
+    }
+
+    .content-wrap {
+      max-width: 980px;
+      margin: 0 auto;
+      display: grid;
+      gap: clamp(1.2rem, 3vw, 2rem);
     }
 
     /* === Grilla moderna 12 columnas === */
@@ -161,7 +186,7 @@
     /* Tipografía y detalles */
     .overline { text-transform: uppercase; letter-spacing: .18em; font-size: .78rem; color: rgba(245,245,233,.85); margin: 0 0 .25rem; display: block; }
     .contenido-nosotros h1 { font-size: clamp(2rem, 4.5vw, 3.2rem); color: var(--accent); margin: 0 0 1.2rem; letter-spacing: .08em; }
-    .contenido-nosotros .lead { font-size: clamp(1.05rem, 1.6vw, 1.25rem); line-height: 1.9; color: var(--text); margin: 0 0 1.8rem; max-width: 70ch; }
+    .contenido-nosotros .lead { font-size: clamp(1.05rem, 1.6vw, 1.25rem); line-height: 1.9; color: var(--text); margin: 0 0 1.8rem; max-width: none; }
 
     /* Lista de valores tipo chips */
     .valores-list { display:flex; flex-wrap:wrap; gap:.6rem; margin-top:.6rem; }
@@ -171,7 +196,7 @@
     .divider { height:1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.18), transparent); margin: clamp(16px, 2vw, 24px) 0; }
 
     /* Ajustes de contenedor */
-    .contenido-nosotros { max-width: 1100px; }
+    .contenido-nosotros { max-width: none; }
     .equipo {
       display: flex;
       gap: 2.5rem;
@@ -237,13 +262,11 @@
     /* ===== Adaptación automática para móvil (<=768 px o UA móvil) ===== */
     body.mobile header{
       width: 100%;
-      height: auto;
-      flex-direction: row;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1rem 2vw;
-      border-right: none;
-      border-bottom: 1px solid rgba(255,255,255,.08);
+      height: 40px;
+      overflow: visible;
+      padding: 0;
+      background: transparent;
+      border: none;
     }
     body.mobile nav ul{
       flex-direction: row;
@@ -276,14 +299,6 @@
     }
     body.mobile .fab:active{
       transform: scale(0.97);
-    }
-    body.mobile header{
-      width:100%;
-      height:0;
-      overflow:visible;
-      padding:0;
-      background:transparent;
-      border:none;
     }
     body.mobile header nav{
       display: flex;
@@ -392,8 +407,8 @@ body {
     /* alineación con sidebar fijo */
     margin: 2.5rem 0 0 210px;
     /* mismo ancho y respiración que el main */
-    max-width: 1100px;
-    padding: 3rem 2rem 2rem 2rem;
+    max-width: none;
+    padding: clamp(2rem, 5vw, 3rem) 2rem;
     border-top: 1px solid rgba(255,255,255,.12);
     box-sizing: border-box;
   }
@@ -407,13 +422,17 @@ body {
   .carousel {
     position: relative;
     overflow: hidden;
+    /* Permite scroll vertical natural y gestos horizontales del carrusel */
+    touch-action: pan-y;
   }
   .slides {
     display: grid;
     grid-auto-flow: column;
     grid-auto-columns: 100%;
     transition: transform .6s ease;
+    cursor: grab;                 /* puntero tipo arrastre en desktop */
   }
+  .slides.dragging { cursor: grabbing; }
   .slide {
     display: grid;
     grid-template-columns: 5fr 7fr; /* imagen/texto en proporción 5:7 como la grilla */
@@ -524,20 +543,20 @@ body {
     <div id="menuBtn" class="fab">☰</div>
   </header>
   <main class="contenido-nosotros">
-    <h1>Nosotros</h1>
-    <p class="lead">
-      ANTE es un estudio de retrato minimalista. Nace del gusto por mirar a las personas con atención y traducir esa mirada en una imagen honesta, sobria y de buen gusto. Cada sesión es un encuentro: una foto para reconocerse y sentirse orgulloso de quién se es.
-    </p>
-
-    <section class="grid">
-      <article class="card span-7">
+    <div class="content-wrap">
+      <h1 class="reveal">Nosotros</h1>
+      <p class="lead reveal">
+        ANTE es un estudio de retrato minimalista. Nace del gusto por mirar a las personas con atención y traducir esa mirada en una imagen honesta, sobria y de buen gusto. Cada sesión es un encuentro: una foto para reconocerse y sentirse orgulloso de quién se es.
+      </p>
+      <section class="grid">
+      <article class="card span-7 reveal">
         <span class="overline">De dónde surge</span>
         <p>
           La fotografía ha acompañado a ANTE desde la infancia. Con el tiempo, hacer retratos se volvió una forma de estar cerca: un pequeño homenaje a la relación con cada persona. Cuando una imagen funciona, permite verse “a través de nuestros ojos”: sin artificios, con cariño y claridad.
         </p>
       </article>
 
-      <article class="card span-5">
+      <article class="card span-5 reveal">
         <span class="overline">Lo importante aquí</span>
         <p>
           Se celebra lo que hace único a cada quien —las diferencias sutiles y las evidentes—. El estudio trabaja con una estética limpia y un ritmo tranquilo para que la experiencia sea amable. El objetivo es sencillo: que la persona se guste y se reconozca.
@@ -553,14 +572,14 @@ body {
 
       <div class="span-12 divider"></div>
 
-      <article class="card span-6">
+      <article class="card span-6 reveal">
         <span class="overline">Qué se hace hoy</span>
         <p>
           Retrato profesional para perfiles y equipos; retrato personal y editorial. La invitación es para ejecutivos, artistas y cualquier persona que quiera una foto que la represente y perdure. La propuesta: luz cuidada, dirección suave y un resultado sobrio.
         </p>
       </article>
 
-      <article class="card span-6">
+      <article class="card span-6 reveal">
         <span class="overline">Testimonios</span>
         <div class="carousel" id="carouselTestimonios">
           <div class="slides">
@@ -598,7 +617,7 @@ body {
 
       <div class="span-12 divider"></div>
 
-      <article class="card span-12">
+      <article class="card span-12 reveal">
         <span class="overline">¿Agendamos?</span>
         <p>
           Si se desea conocer más o programar una sesión, puede escribirse aquí:
@@ -606,6 +625,7 @@ body {
         </p>
       </article>
     </section>
+    </div>
   </main>
   <script>
     // Detectar móvil y actualizar clase 'mobile' dinámica
@@ -643,89 +663,39 @@ body {
       }
     });
     
-    /* Fade-on-scroll simplificado y más efectivo */
+    // Reveal-on-scroll (aparece el contenido al entrar al viewport)
     (function(){
-      let targets = [];
-      const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
-
-      function collect(){
-        // Limpiar clases anteriores
-        document.querySelectorAll('.fade-scroll').forEach(el => {
-          el.classList.remove('fade-scroll');
-          el.style.removeProperty('--fade');
-        });
-        
-        // Seleccionar elementos principales que siempre deben tener efecto
-        const mainElements = document.querySelectorAll('h1, h2, .card, .overline, .lead, p:first-of-type');
-        targets = Array.from(mainElements).filter(el => !el.closest('header'));
-        
-        // Aplicar clase fade-scroll a todos los objetivos
-        targets.forEach(el => el.classList.add('fade-scroll'));
-        
-        // Verificación visual (quitar en producción)
-        if (location.hash === '#debug') {
-          targets.forEach(el => el.classList.add('fade-debug'));
-        }
-        
-        update();
+      const els = document.querySelectorAll('.reveal');
+      if (!('IntersectionObserver' in window) || !els.length) {
+        els.forEach(e => e.classList.add('in')); 
+        return;
       }
-
-      let ticking = false;
-      function update(){
-        const vh = window.innerHeight;
-        const band = vh * 0.15;     // Aumentado a 15% para mayor efecto
-        const minOpacity = 0.4;     // Más bajo = más contraste en los extremos
-        const topEdge = band;
-        const bottomEdge = vh - band;
-
-        targets.forEach(el => {
-          const r = el.getBoundingClientRect();
-          // Usar la posición superior en lugar del centro para elementos grandes
-          const pos = r.top + Math.min(r.height * 0.5, 100);
-
-          let fade = 1;
-          if (pos <= topEdge){
-            // Dentro de la banda superior
-            const t = clamp(pos / band, 0, 1);
-            fade = minOpacity + t * (1 - minOpacity);
-          } else if (pos >= bottomEdge){
-            // Dentro de la banda inferior
-            const t = clamp((vh - pos) / band, 0, 1);
-            fade = minOpacity + t * (1 - minOpacity);
-          }
-          
-          // Solo actualizar si hay cambio significativo
-          if (fade < 0.98) {
-            el.style.setProperty('--fade', fade.toFixed(2));
-          } else {
-            el.style.setProperty('--fade', "1");
-          }
-        });
-        ticking = false;
-      }
-
-      function onScroll(){
-        if (!ticking){
-          ticking = true;
-          requestAnimationFrame(update);
-        }
-      }
-
-      // Registrar los eventos
-      window.addEventListener('scroll', onScroll, { passive: true });
-      window.addEventListener('resize', collect, { passive: true });
       
-      // Iniciar después de cargar la página
+      // Esta es la clave: crear el observer apenas carga la página
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(en => { 
+          if(en.isIntersecting){ 
+            en.target.classList.add('in'); 
+            io.unobserve(en.target); 
+          }
+        });
+      }, { threshold: 0.12, rootMargin: '50px' }); // rootMargin hace que se active un poco antes
+      
+      // IMPORTANTE: Hacer que todos los elementos aparezcan
+      // automáticamente si están visibles al cargar
       if (document.readyState !== 'loading') {
-        collect();
+        setTimeout(() => els.forEach(e => io.observe(e)), 100);
       } else {
-        document.addEventListener('DOMContentLoaded', collect);
+        document.addEventListener('DOMContentLoaded', () => {
+          setTimeout(() => els.forEach(e => io.observe(e)), 100);
+        });
       }
-      
-      // Recolectar periódicamente por si hay cambios dinámicos
-      setInterval(collect, 2000);
     })();
+    
+    // Mantener el resto de funciones
+    // ...existing code...
   </script>
+  <!-- Restaurando el logo flotante -->
   <a href="index.html" class="logo-float">A&nbsp;N&nbsp;T&nbsp;E</a>
 </body>
 </html>
