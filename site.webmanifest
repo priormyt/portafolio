@@ -1,19 +1,23 @@
 {
-  "name": "ANTE Estudio",
+  "name": "ANTE Estudio de Fotografía",
   "short_name": "ANTE",
   "icons": [
     {
       "src": "img/favicon/android-chrome-192x192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "img/favicon/android-chrome-512x512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ],
   "theme_color": "#111111",
   "background_color": "#111111",
-  "display": "standalone"
+  "start_url": "https://ante.mx/",
+  "display": "standalone",
+  "orientation": "portrait"
 }
