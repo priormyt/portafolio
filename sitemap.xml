@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="https://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://ante.photo/</loc>
+    <priority>1.00</priority>
+  </url>
+  <url>
+    <loc>https://ante.photo/galeria.html</loc>
+    <priority>0.90</priority>
+  </url>
+  <url>
+    <loc>https://ante.photo/nosotros.html</loc>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://ante.photo/contacto.html</loc>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://ante.photo/mas.html</loc>
+    <priority>0.70</priority>
+  </url>
+  <url>
+    <loc>https://ante.photo/aviso-privacidad.html</loc>
+    <priority>0.60</priority>
+  </url>
+</urlset>
