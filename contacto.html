@@ -177,7 +177,7 @@
         border-right: none;
         border-bottom: 1px solid rgba(255,255,255,.08);
         gap: 1rem;
-        background: #111;
+        background: transparent; /* sin fondo en móvil */
       }
       nav ul {
         flex-direction: row;
@@ -230,10 +230,10 @@ body.mobile .fab:active{
 }
     body.mobile header{
       width:100%;
-      height:0;
+      height:50px;
       overflow:visible;
       padding:0;
-      background:#111;
+      background: transparent; /* sin fondo en móvil */
       border:none;
     }
 
@@ -246,7 +246,7 @@ body.mobile header nav{
   top: 90px;
   left: 20px;
   transform: none;
-  background: #111;
+  background: transparent; /* sin fondo en móvil */
   padding: 0;
   border-radius: 0;
   opacity: 0;
@@ -588,8 +588,8 @@ body.mobile header.open nav{
     .overline { text-transform: uppercase; letter-spacing: .18em; font-size: .78rem; color: rgba(245,245,233,.85); margin: 0 0 .25rem; display: block; }
     
     /* Separadores sutiles */
-    .divider { height:1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.18), transparent); margin: clamp(16px, 2vw, 24px) 0; }
-    
+  .divider { height:1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.18), transparent); margin: clamp(16px, 2vw, 24px) 0; }
+  
   </style>
   <!-- Datos estructurados: Organización actualizados -->
   <script type="application/ld+json">
