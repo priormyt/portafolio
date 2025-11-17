@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Acceso Clientes | ANTE Estudio</title>
+
+  <link rel="icon" type="image/x-icon" href="https://ante.photo/img/favicon.ico">
+  <link rel="shortcut icon" type="image/x-icon" href="https://ante.photo/img/favicon.ico">
+
+  <meta name="description" content="Acceso privado para clientes de ANTE Estudio de Fotografía. Ingresa el código de tu sesión para ver y descargar tus fotos.">
+
+  <style>
+    :root {
+      --bg: #111;
+      --text: #ffffff;
+      --accent: #f5f5e9;
+      --error: #ff6363;
+    }
+    *,*::before,*::after{box-sizing:border-box;}
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display:flex;
+      flex-direction:column;
+    }
+    a { color: inherit; text-decoration: none; }
+
+    header{
+      position:fixed;
+      top:0;
+      left:0;
+      width:180px;
+      height:100vh;
+      padding:2.5rem 1rem 2rem;
+      display:flex;
+      flex-direction:column;
+      align-items:flex-start;
+      gap:2.5rem;
+      background:transparent;
+      border:none;
+      pointer-events:none;
+      z-index:10;
+    }
+    header *{pointer-events:auto;}
+    nav ul{
+      list-style:none;
+      margin:0;
+      padding:0;
+      display:flex;
+      flex-direction:column;
+      gap:1.4rem;
+      width:100%;
+    }
+    nav a{
+      text-transform: uppercase;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: .05em;
+      background: #111;
+      color: var(--accent);
+      padding: .65rem 1.4rem .65rem 1.6rem;
+      border-radius: 12px;
+      width: 100%;
+      text-align: left;
+      display: block;
+      transition:background .25s,color .25s,transform .25s,box-shadow .25s;
+      box-shadow: 0 0 6px rgba(0,0,0,0.25);
+    }
+    nav a:hover{
+      background: var(--accent);
+      color: #111;
+      transform:translateX(4px) translateY(-2px) scale(1.05);
+      box-shadow: 0 6px 18px rgba(0,0,0,.25);
+    }
+
+    .fab { display:none; }
+
+    .logo-float{
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      left: auto;
+      display: block;
+      min-width: 120px;
+      max-width: 300px;
+      font-family: "Marion", serif;
+      font-size: clamp(24px, 7vw, 60px);
+      letter-spacing: .09em;
+      text-decoration: none;
+      color: var(--accent);
+      text-shadow:
+        0 2px 8px rgba(0,0,0,0.275),
+        0 0.5px 0.5px rgba(0,0,0,0.125),
+        0 0px 0px #000;
+      z-index: 5;
+      transition: transform .2s;
+    }
+    .logo-float:hover{transform:translateY(-4px) scale(1.07);}
+
+    main{
+      flex:1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:3rem 2rem 2rem;
+    }
+    .access-card{
+      background: rgba(0,0,0,0.75);
+      border-radius: 18px;
+      padding: 2.5rem 2.2rem;
+      max-width: 480px;
+      width:100%;
+      box-shadow:0 14px 38px rgba(0,0,0,0.6);
+      border:1px solid rgba(255,255,255,0.06);
+    }
+    .access-title{
+      font-family: Helvetica, Arial, sans-serif;
+      font-weight: 700;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      font-size:1.2rem;
+      margin-top:0;
+      margin-bottom:.75rem;
+    }
+    .access-subtitle{
+      margin-top:0;
+      margin-bottom:1.8rem;
+      color:rgba(255,255,255,0.72);
+      font-size:.98rem;
+    }
+    label{
+      display:block;
+      font-size:.85rem;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      margin-bottom:.45rem;
+      color:rgba(255,255,255,0.75);
+    }
+    input[type="password"],
+    input[type="text"]{
+      width:100%;
+      padding:.75rem 1rem;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,0.18);
+      background:rgba(0,0,0,0.65);
+      color:#fff;
+      font-size:1rem;
+      outline:none;
+      transition:border-color .25s, box-shadow .25s, background .25s;
+    }
+    input:focus{
+      border-color:var(--accent);
+      box-shadow:0 0 0 1px rgba(245,245,233,0.45);
+      background:rgba(0,0,0,0.9);
+    }
+    button{
+      margin-top:1.3rem;
+      width:100%;
+      padding:.85rem 1rem;
+      border-radius:999px;
+      border:none;
+      cursor:pointer;
+      text-transform:uppercase;
+      letter-spacing:.12em;
+      font-weight:600;
+      font-size:.95rem;
+      background:var(--accent);
+      color:#111;
+      transition:transform .15s, box-shadow .2s, background .2s, color .2s;
+      box-shadow:0 10px 28px rgba(0,0,0,0.55);
+    }
+    button:hover{
+      transform:translateY(-1px) scale(1.02);
+      box-shadow:0 16px 36px rgba(0,0,0,0.7);
+    }
+    button:active{
+      transform:translateY(1px) scale(0.99);
+      box-shadow:0 6px 14px rgba(0,0,0,0.6);
+    }
+    .helper{
+      margin-top:1.1rem;
+      font-size:.85rem;
+      color:rgba(255,255,255,0.7);
+    }
+    .error{
+      margin-top:.8rem;
+      font-size:.85rem;
+      color:var(--error);
+      min-height:1.2em;
+    }
+
+    @media (max-width: 900px){
+      header{
+        position: sticky;
+        width: 100%;
+        height: auto;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 2vw;
+        border-bottom: 1px solid rgba(255,255,255,.08);
+        gap: 1rem;
+      }
+      nav ul{
+        flex-direction: row;
+        gap: 1.2rem;
+        width: auto;
+      }
+      .fab{
+        display:flex;
+      }
+      main{
+        padding:6rem 1.5rem 2.5rem;
+      }
+      .logo-float{
+        font-size:2.1rem;
+        bottom:16px;
+        right:16px;
+      }
+    }
+
+    body.mobile header{
+      width:100%;
+      height:0;
+      overflow:visible;
+      padding:0;
+      background:transparent;
+      border:none;
+    }
+    body.mobile .fab{
+      position:fixed;
+      top:20px;
+      left:20px;
+      width:56px;
+      height:56px;
+      border-radius:50%;
+      background:var(--accent);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:1.5rem;
+      color:#111;
+      cursor:pointer;
+      z-index:20;
+      transition:transform .1s, box-shadow .25s;
+    }
+    body.mobile .fab.active{
+      background:#111;
+      color:var(--accent);
+    }
+    body.mobile header nav{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-start;
+      position:fixed;
+      top:90px;
+      left:20px;
+      background:transparent;
+      padding:0;
+      opacity:0;
+      pointer-events:none;
+      visibility:hidden;
+      transition:opacity .35s ease;
+      z-index:50;
+    }
+    body.mobile header.open nav{
+      opacity:1;
+      pointer-events:auto;
+      visibility:visible;
+    }
+    body.mobile header nav ul{
+      flex-direction:column;
+      gap:1.1rem;
+      margin:0;
+      padding:0;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <ul>
+        <li><a href="index.html">Inicio</a></li>
+        <li><a href="galeria.html">Galería</a></li>
+        <li><a href="nosotros.html">Nosotros</a></li>
+        <li><a href="contacto.html">Contacto</a></li>
+        <li><a href="clientes.html">Clientes</a></li>
+        <li><a href="mas.html">Más</a></li>
+      </ul>
+    </nav>
+    <div id="menuBtn" class="fab">☰</div>
+  </header>
+
+  <a href="index.html" class="logo-float">A&nbsp;N&nbsp;T&nbsp;E</a>
+
+  <main>
+    <section class="access-card" aria-label="Acceso privado para clientes">
+      <h1 class="access-title">Acceso clientes</h1>
+      <p class="access-subtitle">
+        Ingresa el <strong>código de tu sesión</strong> que te compartimos por correo o WhatsApp
+        para ver tu galería privada y descargar tus fotos.
+      </p>
+      <form id="accessForm">
+        <label for="code">Código / contraseña</label>
+        <input id="code" name="code" type="password" autocomplete="off" required placeholder="******">
+        <button type="submit">Entrar a mi galería</button>
+        <p class="helper">
+          Si tienes problemas con tu código, escríbenos por WhatsApp o correo
+          y te ayudamos a recuperar el acceso.
+        </p>
+        <p id="errorMsg" class="error" aria-live="polite"></p>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    // Detectar móvil y actualizar clase 'mobile'
+    function setDeviceClass(){
+      const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+                       || window.matchMedia('(max-width:768px)').matches;
+      document.body.classList.toggle('mobile', isMobile);
+    }
+    setDeviceClass();
+    window.addEventListener('resize', setDeviceClass);
+
+    // FAB menú móvil
+    const menuBtn = document.getElementById('menuBtn');
+    if(menuBtn){
+      menuBtn.addEventListener('click', ()=>{
+        const header = document.querySelector('header');
+        header.classList.toggle('open');
+        menuBtn.classList.toggle('active');
+      });
+    }
+
+    // Mapa de códigos → páginas privadas
+    // Ejemplo: ajusta o añade los códigos reales de tus clientes
+    const galleries = {
+      "VALERIA2024": "cliente-valeria.html",
+      "CARLOS2024": "cliente-carlos.html"
+      // Agrega más: "CODIGO": "archivo.html"
+    };
+
+    const form = document.getElementById('accessForm');
+    const codeInput = document.getElementById('code');
+    const errorMsg = document.getElementById('errorMsg');
+
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      errorMsg.textContent = "";
+      const raw = (codeInput.value || "").trim();
+      if(!raw){
+        errorMsg.textContent = "Por favor escribe tu código.";
+        return;
+      }
+      const key = raw.toUpperCase();
+      const target = galleries[key];
+      if(target){
+        window.location.href = target;
+      } else {
+        errorMsg.textContent = "Código no reconocido. Revisa que esté escrito igual que en el correo.";
+      }
+    });
+  </script>
+</body>
+</html>
