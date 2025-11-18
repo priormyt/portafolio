@@ -114,6 +114,104 @@ function generarEmailCliente(clientName, codeKey, galleryFilename) {
   console.log(`Email creado: ${emailFilename}`);
 }
 
+function deleteClientByName(clientName) {
+  const slug = slugify(clientName);
+  const galleryDir = 'Galerias_privadas';
+  const emailsDir = 'Emails_personalizados';
+
+  const galleryRelPath = `${galleryDir}/cliente-${slug}.html`;
+  const galleryPath = path.join(__dirname, galleryRelPath);
+  const emailPath = path.join(__dirname, emailsDir, `email-${slug}.html`);
+
+  // Eliminar galería si existe
+  if (fs.existsSync(galleryPath)) {
+    fs.unlinkSync(galleryPath);
+    console.log(`Galería eliminada: ${galleryRelPath}`);
+  } else {
+    console.log(`No se encontró la galería: ${galleryRelPath}`);
+  }
+
+  // Eliminar email si existe
+  if (fs.existsSync(emailPath)) {
+    fs.unlinkSync(emailPath);
+    console.log(`Email eliminado: ${emailsDir}/email-${slug}.html`);
+  } else {
+    console.log(`No se encontró el email: ${emailsDir}/email-${slug}.html`);
+  }
+
+  // Eliminar entrada en clientes.html
+  const clientesPath = path.join(__dirname, 'clientes.html');
+  if (!fs.existsSync(clientesPath)) {
+    console.warn('No se encontró clientes.html; no se pudo actualizar el mapa de códigos.');
+    return;
+  }
+  let content = fs.readFileSync(clientesPath, 'utf8');
+  const re = /const galleries = {([\s\S]*?)};/;
+  const match = content.match(re);
+  if (!match) {
+    console.warn('No se encontró el objeto "galleries" en clientes.html; revisa el archivo manualmente.');
+    return;
+  }
+
+  const body = match[1];
+  const pairs = [];
+  const pairRe = /"([^"]+)"\s*:\s*"([^"]+)"/g;
+  let m;
+  while ((m = pairRe.exec(body)) !== null) {
+    pairs.push([m[1], m[2]]);
+  }
+
+  const filtered = pairs.filter(([, file]) => file !== galleryRelPath);
+  if (filtered.length === pairs.length) {
+    console.log('No se encontró ninguna entrada en galleries para ese cliente.');
+    return;
+  }
+
+  const lines = filtered.map(([k, v]) => `      "${k}": "${v}"`);
+  const newBody =
+    '\n' +
+    lines
+      .map((l, i) => (i < lines.length - 1 ? `${l},` : l))
+      .join('\n') +
+    '\n      // Agrega más: "CODIGO": "archivo.html"\n    ';
+
+  content = content.replace(re, `const galleries = {${newBody}};`);
+  fs.writeFileSync(clientesPath, content, 'utf8');
+  console.log('Entrada eliminada de galleries en clientes.html.');
+}
+
+function askDeleteClient() {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+
+  rl.question(
+    '\n¿Quieres eliminar algún cliente? (s/n): ',
+    (answer) => {
+      const ans = (answer || '').trim().toLowerCase();
+      if (!ans || ans === 'n' || ans === 'no') {
+        rl.close();
+        return;
+      }
+
+      rl.question(
+        'Nombre del cliente a eliminar (tal como lo escribiste al crearlo): ',
+        (nameAns) => {
+          const name = (nameAns || '').trim();
+          if (!name) {
+            console.error('Nombre vacío. No se realizó ninguna eliminación.');
+            rl.close();
+            return;
+          }
+          deleteClientByName(name);
+          rl.close();
+        }
+      );
+    }
+  );
+}
+
 function runGenerator(clientName, codeKey, imageFiles) {
   const templatePath = path.join(
     __dirname,
@@ -203,6 +301,7 @@ function askInteractive() {
 
           rl.close();
           runGenerator(clientName, codeKey, imageFiles);
+          askDeleteClient();
         }
       );
     });
@@ -228,6 +327,7 @@ function main() {
     }
 
     runGenerator(clientName, codeKey, imageFiles);
+    askDeleteClient();
     return;
   }
 
