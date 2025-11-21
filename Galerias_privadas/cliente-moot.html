@@ -125,27 +125,54 @@
     }
     .intro{
       width:100%;
-      max-width:720px;
-      text-align:center;
+      max-width:820px;
+      text-align:left;
+      display:grid;
+      row-gap:1rem;
     }
     .intro-title{
       font-family:Helvetica, Arial, sans-serif;
       letter-spacing:.16em;
       text-transform:uppercase;
       font-size:.95rem;
-      margin:0 0 .45rem;
+      margin:0 0 .2rem;
       color:var(--accent);
+      text-align:center;
+    }
+    .intro-header{
+      display:grid;
+      grid-template-columns:auto 1fr;
+      align-items:center;
+      gap:1.1rem;
+      justify-items:start;
+    }
+    .avatar-circle{
+      width:110px;
+      aspect-ratio:1 / 1;
+      border-radius:50%;
+      overflow:hidden;
+      border:3px solid rgba(255,255,255,0.25);
+      box-shadow:0 10px 26px rgba(0,0,0,0.45);
+      background:#000;
+    }
+    .avatar-circle img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      object-position:center 20%;
+      display:block;
     }
     .intro-name{
       font-family:Helvetica, Arial, sans-serif;
       font-size:clamp(1.8rem, 3vw, 2.4rem);
-      margin:0 0 .9rem;
+      margin:0 0 .35rem;
       letter-spacing:.03em;
     }
     .intro-text{
       margin:0;
       color:rgba(255,255,255,0.78);
       font-size:.98rem;
+      line-height:1.65;
     }
 
     .gallery{
@@ -221,6 +248,7 @@
       color:rgba(255,255,255,0.7);
       text-align:center;
     }
+
 
     /* Lightbox */
     .lightbox{
@@ -369,12 +397,19 @@
   <main class="client-main">
     <section class="intro">
       <p class="intro-title">Galería privada</p>
-      <h1 class="intro-name">Moot</h1>
-      <p class="intro-text">
-        Gracias por confiar en ANTE para tu sesión. Aquí puedes ver y guardar las
-        fotografías finales; esperamos que hayas disfrutado tanto del proceso como
-        del resultado, y que estas imágenes te acompañen por mucho tiempo.
-      </p>
+      <div class="intro-header">
+        <div class="avatar-circle">
+          <img id="avatarPreview" src="../img/MootMadrid2025_1.jpg" alt="Vista previa de Moot">
+        </div>
+        <div>
+          <h1 class="intro-name">Moot</h1>
+          <p class="intro-text">
+            Gracias por confiar en ANTE para tu sesión. Aquí puedes ver y guardar las
+            fotografías finales; esperamos que hayas disfrutado tanto del proceso como
+            del resultado, y que estas imágenes te acompañen por mucho tiempo.
+          </p>
+        </div>
+      </div>
     </section>
 
     <section class="gallery" id="gallery"></section>
@@ -383,6 +418,7 @@
       Consejo: toca el icono de descarga en la esquina de cada foto para guardarla
       en tu dispositivo. Todas las fotos se borrarán 30 días después de que se haya enviado el correo electrónico con esta galería.
     </p>
+
   </main>
 
   <div id="lightbox" class="lightbox">
@@ -420,6 +456,7 @@
     const lightbox = document.getElementById('lightbox');
     const lightboxImg = document.getElementById('lightbox-img');
     const closeBtn = lightbox.querySelector('.close');
+    const avatarPreview = document.getElementById('avatarPreview');
 
     images.forEach(img => {
       const item = document.createElement('figure');
@@ -450,6 +487,12 @@
         lightbox.classList.add('show');
       });
     });
+
+    // Previsualización circular (solo primera foto)
+    if(avatarPreview && images.length){
+      avatarPreview.src = images[0].src;
+      avatarPreview.alt = images[0].alt;
+    }
 
     closeBtn.addEventListener('click', () => lightbox.classList.remove('show'));
     lightbox.addEventListener('click', e => {
