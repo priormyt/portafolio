@@ -3,6 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
+const { execSync } = require('child_process');
 
 function slugify(str) {
   return str
@@ -97,7 +98,7 @@ function generarEmailCliente(clientName, codeKey, galleryFilename) {
 
   let emailHtml = fs.readFileSync(templateEmailPath, 'utf8');
 
-  const baseUrl = 'https://ante.photo';
+  const baseUrl = 'https://www.ante.photo';
   const urlGaleria = `${baseUrl}/${galleryFilename}`;
 
   emailHtml = emailHtml
@@ -112,6 +113,66 @@ function generarEmailCliente(clientName, codeKey, galleryFilename) {
 
   fs.writeFileSync(emailOutputPath, emailHtml, 'utf8');
   console.log(`Email creado: ${emailFilename}`);
+}
+
+function ensureThumb(imageFile) {
+  const src = path.join(__dirname, 'img', imageFile);
+  const destDir = path.join(__dirname, 'img', 'thumb');
+  const dest = path.join(destDir, imageFile);
+
+  if (!fs.existsSync(src)) {
+    console.warn(`No se encontró la imagen original: ${src}`);
+    return;
+  }
+  fs.mkdirSync(destDir, { recursive: true });
+
+  try {
+    // Redimensiona a un máximo de 1400px para reducir peso (≈ <300 KB usualmente)
+    execSync(`sips -Z 1400 "${src}" --out "${dest}"`, { stdio: 'ignore' });
+  } catch (err) {
+    console.warn(`No se pudo generar miniatura para ${imageFile}: ${err.message}`);
+  }
+}
+
+function updateGaleria(images, clientName) {
+  const filePath = path.join(__dirname, 'galeria.html');
+  if (!fs.existsSync(filePath)) {
+    console.warn('No se encontró galeria.html, se omitió agregar las fotos a la galería general.');
+    return;
+  }
+
+  let content = fs.readFileSync(filePath, 'utf8');
+  const re = /const images = \[([\s\S]*?)\];/;
+  const match = content.match(re);
+  if (!match) {
+    console.warn('No se encontró el array const images en galeria.html');
+    return;
+  }
+
+  const body = match[1];
+  const existing = new Set();
+  const srcRe = /\{\s*src:\s*"([^"]+)"/g;
+  let m;
+  while ((m = srcRe.exec(body)) !== null) {
+    existing.add(m[1]);
+  }
+
+  const newEntries = [];
+  images.forEach((file) => {
+    const src = `img/${file}`;
+    if (existing.has(src)) return;
+    const alt = `Retrato profesional México – foto de ${clientName} para perfil y redes`;
+    newEntries.push(`      {src: "${src}", alt: "${alt}"}`);
+  });
+
+  if (!newEntries.length) return;
+
+  const bodyTrimmed = body.trim();
+  const insert = (bodyTrimmed ? '\n' : '\n') + newEntries.join(',\n') + '\n';
+  const newBody = `${body}${insert}`;
+  content = content.replace(re, `const images = [${newBody}    ];`);
+  fs.writeFileSync(filePath, content, 'utf8');
+  console.log('Añadidas las fotos a la galería general.');
 }
 
 function deleteClientByName(clientName) {
@@ -249,6 +310,9 @@ function runGenerator(clientName, codeKey, imageFiles) {
   fs.mkdirSync(path.join(__dirname, galleryDir), { recursive: true });
   fs.mkdirSync(path.join(__dirname, 'Emails_personalizados'), { recursive: true });
 
+  // Genera miniaturas optimizadas para la galería general
+  imageFiles.forEach((file) => ensureThumb(file));
+
   fs.writeFileSync(outputPath, html, 'utf8');
   console.log(`Galería creada: ${filename}`);
 
@@ -258,6 +322,9 @@ function runGenerator(clientName, codeKey, imageFiles) {
 
   // Genera plantilla de email personalizada
   generarEmailCliente(clientName, codeKey, relativeGalleryPath);
+
+  // Añade las fotos a la galería general
+  updateGaleria(imageFiles, clientName);
 }
 
 function askInteractive() {
