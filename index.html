@@ -61,7 +61,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:ital,wght@0,300;1,300&family=Outfit:wght@300;400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;1,300&display=swap" rel="stylesheet">
 
   <style>
     :root {
@@ -71,9 +71,9 @@
       --ash: #9a9690;
       --char: #1c1b18;
       --mist: #ccc8c0;
-      --accent: #c8b89a;
-      --f-serif: 'Cormorant Garamond', Georgia, serif;
-      --f-sans: 'Outfit', Georgia, serif;
+      --accent: #f5f5e9;
+      --f-serif: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      --f-sans: 'Helvetica Neue', Helvetica, Arial, sans-serif;
       --f-mono: 'DM Mono', 'Courier New', monospace;
       --fs-label: 0.62rem;
       --fs-body: 0.9rem;
@@ -128,9 +128,9 @@
       padding: 2rem 4rem;
     }
     .nav-logo {
-      font-family: var(--f-mono);
-      font-size: var(--fs-label);
-      font-weight: 300;
+      font-family: 'Marion', Georgia, serif;
+      font-size: 1.1rem;
+      font-weight: 400;
       letter-spacing: var(--ls-wide);
       color: var(--paper);
       text-decoration: none;
@@ -203,7 +203,7 @@
     .hero-title {
       font-family: var(--f-serif);
       font-size: clamp(3.5rem, 8vw, 7rem);
-      font-weight: 300;
+      font-weight: 700;
       line-height: 1.0;
       letter-spacing: -0.01em;
       color: var(--paper);
@@ -212,7 +212,7 @@
       animation: fadeup 1.2s 0.5s forwards;
     }
     .hero-title em {
-      font-style: italic;
+      font-style: normal;
       color: var(--accent);
     }
     .hero-sub {
@@ -234,21 +234,27 @@
     .btn-ghost {
       display: inline-flex;
       align-items: center;
-      gap: 1rem;
-      font-family: var(--f-mono);
-      font-size: var(--fs-label);
-      letter-spacing: var(--ls-label);
-      text-transform: uppercase;
-      color: var(--paper);
+      gap: .6rem;
+      font-family: var(--f-sans);
+      font-size: clamp(1rem, 2.2vw, 1.1rem);
+      font-weight: 600;
+      letter-spacing: .04em;
+      color: var(--accent);
       text-decoration: none;
-      border: 0.5px solid rgba(245,242,237,0.3);
-      padding: 1rem 2rem;
-      transition: border-color 0.3s, background 0.3s;
+      position: relative;
     }
-    .btn-ghost:hover {
-      border-color: var(--accent);
-      background: rgba(200,184,154,0.08);
+    .btn-ghost::after {
+      content: '';
+      position: absolute;
+      left: 0; bottom: -6px;
+      height: 2px; width: 100%;
+      background: currentColor;
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform .35s ease;
+      opacity: .9;
     }
+    .btn-ghost:hover::after { transform: scaleX(1); }
     .btn-ghost .arrow { transition: transform 0.3s; }
     .btn-ghost:hover .arrow { transform: translateX(6px); }
 
@@ -323,13 +329,13 @@
     .filosofia-title {
       font-family: var(--f-serif);
       font-size: clamp(2.2rem, 4vw, 3.5rem);
-      font-weight: 300;
+      font-weight: 700;
       line-height: 1.15;
       letter-spacing: -0.01em;
       margin-bottom: 2rem;
     }
     .filosofia-title em {
-      font-style: italic;
+      font-style: normal;
       color: var(--accent);
     }
     .filosofia-body {
@@ -404,7 +410,7 @@
     .galeria-title {
       font-family: var(--f-serif);
       font-size: clamp(2rem, 4vw, 3rem);
-      font-weight: 300;
+      font-weight: 700;
       line-height: 1;
     }
     .galeria-link {
@@ -490,7 +496,7 @@
     .test-title {
       font-family: var(--f-serif);
       font-size: clamp(2rem, 4vw, 3rem);
-      font-weight: 300;
+      font-weight: 700;
       color: var(--paper);
     }
     .test-grid {
@@ -513,7 +519,9 @@
     .test-portrait {
       width: 80px; height: 80px;
       object-fit: cover;
+      object-position: center;
       filter: grayscale(0.3);
+      border-radius: 6px;
     }
     .test-quote {
       font-family: var(--f-serif);
@@ -569,11 +577,11 @@
     .cta-title {
       font-family: var(--f-serif);
       font-size: clamp(2.5rem, 6vw, 5rem);
-      font-weight: 300;
+      font-weight: 700;
       line-height: 1.15;
       margin-bottom: 1.5rem;
     }
-    .cta-title em { font-style: italic; color: var(--accent); }
+    .cta-title em { font-style: normal; color: var(--accent); }
     .cta-body {
       font-family: var(--f-sans);
       font-size: var(--fs-body);
@@ -592,20 +600,27 @@
     .btn-primary {
       display: inline-flex;
       align-items: center;
-      gap: 0.8rem;
-      font-family: var(--f-mono);
-      font-size: var(--fs-label);
-      letter-spacing: var(--ls-label);
-      text-transform: uppercase;
-      color: var(--ink);
-      background: var(--paper);
+      gap: .6rem;
+      font-family: var(--f-sans);
+      font-size: clamp(1rem, 2.2vw, 1.1rem);
+      font-weight: 600;
+      letter-spacing: .04em;
+      color: var(--accent);
       text-decoration: none;
-      padding: 1rem 2rem;
-      transition: background 0.3s, color 0.3s;
+      position: relative;
     }
-    .btn-primary:hover {
-      background: var(--accent);
+    .btn-primary::after {
+      content: '';
+      position: absolute;
+      left: 0; bottom: -6px;
+      height: 2px; width: 100%;
+      background: currentColor;
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform .35s ease;
+      opacity: .9;
     }
+    .btn-primary:hover::after { transform: scaleX(1); }
 
     /* FOOTER */
     footer {
