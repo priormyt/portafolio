@@ -293,6 +293,62 @@
     /* SECTIONS */
     section { padding: 9rem 4rem; }
 
+    /* PRICING STRIP */
+    .pricing-strip {
+      border-top: 0.5px solid rgba(245,242,237,0.1);
+      border-bottom: 0.5px solid rgba(245,242,237,0.1);
+      padding: 2rem 4rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 2rem;
+    }
+    .pricing-strip-left {
+      display: flex;
+      align-items: center;
+      gap: 1.4rem;
+      font-family: var(--f-mono);
+      font-size: 0.78rem;
+      letter-spacing: var(--ls-label);
+      color: var(--ash);
+      text-transform: uppercase;
+    }
+    .pricing-strip-left::before {
+      content: '';
+      display: block;
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+    .pricing-strip-left strong {
+      font-weight: 400;
+      color: var(--paper);
+      font-size: 0.9rem;
+    }
+    .pricing-strip-link {
+      font-family: var(--f-mono);
+      font-size: 0.78rem;
+      letter-spacing: var(--ls-label);
+      color: var(--ash);
+      text-decoration: none;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      transition: color 0.3s;
+      white-space: nowrap;
+      border: 0.5px solid rgba(245,242,237,0.15);
+      padding: 0.65rem 1.2rem;
+    }
+    .pricing-strip-link:hover {
+      color: var(--paper);
+      border-color: rgba(245,242,237,0.35);
+    }
+    @media (max-width: 768px) {
+      .pricing-strip { padding: 1.5rem 1.5rem; }
+    }
+
     /* FILOSOFIA */
     .filosofia {
       display: grid;
@@ -427,7 +483,6 @@
     .galeria-grid {
       display: grid;
       grid-template-columns: 2fr 1fr 1fr;
-      grid-template-rows: auto auto;
       gap: 1rem;
     }
     .galeria-item {
@@ -440,12 +495,6 @@
     }
     .galeria-item:not(:first-child) {
       aspect-ratio: 4/5;
-    }
-    .galeria-item--wide {
-      aspect-ratio: 4/3 !important;
-    }
-    .galeria-img--top {
-      object-position: center 20%;
     }
     .galeria-item img {
       width: 100%; height: 100%;
@@ -519,9 +568,9 @@
     .test-portrait {
       width: 80px; height: 80px;
       object-fit: cover;
-      object-position: center;
+      object-position: center 10%;
       filter: grayscale(0.3);
-      border-radius: 6px;
+      border-radius: 50%;
     }
     .test-quote {
       font-family: var(--f-serif);
@@ -687,7 +736,6 @@
         grid-template-columns: 1fr 1fr;
       }
       .galeria-item:first-child { grid-row: span 1; aspect-ratio: 4/5; }
-      .galeria-item--wide { aspect-ratio: 4/5 !important; }
       .test-grid { grid-template-columns: 1fr; }
       .test-card { grid-template-columns: 60px 1fr; }
       footer { flex-direction: column; gap: 1.5rem; text-align: center; }
@@ -728,6 +776,14 @@
   </div>
   <div class="hero-scroll">Desplazar</div>
 </section>
+
+<!-- PRICING STRIP -->
+<div class="pricing-strip">
+  <span class="pricing-strip-left">Paquetes desde&nbsp;<strong>$900 MXN</strong></span>
+  <a href="img/lista-precios.jpg" target="_blank" rel="noopener" class="pricing-strip-link">
+    Lista de precios&nbsp;→
+  </a>
+</div>
 
 <!-- FILOSOFIA -->
 <section class="filosofia" id="nosotros">
@@ -786,13 +842,13 @@
         <span class="galeria-item-label">Retrato corporativo</span>
       </div>
     </div>
-    <div class="galeria-item galeria-item--wide">
-      <img src="img/Fondo3.jpg" alt="Estudio ANTE" loading="lazy" class="galeria-img--top">
+    <div class="galeria-item">
+      <img src="img/Mich1.jpg" alt="Retrato Michelle" loading="lazy">
       <div class="galeria-item-overlay">
-        <span class="galeria-item-label">Estudio · fondo oscuro</span>
+        <span class="galeria-item-label">Retrato artístico</span>
       </div>
     </div>
-    <div class="galeria-item galeria-item--wide">
+    <div class="galeria-item">
       <img src="img/Valeria1.jpg" alt="Retrato Valeria" loading="lazy">
       <div class="galeria-item-overlay">
         <span class="galeria-item-label">Retrato personal</span>

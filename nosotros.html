@@ -7,28 +7,21 @@
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-
     gtag('config', 'G-REE0NDQ50Y');
   </script>
-
 
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="index,follow,max-image-preview:large">
-  <title>Nosotros | ANTE Estudio de Fotografía Profesional</title>
-  
-  <!-- Favicons optimizados para motores de búsqueda -->
-   <link rel="icon" type="image/x-icon" href="https://www.ante.photo/img/favicon.ico">
-   <link rel="shortcut icon" type="image/x-icon" href="https://www.ante.photo/img/favicon.ico">
+  <title>Nosotros | ANTE Estudio de Fotografía</title>
 
-  
-  <!-- Metadatos para SEO optimizados con dominio correcto -->
-  <meta name="description" content="ANTE Estudio: fotografía de retrato minimalista en CDMX y Teotihuacán. Nuestras sesiones capturan la esencia de cada persona con luz cuidada, dirección suave y un resultado sobrio que perdura.">
-  <meta name="keywords" content="estudio fotográfico, retrato minimalista, fotografía profesional, sesión fotográfica, ANTE Estudio, Teotihuacán, CDMX, retratos editoriales">
+  <link rel="icon" type="image/x-icon" href="img/favicon.ico">
+  <link rel="shortcut icon" type="image/x-icon" href="img/favicon.ico">
+
+  <meta name="description" content="ANTE Estudio: fotografía de retrato minimalista en CDMX. Nuestras sesiones capturan la esencia de cada persona con luz cuidada, dirección suave y un resultado sobrio que perdura.">
   <meta name="author" content="ANTE Estudio Fotográfico">
   <link rel="canonical" href="https://www.ante.photo/nosotros.html">
-  
-  <!-- Metadatos para redes sociales actualizados -->
+
   <meta property="og:title" content="Nosotros | ANTE Estudio de Fotografía">
   <meta property="og:description" content="Fotografía de retrato minimalista que captura la esencia de cada persona. Sesiones con luz cuidada y dirección suave.">
   <meta property="og:image" content="https://www.ante.photo/img/Fondo3.jpg">
@@ -36,20 +29,17 @@
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="ANTE Estudio">
   <meta property="og:locale" content="es_MX">
-  
-  <!-- Metadatos Twitter actualizados -->
+
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Nosotros | ANTE Estudio de Fotografía">
-  <meta name="twitter:description" content="Retrato minimalista, honesto y humano para reconocerse y sentirse orgulloso.">
+  <meta name="twitter:description" content="Retrato minimalista, honesto y humano.">
   <meta name="twitter:image" content="https://www.ante.photo/img/Fondo3.jpg">
-  
-  <!-- Datos estructurados para Nosotros actualizados -->
+
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "PhotographyBusiness",
     "name": "ANTE Estudio Fotográfico",
-    "image": "https://www.ante.photo/favicon.png",
     "url": "https://www.ante.photo",
     "telephone": "+525951220554",
     "address": {
@@ -58,757 +48,638 @@
       "addressRegion": "CDMX",
       "addressCountry": "MX"
     },
-    "geo": {
-      "@type": "GeoCoordinates",
-      "latitude": "19.6880",
-      "longitude": "-98.8760"
-    },
-    "description": "ANTE es un estudio de retrato minimalista que captura la esencia de cada persona con un estilo sobrio y de buen gusto.",
-    "priceRange": "$$",
-    "openingHoursSpecification": [
-      {
-        "@type": "OpeningHoursSpecification",
-        "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-        "opens": "10:00",
-        "closes": "18:00"
-      },
-      {
-        "@type": "OpeningHoursSpecification",
-        "dayOfWeek": ["Saturday"],
-        "opens": "10:00",
-        "closes": "14:00"
-      }
-    ]
+    "description": "ANTE es un estudio de retrato minimalista que captura la esencia de cada persona con un estilo sobrio y de buen gusto."
   }
   </script>
-  
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;1,300&display=swap" rel="stylesheet">
+
   <style>
-    /* Aparición al hacer scroll (dinámico y sutil) - Colocar ANTES de otros estilos reveal */
-    .reveal { 
-      opacity: 0; 
-      transform: translateY(12px); 
-    }
-    .reveal.in { 
-      opacity: 1; 
-      transform: none; 
-      transition: opacity .6s ease, transform .6s ease; 
-    }
-    
-    /* Asegurar que la animación sea suave y respete preferencias de movimiento reducido */
-    @media (prefers-reduced-motion: reduce){
-      .reveal, .reveal.in { 
-        opacity: 1 !important; 
-        transform: none !important; 
-        transition: none !important; 
-      }
-    }
     :root {
-      --bg: #111;
-      --text: #f5f5e9;
+      --ink: #0d0d0b;
+      --paper: #f5f2ed;
+      --bone: #e8e3da;
+      --ash: #9a9690;
+      --char: #1c1b18;
+      --mist: #ccc8c0;
       --accent: #f5f5e9;
+      --f-serif: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      --f-sans: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      --f-mono: 'DM Mono', 'Courier New', monospace;
+      --fs-label: 0.62rem;
+      --fs-body: 0.9rem;
+      --fs-micro: 0.58rem;
+      --ls-label: 0.3em;
+      --ls-wide: 0.4em;
     }
-    *,*::before,*::after{box-sizing:border-box;}
-    html, body { height: 100%; }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
     body {
-      margin: 0;
-      font-family: Helvetica, Arial, sans-serif;
-      background: url('img/Ciudad de Noche.jpg') no-repeat center center fixed;
-      background-size: cover;
-      color: var(--text);
-      line-height: 1.6;
-      -webkit-font-smoothing: antialiased;
-      min-height: 100vh;
-    }
-    a { color: inherit; text-decoration: none; }
-    header{
-      position:fixed;
-      top:0;
-      left:0;
-      width:190px;
-      height:100vh;
-      padding:2.5rem 1rem 2rem;
-      display:flex;
-      flex-direction:column;
-      align-items:flex-start;
-      gap:2.5rem;
-      background:#111;
-      border:none;
-      pointer-events:none;
-      z-index:10;
-    }
-    header *{pointer-events:auto;}
-    nav ul{
-      list-style:none;
-      margin:0;
-      padding:0;
-      display:flex;
-      flex-direction:column;
-      gap:1.4rem;
-      width:100%;
-    }
-    nav a{
-      text-transform: uppercase;
-      font-size: 1.05rem;
-      font-weight: 700;
-      letter-spacing: .05em;
-      background: #111;
-      color: var(--accent);
-      padding: .65rem 1.4rem .65rem 1.6rem;
-      border-radius: 12px;
-      width: 100%;
-      text-align: left;
-      display: block;
-      transition:background .25s,color .25s,transform .25s,box-shadow .25s;
-      box-shadow: 0 0 6px rgba(0,0,0,0.25);
-    }
-    nav a:active{
-      transform: translateY(1px) scale(0.99);
-      box-shadow: 0 0 4px rgba(0,0,0,0.3);
-    }
-    nav a:hover{
-      background: var(--accent);
-      color: #111;
-      transform:translateX(4px) translateY(-2px) scale(1.12);
-      box-shadow: 0 6px 18px rgba(0,0,0,.25);
-    }
-    .fab {
-      display: none;
+      background: var(--ink);
+      color: var(--paper);
+      font-family: var(--f-sans);
+      font-weight: 300;
+      overflow-x: hidden;
+      cursor: none;
     }
 
-    /* Contenido principal */
-    .contenido-nosotros {
-      margin-left: 210px;
-      padding: clamp(2rem, 5vw, 3rem) 2rem;
-      max-width: none;
-      font-weight: 520;
+    /* Cursor */
+    .cursor {
+      position: fixed;
+      width: 8px; height: 8px;
+      background: var(--paper);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: transform 0.1s ease, opacity 0.2s;
     }
-    .contenido-nosotros h1 {
-      font-size: 2.5rem;
-      font-weight: 700;
-      color: var(--accent);
-      margin-bottom: 0;
-      letter-spacing: .08em;
-    }
-    .contenido-nosotros h2 {
-      font-weight: 700;
-      color: var(--accent);
-      margin-top: 2.5rem;
-      margin-bottom: 1rem;
-      font-size: 1.4rem;
-      letter-spacing: .06em;
-    }
-    .contenido-nosotros p {
-      font-size: 1.15rem;
-      margin-bottom: 1.2rem;
-      color: var(--text);
-      line-height: 1.8;
+    .cursor-ring {
+      position: fixed;
+      width: 36px; height: 36px;
+      border: 0.5px solid var(--accent);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9998;
+      transform: translate(-50%, -50%);
+      transition: transform 0.25s ease, width 0.2s, height 0.2s, opacity 0.2s;
     }
 
-    .content-wrap {
-      max-width: 980px;
-      margin: 0 auto;
-      display: grid;
-      gap: clamp(1.2rem, 3vw, 2rem);
-    }
-
-    /* === Grilla moderna 12 columnas === */
-    .grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: clamp(16px, 2.4vw, 28px); }
-    .span-12 { grid-column: 1 / -1; }
-    .span-7  { grid-column: span 7; }
-    .span-5  { grid-column: span 5; }
-    .span-6  { grid-column: span 6; }
-    @media (max-width: 900px){ .span-7, .span-5, .span-6 { grid-column: 1 / -1; } }
-
-    /* Tarjetas mínimas con detalle dinámico */
-    .card {
-      background: rgba(17,17,17,.6);
-      border: 1px solid rgba(255,255,255,.08);
-      border-radius: 14px;
-      padding: clamp(16px, 2.2vw, 28px);
-      box-shadow: 0 6px 18px rgba(0,0,0,.18);
-      transition: transform .25s ease, box-shadow .25s ease, background .25s ease;
-      backdrop-filter: blur(4px);
-    }
-    .card:hover{ transform: translateY(-4px); box-shadow: 0 10px 28px rgba(0,0,0,.28); background: rgba(17,17,17,.7); }
-
-    /* Tipografía y detalles */
-    .overline { text-transform: uppercase; letter-spacing: .18em; font-size: .78rem; color: rgba(245,245,233,.85); margin: 0 0 .25rem; display: block; }
-    .contenido-nosotros h1 { font-size: clamp(2rem, 4.5vw, 3.2rem); font-weight: 700; color: var(--accent); margin: 0; letter-spacing: .08em; }
-    .contenido-nosotros .lead { font-size: clamp(1.05rem, 1.6vw, 1.25rem); line-height: 1.9; color: var(--text); margin: 0 0 1.8rem; max-width: none; }
-    .marca-marion { font-family: "Marion", serif; letter-spacing: .08em; }
-
-    /* Lista de valores tipo chips */
-    .valores-list { display:flex; flex-wrap:wrap; gap:.6rem; margin-top:.6rem; }
-    .chip { padding:.45rem .8rem; border:1px solid rgba(255,255,255,.12); border-radius:999px; font-size:.95rem; color:var(--accent); background:rgba(24,24,24,.6); box-shadow: 0 2px 8px rgba(0,0,0,.18); }
-
-    /* Separadores sutiles */
-    .divider { height:1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.18), transparent); margin: clamp(16px, 2vw, 24px) 0; }
-
-    /* Ajustes de contenedor */
-    .contenido-nosotros { max-width: none; }
-    .equipo {
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
       display: flex;
-      gap: 2.5rem;
-      flex-wrap: wrap;
-      margin-top: 2rem;
+      justify-content: space-between;
+      align-items: center;
+      padding: 2rem 4rem;
+    }
+    .nav-logo {
+      font-family: 'Marion', Georgia, serif;
+      font-size: 1.1rem;
+      font-weight: 400;
+      letter-spacing: var(--ls-wide);
+      color: var(--paper);
+      text-decoration: none;
+      text-transform: uppercase;
+    }
+    .nav-links {
+      display: flex;
+      gap: 3rem;
+      list-style: none;
+    }
+    .nav-links a {
+      font-family: var(--f-mono);
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-label);
+      color: var(--ash);
+      text-decoration: none;
+      text-transform: uppercase;
+      transition: color 0.3s;
+    }
+    .nav-links a:hover, .nav-links a.active { color: var(--paper); }
+
+    /* SECTIONS */
+    section { padding: 9rem 4rem; }
+
+    /* SECTION TAG */
+    .section-tag {
+      font-family: var(--f-mono);
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-wide);
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 2.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .section-tag::before {
+      content: '';
+      display: block;
+      width: 24px; height: 0.5px;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+    .section-tag--center { justify-content: center; }
+    .section-tag--center::before { display: none; }
+
+    /* PAGE HERO */
+    .page-hero {
+      padding: 14rem 4rem 7rem;
+      border-bottom: 0.5px solid rgba(245,242,237,0.1);
+    }
+    .page-eyebrow {
+      font-family: var(--f-mono);
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-wide);
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: fadeup 1s 0.3s forwards;
+    }
+    .page-title {
+      font-family: var(--f-serif);
+      font-size: clamp(3.5rem, 8vw, 7rem);
+      font-weight: 700;
+      line-height: 1.0;
+      letter-spacing: -0.01em;
+      color: var(--paper);
+      opacity: 0;
+      animation: fadeup 1.2s 0.5s forwards;
+    }
+
+    /* ABOUT */
+    .about {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8rem;
+      align-items: center;
+      border-top: 0.5px solid rgba(245,242,237,0.1);
+    }
+    .about-title {
+      font-family: var(--f-serif);
+      font-size: clamp(2.2rem, 4vw, 3.5rem);
+      font-weight: 700;
+      line-height: 1.15;
+      letter-spacing: -0.01em;
       margin-bottom: 2rem;
     }
-    .miembro {
-      background: #181818;
-      border-radius: 12px;
-      padding: 1.2rem 1.5rem;
-      flex: 1 1 220px;
-      min-width: 220px;
-      max-width: 260px;
-      box-shadow: 0 0 8px rgba(0,0,0,0.18);
-      color: var(--accent);
-      text-align: center;
+    .about-title em { font-style: normal; color: var(--accent); }
+    .about-body {
+      font-size: var(--fs-body);
+      font-weight: 300;
+      line-height: 1.9;
+      color: var(--mist);
+      margin-bottom: 2rem;
     }
-    .miembro h3 {
-      margin: 0.5rem 0 0.2rem 0;
-      font-size: 1.15rem;
-      font-weight: 700;
-      color: var(--accent);
-      letter-spacing: .04em;
+    .valores {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
     }
-    .miembro p {
-      color: #fff;
-      font-size: 1rem;
-      margin: 0.2rem 0 0 0;
-      line-height: 1.5;
+    .valor {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      padding: 1.1rem 0;
+      border-bottom: 0.5px solid rgba(245,242,237,0.08);
+      font-family: var(--f-mono);
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-label);
+      color: var(--ash);
+      text-transform: uppercase;
+      transition: color 0.3s, gap 0.3s;
     }
-    @media (max-width: 900px) {
-      header {
-        position: sticky;
-        width: 100%;
-        height: auto;
-        flex-direction: row;
-        align-items: center;
-        justify-content: space-between;
-        padding: 1rem 2vw;
-        border-right: none;
-        border-bottom: 1px solid rgba(255,255,255,.08);
-        gap: 1rem;
-      }
-      nav ul {
-        flex-direction: row;
-        gap: 1.2rem;
-        width: auto;
-      }
-      .fab {
-        display: flex;
-      }
-      .contenido-nosotros {
-        margin-left: 0;
-        padding: 2.5rem 1rem 1.5rem 1rem;
-        max-width: 100vw;
-      }
-      .equipo {
-        flex-direction: column;
-        gap: 1.2rem;
-      }
+    .valor:hover { color: var(--paper); gap: 2rem; }
+    .valor-dot {
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+    .about-img {
+      position: relative;
+      aspect-ratio: 4/5;
+      overflow: hidden;
+    }
+    .about-img img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      filter: grayscale(0.2) contrast(1.05);
+      transition: transform 0.8s ease;
+    }
+    .about-img:hover img { transform: scale(1.04); }
+    .about-img-tag {
+      position: absolute;
+      bottom: 1.5rem; right: 1.5rem;
+      font-family: var(--f-mono);
+      font-size: var(--fs-micro);
+      letter-spacing: var(--ls-label);
+      color: var(--paper);
+      background: rgba(13,13,11,0.6);
+      padding: 0.5rem 1rem;
+      text-transform: uppercase;
+      backdrop-filter: blur(4px);
     }
 
-    /* ===== Adaptación automática para móvil (<=768 px o UA móvil) ===== */
-    body.mobile header{
-      width: 100%;
-      height: 40px;
-      overflow: visible;
-      padding: 0;
-      background: transparent;
-      border: none;
+    /* ABOUT CARDS */
+    .about-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6rem;
+      border-top: 0.5px solid rgba(245,242,237,0.1);
     }
-    body.mobile nav ul{
-      flex-direction: row;
-      align-items: center;
-      gap: 1.2rem;
-      margin-left: 6rem;
-      margin-bottom: 6rem;
-    }
-    body.mobile .fab{
-      position:fixed;
-      top:20px;
-      left:20px;
-      transform:none;
-      width:56px;
-      height:56px;
-      border-radius:50%;
-      background:var(--accent);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:1.5rem;
-      color:#111;
-      cursor:pointer;
-      z-index:20;
-      transition:transform .1s, box-shadow .25s;
-    }
-    body.mobile .fab.active {
-      background: #111;
+    .about-card-label {
+      font-family: var(--f-mono);
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-wide);
       color: var(--accent);
-    }
-    body.mobile .fab:active{
-      transform: scale(0.97);
-    }
-    body.mobile header nav{
+      text-transform: uppercase;
       display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      position: fixed;
-      top: 90px;
-      left: 20px;
-      transform: none;
-      background: transparent;
-      padding: 0;
-      border-radius: 0;
-      opacity: 0;
-      max-height: none;
-      overflow: visible;
-      transition: opacity .35s ease;
-      pointer-events: none;        /* nav cerrado NO capta clics */
-      visibility: hidden;         /* oculta para Safari/iOS y evita hit-testing */
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
     }
-    body.mobile header.open nav{
-      opacity: 1;
-      max-height: none;
-      pointer-events: auto;        /* nav abierto SÍ capta clics */
-      visibility: visible;         /* visible y clickable */
-      z-index: 50;                 /* sobre el contenido */
+    .about-card-label::before {
+      content: '';
+      display: block;
+      width: 24px; height: 0.5px;
+      background: var(--accent);
     }
-    body.mobile header nav ul{
+
+    /* TESTIMONIOS */
+    .testimonios {
+      border-top: 0.5px solid rgba(245,242,237,0.1);
+      background: var(--char);
+    }
+    .test-header {
+      text-align: center;
+      margin-bottom: 5rem;
+    }
+    .test-title {
+      font-family: var(--f-serif);
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 700;
+      color: var(--paper);
+    }
+    .test-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2rem;
+    }
+    .test-card {
+      border: 0.5px solid rgba(245,242,237,0.1);
+      padding: 2.5rem;
+      display: grid;
+      grid-template-columns: 80px 1fr;
+      gap: 1.5rem;
+      align-items: start;
+      transition: border-color 0.3s;
+    }
+    .test-card:hover { border-color: rgba(200,184,154,0.35); }
+    .test-portrait {
+      width: 80px; height: 80px;
+      object-fit: cover;
+      object-position: center 10%;
+      filter: grayscale(0.3);
+      border-radius: 50%;
+    }
+    .test-quote {
+      font-family: var(--f-serif);
+      font-size: 1.05rem;
+      font-weight: 300;
+      line-height: 1.7;
+      color: var(--mist);
+      margin-bottom: 1.2rem;
+    }
+    .test-quote::before { content: '\201C'; color: var(--accent); margin-right: 0.1em; }
+    .test-quote::after  { content: '\201D'; color: var(--accent); margin-left: 0.1em; }
+    .test-name {
+      font-family: var(--f-mono);
+      font-size: var(--fs-micro);
+      letter-spacing: var(--ls-label);
+      color: var(--ash);
+      text-transform: uppercase;
+    }
+
+    /* CTA */
+    .cta-section {
+      border-top: 0.5px solid rgba(245,242,237,0.1);
+      text-align: center;
+      padding: 10rem 4rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-bg-text {
+      position: absolute;
+      inset: 0;
       display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 1.2rem;
-      margin: 0;
-      padding: 0;
-      transform: translateY(-20px);
+      align-items: center;
+      justify-content: center;
+      font-family: var(--f-serif);
+      font-size: clamp(8rem, 22vw, 18rem);
+      font-weight: 300;
+      color: rgba(245,242,237,0.03);
+      letter-spacing: -0.04em;
+      user-select: none;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    .cta-content { position: relative; z-index: 1; }
+    .cta-tag {
+      font-family: var(--f-mono);
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-wide);
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 2rem;
+    }
+    .cta-title {
+      font-family: var(--f-serif);
+      font-size: clamp(2.5rem, 6vw, 5rem);
+      font-weight: 700;
+      line-height: 1.15;
+      margin-bottom: 1.5rem;
+    }
+    .cta-title em { font-style: normal; color: var(--accent); }
+    .cta-body {
+      font-size: var(--fs-body);
+      font-weight: 300;
+      color: var(--mist);
+      line-height: 1.85;
+      max-width: 420px;
+      margin: 0 auto 3rem;
+    }
+    .cta-buttons {
+      display: flex;
+      gap: 1.5rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: .6rem;
+      font-size: clamp(1rem, 2.2vw, 1.1rem);
+      font-weight: 600;
+      letter-spacing: .04em;
+      color: var(--accent);
+      text-decoration: none;
+      position: relative;
+    }
+    .btn-primary::after {
+      content: '';
+      position: absolute;
+      left: 0; bottom: -6px;
+      height: 2px; width: 100%;
+      background: currentColor;
+      transform: scaleX(0);
+      transform-origin: left;
       transition: transform .35s ease;
     }
-    body.mobile header.open nav ul{
-      transform: translateY(0);
+    .btn-primary:hover::after { transform: scaleX(1); }
+    .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: .6rem;
+      font-size: clamp(1rem, 2.2vw, 1.1rem);
+      font-weight: 600;
+      letter-spacing: .04em;
+      color: var(--accent);
+      text-decoration: none;
+      position: relative;
     }
-    body.mobile header nav li{
-      transform: translateY(-20px);
+    .btn-ghost::after {
+      content: '';
+      position: absolute;
+      left: 0; bottom: -6px;
+      height: 2px; width: 100%;
+      background: currentColor;
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform .35s ease;
+    }
+    .btn-ghost:hover::after { transform: scaleX(1); }
+
+    /* FOOTER */
+    footer {
+      border-top: 0.5px solid rgba(245,242,237,0.08);
+      padding: 3rem 4rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .footer-logo {
+      font-family: var(--f-mono);
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-wide);
+      color: var(--ash);
+      text-transform: uppercase;
+    }
+    .footer-info {
+      font-family: var(--f-mono);
+      font-size: var(--fs-micro);
+      letter-spacing: var(--ls-label);
+      color: var(--ash);
+      text-align: right;
+      line-height: 1.9;
+    }
+    .footer-info a {
+      color: var(--ash);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    .footer-info a:hover { color: var(--paper); }
+
+    /* ANIMATIONS */
+    @keyframes fadeup {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .reveal {
       opacity: 0;
-      transition: transform .35s ease, opacity .35s ease;
+      transform: translateY(30px);
+      transition: opacity 0.9s ease, transform 0.9s ease;
     }
-    body.mobile header.open nav li{
-      transform: translateY(0);
-      opacity: 1;
-    }
-    body.mobile header.open nav a {
-      box-shadow: 0 0 6px rgba(0,0,0,0.25);
-    }
-    body.mobile header.open nav a:active {
-      box-shadow: 0 0 4px rgba(0,0,0,0.35);
-    }
-    body.mobile header.open nav a:hover {
-      box-shadow: 0 0 8px rgba(0,0,0,0.35);
-    }
-    .logo-float{
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  left: auto;
-  display: block;
-  width: auto;
-  min-width: 120px;
-  max-width: 300px;
-  height: auto;
-  box-shadow: none;
-  border-radius: 0;
-  background: transparent;
-  text-shadow:
-    0 2px 8px rgba(0,0,0,0.275),   /* sombra principal a la mitad */
-    0 0.5px 0.5px rgba(0,0,0,0.125),
-    0 0px 0px #000;
-  color: var(--accent);
-  font-family: "Marion", serif;
-  font-size: clamp(24px, 7vw, 60px);
-  white-space: nowrap;
-  letter-spacing: .09em;
-  text-decoration: none;
-  line-height: 1;
-  overflow: visible;
-  text-overflow: unset;
-  z-index: 120;
-  pointer-events: auto;
-  transition: transform .2s;
-}
-.logo-float:hover {
-  transform: translateY(-4px) scale(1.07);
-}
+    .reveal.visible { opacity: 1; transform: translateY(0); }
 
-/* Añade al final de tu <style> para restaurar la animación de fondo */
-body {
-  /* Asegúrate de usar la misma imagen que tienes en tu proyecto */
-  background: url('img/Ciudad de Noche.jpg') no-repeat center center fixed;
-  background-size: 120% 150%;               /* Zoom aumentadado para cubrir al animar */
-  animation: fondo-mueve 60s ease-in-out infinite alternate;  /* 3× más lento */
-}
-
-@keyframes fondo-mueve {
-  0%   { background-position: 50% 80%; }   /* punto de inicio */
-  100% { background-position: 50% 20%; }   /* punto final */
-}
-  /* ===== Carrusel de testimonios ===== */
-  .testimonios {
-    /* alineación con sidebar fijo */
-    margin: 2.5rem 0 0 210px;
-    /* mismo ancho y respiración que el main */
-    max-width: none;
-    padding: clamp(2rem, 5vw, 3rem) 2rem;
-    border-top: 1px solid rgba(255,255,255,.12);
-    box-sizing: border-box;
-  }
-  .testimonios h2 { /* accesible pero visible minimalista */
-    font-size: 1.1rem;
-    font-weight: 700;
-    letter-spacing: .18em;
-    text-transform: uppercase;
-    color: rgba(245,245,233,.85);
-    margin: 0 0 1rem 0;
-  }
-  .carousel {
-    position: relative;
-    overflow: hidden;
-    /* Permite scroll vertical natural y gestos horizontales del carrusel */
-    touch-action: pan-y;
-  }
-  .slides {
-    display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: 100%;
-    transition: transform .6s ease;
-    cursor: grab;                 /* puntero tipo arrastre en desktop */
-  }
-  .slides.dragging { cursor: grabbing; }
-  .slide {
-    display: grid;
-    grid-template-columns: 5fr 7fr; /* imagen/texto en proporción 5:7 como la grilla */
-    align-items: center;
-    gap: clamp(8px, 1.5vw, 16px);
-    padding: clamp(12px, 2.2vw, 24px);
-    background: rgba(17,17,17,.55);
-    border: 1px solid rgba(255,255,255,.08);
-    border-radius: 14px;
-    min-height: 220px;
-  }
-  .slide figure{
-    margin: 0;
-    width: 100%;
-    /* aspect-ratio eliminado para que el contenedor se ajuste más a la imagen */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-  }
-  .slide img{
-    width: 100%;
-    height: 100%;
-    aspect-ratio: 1 / 1;
-    max-width: 120px;
-    object-fit: cover;
-    object-position: center 20%; /* desplaza ligeramente el encuadre hacia abajo */
-    border-radius: 50%;
-    box-shadow: 0 6px 18px rgba(0,0,0,.22);
-    display: block;
-    margin: 0;
-  }
-  .slide blockquote{
-    margin: 0;
-    font-size: clamp(1rem, 1.4vw, 1.15rem);
-    line-height: 1.8;
-    color: var(--text);
-  }
-  .slide footer{
-    margin-top: .6rem;
-    font-weight: 700;
-    color: var(--accent);
-    letter-spacing: .02em;
-  }
-  .carousel-controls{
-    position: absolute;
-    inset: auto 10px 10px auto;
-    display: flex;
-    gap: .35rem;
-  }
-  .carousel button{
-    appearance: none;
-    border: 1px solid rgba(255,255,255,.18);
-    background: rgba(24,24,24,.7);
-    color: var(--accent);
-    border-radius: 10px;
-    padding: .45rem .6rem;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: transform .15s ease, background .25s ease, box-shadow .25s ease;
-    box-shadow: 0 6px 14px rgba(0,0,0,.22);
-  }
-  .carousel button:hover{ transform: translateY(-1px); background: rgba(24,24,24,.85); }
-  .carousel button:active{ transform: translateY(0); }
-  .carousel-indicators{
-    position: absolute;
-    inset: auto auto 12px 12px;
-    display: flex;
-    gap: 6px;
-  }
-  .carousel-indicators .dot{
-    width: 8px; height: 8px; border-radius: 50%;
-    background: rgba(255,255,255,.25);
-    transition: transform .25s ease, background .25s ease;
-  }
-  .carousel-indicators .dot.active{
-    background: var(--accent);
-    transform: scale(1.2);
-  }
-  @media (max-width: 900px){
-    .slide{ grid-template-columns: 1fr; }
-    .testimonios { margin-left: 0; padding: 2rem 1rem 1.5rem 1rem; max-width: 100vw; }
-  }
-
-  /* Fade por scroll solo en bandas superior e inferior (sutil) */
-.fade-scroll{
-  opacity: var(--fade, 1);
-  transform: translateY(calc((1 - var(--fade,1)) * 18px)); /* Mayor desplazamiento */
-  transition: opacity .15s linear, transform .2s ease-out;
-  will-change: opacity, transform;
-}
-
-/* Indicador visual para depuración */
-.fade-debug { outline: 1px solid rgba(255,0,0,0.5); }
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      nav { padding: 1.5rem 1.5rem; }
+      .nav-links { gap: 1.5rem; }
+      section { padding: 6rem 1.5rem; }
+      .page-hero { padding: 10rem 1.5rem 4rem; }
+      .about { grid-template-columns: 1fr; gap: 4rem; }
+      .about-cards { grid-template-columns: 1fr; gap: 4rem; }
+      .test-grid { grid-template-columns: 1fr; }
+      .test-card { grid-template-columns: 60px 1fr; }
+      footer { flex-direction: column; gap: 1.5rem; text-align: center; }
+      .footer-info { text-align: center; }
+    }
   </style>
 </head>
 <body>
 
-  <header>
-    <nav>
-      <ul>
-        <li><a href="index.html">Inicio</a></li>
-        <li><a href="galeria.html">Galería</a></li>
-        <li><a href="nosotros.html">Nosotros</a></li>
-        <li><a href="contacto.html">Contacto</a></li>
-        <li><a href="clientes.html">Clientes</a></li>
-        <li><a href="mas.html">Más</a></li>
-      </ul>
-    </nav>
-    <div id="menuBtn" class="fab">☰</div>
-  </header>
-  <main class="contenido-nosotros">
-    <div class="content-wrap">
-      <h1 class="reveal">Nosotros</h1>
-      <p class="lead reveal">
-        <span class="marca-marion">ANTE</span> es un estudio de retrato minimalista, el cual nace del gusto por mirar a las personas con atención y traducir esa mirada en una imagen honesta que refleje el carácter único de cada persona. Cada sesión sirve como un espacio para reencontrarse con uno mismo y estar orgulloso de quien se es.
-      </p>
-      <section class="grid">
-      <article class="card span-6 reveal">
-        <span class="overline">Lo importante aquí</span>
-        <p>
-          Se celebra lo que hace único a cada quien —las diferencias sutiles y las evidentes—. El estudio trabaja con una estética limpia y un ritmo tranquilo para que la experiencia sea cómoda y eficiente. Un solo fin: que cada persona se reconozca y se afirme.
-        </p>
-        <div class="valores-list" role="list" aria-label="Así se trabaja">
-          <span class="chip" role="listitem">Calidad</span>
-          <span class="chip" role="listitem">Honestidad</span>
-          <span class="chip" role="listitem">Empatía</span>
-          <span class="chip" role="listitem">Respeto a la individualidad</span>
-          <span class="chip" role="listitem">Humanidad</span>
-        </div>
-      </article>
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
 
-      <article class="card span-6 reveal">
-        <span class="overline">Testimonios</span>
-        <div class="carousel" id="carouselTestimonios">
-          <div class="slides">
-            <article class="slide" aria-roledescription="slide">
-              <figure>
-                <img src="img/Valeria1.jpg" alt="Retrato de cliente durante la sesión" loading="lazy">
-              </figure>
-              <div>
-                <blockquote>“La sesión fue sencilla y tranquila. La foto final me representa: limpia, directa y humana.”</blockquote>
-                <footer>— Valeria, abogada</footer>
-              </div>
-            </article>
-            <article class="slide" aria-roledescription="slide">
-              <figure>
-                <img src="img/Ricardo1.jpg" alt="Retrato editorial de cliente" loading="lazy">
-              </figure>
-              <div>
-                <blockquote>“Se nota el buen gusto en la luz y en la dirección. El resultado es justo lo que necesitaba.”</blockquote>
-                <footer>— Ricardo, servidor público</footer>
-              </div>
-            </article>
-            <article class="slide" aria-roledescription="slide">
-              <figure>
-                <img src="img/Jona1.jpg" alt="Retrato profesional de Jonathan" loading="lazy">
-              </figure>
-              <div>
-                <blockquote>“Llegué nervioso y terminé disfrutando la sesión. La dirección fue precisa y el resultado se siente auténtico.”</blockquote>
-                <footer>— Jonathan, gerente</footer>
-              </div>
-            </article>
-            <article class="slide" aria-roledescription="slide">
-              <figure>
-                <img src="img/Carlos2.jpg" alt="Retrato corporativo de Carlos" loading="lazy">
-              </figure>
-              <div>
-                <blockquote>“Necesitaba una foto formal pero moderna. En minutos obtuvimos imágenes que uso en todos mis perfiles.”</blockquote>
-                <footer>— Carlos, abogado</footer>
-              </div>
-            </article>
-          </div>
-          <div class="carousel-controls" aria-hidden="true">
-            <button type="button" class="prev" aria-label="Testimonio anterior">‹</button>
-            <button type="button" class="next" aria-label="Testimonio siguiente">›</button>
-          </div>
-          <div class="carousel-indicators" aria-label="Indicadores"></div>
-        </div>
-      </article>
+<nav>
+  <a href="index.html" class="nav-logo">Ante</a>
+  <ul class="nav-links">
+    <li><a href="galeria.html">Galería</a></li>
+    <li><a href="nosotros.html" class="active">Nosotros</a></li>
+    <li><a href="contacto.html">Contacto</a></li>
+    <li><a href="clientes.html">Clientes</a></li>
+    <li><a href="mas.html">Más</a></li>
+  </ul>
+</nav>
 
-      <div class="span-12 divider"></div>
+<!-- PAGE HERO -->
+<section class="page-hero">
+  <p class="page-eyebrow">Sobre el estudio</p>
+  <h1 class="page-title">Nosotros</h1>
+</section>
 
-      <article class="card span-6 reveal">
-        <span class="overline">Qué se hace</span>
-        <p>
-          Retrato profesional para perfiles y equipos; retrato personal y editorial. La invitación es para ejecutivos, artistas y cualquier persona que quiera una foto que la represente y perdure. La propuesta: luz cuidada, dirección suave y un resultado excepcional.
-        </p>
-      </article>
-
-      <article class="card span-6 reveal">
-        <span class="overline">De dónde surge</span>
-        <p>
-          <span class="marca-marion">ANTE</span> nace en oposición a la prisa y al exceso. En un mundo de imágenes saturadas, el estudio elige la pausa, la luz precisa y el encuadre esencial para retratos honestos, elegantes y perdurables.
-        </p>
-      </article>
-
-      <div class="span-12 divider"></div>
-
-      <article class="card span-12 reveal">
-        <span class="overline">¿Agendamos?</span>
-        <p style="margin:0;">
-          <a href="https://wa.me/525951220554?text=Hola%20ANTE%2C%20me%20gustar%C3%ADa%20agendar%20una%20sesi%C3%B3n." style="color:var(--accent);text-decoration:none;">WhatsApp · +52 (595) 122 0554</a><br>
-          <a href="mailto:contacto@ante.photo" style="color:var(--accent);text-decoration:none;">Escríbenos · contacto@ante.photo</a>
-        </p>
-      </article>
-    </section>
+<!-- ABOUT -->
+<section class="about">
+  <div class="reveal">
+    <div class="section-tag">Filosofía</div>
+    <h2 class="about-title">
+      En oposición<br>
+      a la prisa<br>
+      <em>y al exceso.</em>
+    </h2>
+    <p class="about-body">
+      ANTE nace del gusto por mirar a las personas con atención y traducir esa mirada en una imagen honesta que refleje el carácter único de cada quien. Cada sesión es un espacio para reencontrarse con uno mismo y estar orgulloso de quien se es.
+    </p>
+    <p class="about-body">
+      Se celebra lo que hace único a cada quien —las diferencias sutiles y las evidentes—. Un estilo limpio, un ritmo tranquilo y un solo fin: que cada persona se reconozca y se afirme.
+    </p>
+    <div class="valores">
+      <div class="valor"><span class="valor-dot"></span>Calidad</div>
+      <div class="valor"><span class="valor-dot"></span>Honestidad</div>
+      <div class="valor"><span class="valor-dot"></span>Empatía</div>
+      <div class="valor"><span class="valor-dot"></span>Respeto a la individualidad</div>
+      <div class="valor"><span class="valor-dot"></span>Humanidad</div>
     </div>
-  </main>
-  <script>
-    // Detectar móvil y actualizar clase 'mobile' dinámica
-    function setDeviceClass(){
-      const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
-                       || window.matchMedia('(max-width:768px)').matches;
-      document.body.classList.toggle('mobile', isMobile);
-    }
-    setDeviceClass();
-    window.addEventListener('resize', setDeviceClass);
+  </div>
+  <div class="about-img reveal" style="transition-delay: 0.2s">
+    <img src="img/Ricardo1.jpg" alt="Retrato ANTE · Ricardo" loading="lazy">
+    <div class="about-img-tag">Retrato · Ricardo</div>
+  </div>
+</section>
 
-    // Botón flotante para menú móvil
-    const menuBtn = document.getElementById('menuBtn');
-    if(menuBtn){
-      menuBtn.addEventListener('click', ()=>{
-        const header = document.querySelector('header');
-        header.classList.toggle('open');
-        menuBtn.classList.toggle('active');
-      });
-    }
+<!-- QUÉ HACEMOS + ORIGEN -->
+<section class="about-cards">
+  <div class="reveal">
+    <p class="about-card-label">Qué se hace</p>
+    <p class="about-body">
+      Retrato profesional para perfiles y equipos; retrato personal y editorial. La invitación es para ejecutivos, artistas y cualquier persona que quiera una foto que la represente y perdure. La propuesta: luz cuidada, dirección suave y un resultado excepcional.
+    </p>
+  </div>
+  <div class="reveal" style="transition-delay: 0.15s">
+    <p class="about-card-label">De dónde surge</p>
+    <p class="about-body">
+      ANTE nace en oposición a la prisa y al exceso. En un mundo de imágenes saturadas, el estudio elige la pausa, la luz precisa y el encuadre esencial para retratos honestos, elegantes y perdurables.
+    </p>
+  </div>
+</section>
 
-    // Cerrar menú móvil automáticamente al INICIAR scroll
-    let lastScrollTop = 0;
-    window.addEventListener('scroll', () => {
-      if(document.body.classList.contains('mobile')){
-        const header = document.querySelector('header');
-        if(header.classList.contains('open')){
-          const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
-          if(Math.abs(currentScroll - lastScrollTop) > 5){
-            header.classList.remove('open');
-            menuBtn.classList.remove('active');
-          }
-          lastScrollTop = currentScroll;
-        }
+<!-- TESTIMONIOS -->
+<section class="testimonios">
+  <div class="test-header reveal">
+    <div class="section-tag section-tag--center">Clientes</div>
+    <h2 class="test-title">Lo que dicen</h2>
+  </div>
+  <div class="test-grid reveal">
+    <div class="test-card">
+      <img class="test-portrait" src="img/Valeria1.jpg" alt="Valeria">
+      <div>
+        <p class="test-quote">La sesión fue sencilla y tranquila. La foto final me representa: limpia, directa y humana.</p>
+        <p class="test-name">Valeria · Abogada</p>
+      </div>
+    </div>
+    <div class="test-card">
+      <img class="test-portrait" src="img/Ricardo1.jpg" alt="Ricardo">
+      <div>
+        <p class="test-quote">Se nota el buen gusto en la luz y en la dirección. El resultado es justo lo que necesitaba.</p>
+        <p class="test-name">Ricardo · Servidor público</p>
+      </div>
+    </div>
+    <div class="test-card">
+      <img class="test-portrait" src="img/Jona1.jpg" alt="Jonathan">
+      <div>
+        <p class="test-quote">Llegué nervioso y terminé disfrutando la sesión. La dirección fue precisa y el resultado se siente auténtico.</p>
+        <p class="test-name">Jonathan · Gerente</p>
+      </div>
+    </div>
+    <div class="test-card">
+      <img class="test-portrait" src="img/Carlos2.jpg" alt="Carlos">
+      <div>
+        <p class="test-quote">Necesitaba una foto formal pero moderna. En minutos obtuvimos imágenes que uso en todos mis perfiles.</p>
+        <p class="test-name">Carlos · Abogado</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="cta-bg-text">ANTE</div>
+  <div class="cta-content reveal">
+    <p class="cta-tag">¿Agendamos?</p>
+    <h2 class="cta-title">Tu retrato<br><em>te espera.</em></h2>
+    <p class="cta-body">
+      Ejecutivos, artistas, cualquier persona que quiera una foto que la represente. Contacta directamente por WhatsApp o escríbenos.
+    </p>
+    <div class="cta-buttons">
+      <a href="https://wa.me/525951220554?text=Hola%20ANTE%2C%20me%20gustar%C3%ADa%20agendar%20una%20sesi%C3%B3n." class="btn-primary" target="_blank" rel="noopener">
+        WhatsApp · +52 595 122 0554
+      </a>
+      <a href="mailto:contacto@ante.photo" class="btn-ghost">
+        contacto@ante.photo
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-logo">A N T E · Estudio de Fotografía</div>
+  <div class="footer-info">
+    <a href="mailto:contacto@ante.photo">contacto@ante.photo</a><br>
+    Ciudad de México · México
+  </div>
+</footer>
+
+<script>
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursor.style.left = mx + 'px';
+    cursor.style.top  = my + 'px';
+  });
+
+  function animateRing() {
+    rx += (mx - rx) * 0.12;
+    ry += (my - ry) * 0.12;
+    ring.style.left = rx + 'px';
+    ring.style.top  = ry + 'px';
+    requestAnimationFrame(animateRing);
+  }
+  animateRing();
+
+  document.querySelectorAll('a, button').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      ring.style.width = '56px';
+      ring.style.height = '56px';
+      ring.style.borderColor = 'rgba(200,184,154,0.6)';
+    });
+    el.addEventListener('mouseleave', () => {
+      ring.style.width = '36px';
+      ring.style.height = '36px';
+      ring.style.borderColor = 'var(--accent)';
+    });
+  });
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
       }
     });
-    
-    // Reveal-on-scroll (aparece el contenido al entrar al viewport)
-    (function(){
-      const els = document.querySelectorAll('.reveal');
-      if (!('IntersectionObserver' in window) || !els.length) {
-        els.forEach(e => e.classList.add('in')); 
-        return;
-      }
-      
-      // Esta es la clave: crear el observer apenas carga la página
-      const io = new IntersectionObserver((entries) => {
-        entries.forEach(en => { 
-          if(en.isIntersecting){ 
-            en.target.classList.add('in'); 
-            io.unobserve(en.target); 
-          }
-        });
-      }, { threshold: 0.12, rootMargin: '50px' }); // rootMargin hace que se active un poco antes
-      
-      // IMPORTANTE: Hacer que todos los elementos aparezcan
-      // automáticamente si están visibles al cargar
-      if (document.readyState !== 'loading') {
-        setTimeout(() => els.forEach(e => io.observe(e)), 100);
-      } else {
-        document.addEventListener('DOMContentLoaded', () => {
-          setTimeout(() => els.forEach(e => io.observe(e)), 100);
-        });
-      }
-    })();
-    
-    // Carrusel de testimonios
-    (function(){
-      const carousel = document.getElementById('carouselTestimonios');
-      if(!carousel) return;
-      const track = carousel.querySelector('.slides');
-      const slides = Array.from(track.querySelectorAll('.slide'));
-      if(!slides.length) return;
-      const prevBtn = carousel.querySelector('.carousel-controls .prev');
-      const nextBtn = carousel.querySelector('.carousel-controls .next');
-      const indicators = carousel.querySelector('.carousel-indicators');
-      let dots = [];
-      let index = 0;
-      let autoId;
+  }, { threshold: 0.12 });
 
-      function renderDots(){
-        indicators.innerHTML = '';
-        dots = slides.map((_, i) => {
-          const dot = document.createElement('span');
-          dot.className = 'dot';
-          dot.addEventListener('click', () => { goTo(i); restartAuto(); });
-          indicators.appendChild(dot);
-          return dot;
-        });
-      }
-
-      function goTo(nextIndex){
-        index = (nextIndex + slides.length) % slides.length;
-        track.style.transform = `translateX(-${index * 100}%)`;
-        dots.forEach((dot, i) => dot.classList.toggle('active', i === index));
-      }
-
-      function restartAuto(){
-        if(autoId) clearInterval(autoId);
-        autoId = setInterval(() => goTo(index + 1), 6500);
-      }
-
-      prevBtn?.addEventListener('click', () => { goTo(index - 1); restartAuto(); });
-      nextBtn?.addEventListener('click', () => { goTo(index + 1); restartAuto(); });
-
-      carousel.addEventListener('mouseenter', () => autoId && clearInterval(autoId));
-      carousel.addEventListener('mouseleave', restartAuto);
-
-      renderDots();
-      goTo(0);
-      restartAuto();
-    })();
-    
-    // Mantener el resto de funciones
-    // ...existing code...
-  </script>
-  <!-- Restaurando el logo flotante -->
-  <a href="index.html" class="logo-float">A&nbsp;N&nbsp;T&nbsp;E</a>
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
 </body>
 </html>

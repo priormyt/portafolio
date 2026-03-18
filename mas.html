@@ -7,43 +7,34 @@
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-
     gtag('config', 'G-REE0NDQ50Y');
   </script>
-
 
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="index,follow,max-image-preview:large">
   <title>Más | ANTE Estudio de Fotografía</title>
 
-	 <!-- Coloca este bloque en el <head> de todas las páginas (index.html, nosotros.html, contacto.html, galeria.html, mas.html) -->
-	  <link rel="icon" type="image/x-icon" href="https://www.ante.photo/img/favicon.ico">
-	  <link rel="shortcut icon" type="image/x-icon" href="https://www.ante.photo/img/favicon.ico">
+  <link rel="icon" type="image/x-icon" href="img/favicon.ico">
+  <link rel="shortcut icon" type="image/x-icon" href="img/favicon.ico">
 
-
-  <!-- Metadatos para SEO optimizados con el dominio correcto -->
-  <meta name="description" content="ANTE ofrece renta de foro fotográfico en CDMX: Foro Colibrí. Espacio profesional para sesiones de fotos, video y eventos creativos con equipamiento completo.">
-  <meta name="keywords" content="renta de foro fotográfico, estudio fotográfico CDMX, Foro Colibrí, espacio para sesiones de fotos, alquiler de estudio, equipamiento fotográfico, Ciudad de México">
+  <meta name="description" content="ANTE ofrece renta de foro fotográfico en CDMX: Foro Colibrí. Espacio profesional para sesiones de fotos, video y eventos creativos.">
   <meta name="author" content="ANTE Estudio Fotográfico">
   <link rel="canonical" href="https://www.ante.photo/mas.html">
-  
-  <!-- Metadatos Open Graph actualizados -->
+
   <meta property="og:title" content="Renta de Foro | ANTE Estudio de Fotografía">
-  <meta property="og:description" content="Renta el Foro Colibrí para tus proyectos fotográficos y audiovisuales en CDMX. Espacio profesional completamente equipado.">
+  <meta property="og:description" content="Renta el Foro Colibrí para tus proyectos fotográficos y audiovisuales en CDMX.">
   <meta property="og:image" content="https://www.ante.photo/img/Fondo3.jpg">
   <meta property="og:url" content="https://www.ante.photo/mas.html">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="ANTE Estudio">
   <meta property="og:locale" content="es_MX">
-  
-  <!-- Metadatos Twitter actualizados -->
+
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Renta de Foro | ANTE Estudio de Fotografía">
   <meta name="twitter:description" content="Renta el Foro Colibrí para tus proyectos fotográficos y audiovisuales en CDMX.">
   <meta name="twitter:image" content="https://www.ante.photo/img/Fondo3.jpg">
-  
-  <!-- Datos estructurados LocalBusiness para Foro Colibrí actualizados -->
+
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -51,7 +42,6 @@
     "name": "Foro Colibrí",
     "description": "Estudio fotográfico y espacio para producciones audiovisuales en CDMX",
     "url": "https://forocolibri.com",
-    "image": "https://www.ante.photo/favicon.png",
     "telephone": "+525951220554",
     "address": {
       "@type": "PostalAddress",
@@ -62,428 +52,310 @@
     "priceRange": "$$"
   }
   </script>
-  
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;1,300&display=swap" rel="stylesheet">
+
   <style>
     :root {
-      --bg: #111;
-      --text: #ffffff;
+      --ink: #0d0d0b;
+      --paper: #f5f2ed;
+      --bone: #e8e3da;
+      --ash: #9a9690;
+      --char: #1c1b18;
+      --mist: #ccc8c0;
       --accent: #f5f5e9;
+      --f-serif: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      --f-sans: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      --f-mono: 'DM Mono', 'Courier New', monospace;
+      --fs-label: 0.62rem;
+      --fs-body: 0.9rem;
+      --fs-micro: 0.58rem;
+      --ls-label: 0.3em;
+      --ls-wide: 0.4em;
     }
-    *,*::before,*::after{box-sizing:border-box;}
-    html, body { height: 100%; }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
     body {
-      margin: 0;
-      font-family: Helvetica, Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.6;
-      -webkit-font-smoothing: antialiased;
-      min-height: 100vh;
+      background: var(--ink);
+      color: var(--paper);
+      font-family: var(--f-sans);
+      font-weight: 300;
+      overflow: hidden;
+      height: 100vh;
+      cursor: none;
     }
-    a { color: inherit; text-decoration: none; }
-    header{
-      position:fixed;
-      top:0;
-      left:0;
-      width:180px;
-      height:100vh;
-      padding:2.5rem 1rem 2rem;
-      display:flex;
-      flex-direction:column;
-      align-items:flex-start;
-      gap:2.5rem;
-      background:transparent;
-      border:none;
-      pointer-events:none;
-      z-index:10;
+
+    .cursor {
+      position: fixed;
+      width: 8px; height: 8px;
+      background: var(--paper);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: transform 0.1s ease, opacity 0.2s;
     }
-    header *{pointer-events:auto;}
-    nav ul{
-      list-style:none;
-      margin:0;
-      padding:0;
-      display:flex;
-      flex-direction:column;
-      gap:1.4rem;
-      width:100%;
+    .cursor-ring {
+      position: fixed;
+      width: 36px; height: 36px;
+      border: 0.5px solid var(--accent);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9998;
+      transform: translate(-50%, -50%);
+      transition: transform 0.25s ease, width 0.2s, height 0.2s, opacity 0.2s;
     }
-    nav a{
+
+    /* VIDEO BG */
+    .video-bg {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      object-fit: cover;
+      z-index: -1;
+      filter: brightness(0.55) contrast(1.05);
+    }
+    .video-overlay {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(
+        to bottom,
+        rgba(13,13,11,0.3) 0%,
+        rgba(13,13,11,0.1) 40%,
+        rgba(13,13,11,0.5) 100%
+      );
+      z-index: 0;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 2rem 4rem;
+    }
+    .nav-logo {
+      font-family: 'Marion', Georgia, serif;
+      font-size: 1.1rem;
+      font-weight: 400;
+      letter-spacing: var(--ls-wide);
+      color: var(--paper);
+      text-decoration: none;
       text-transform: uppercase;
-      font-size: 1.05rem;
-      font-weight: 700;
-      letter-spacing: .05em;
-      background: none; /* Elimina el fondo */
+    }
+    .nav-links {
+      display: flex;
+      gap: 3rem;
+      list-style: none;
+    }
+    .nav-links a {
+      font-family: var(--f-mono);
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-label);
+      color: var(--ash);
+      text-decoration: none;
+      text-transform: uppercase;
+      transition: color 0.3s;
+    }
+    .nav-links a:hover, .nav-links a.active { color: var(--paper); }
+
+    /* CENTER CONTENT */
+    .center-wrap {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    .foro-content {
+      text-align: center;
+      opacity: 0;
+      animation: fadeup 1.2s 0.5s forwards;
+    }
+    .foro-eyebrow {
+      font-family: var(--f-mono);
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-wide);
       color: var(--accent);
-      padding: .65rem 1.4rem .65rem 1.6rem;
-      border-radius: 12px;
-      width: 100%;
-      text-align: left;
+      text-transform: uppercase;
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+    }
+    .foro-eyebrow::before, .foro-eyebrow::after {
+      content: '';
       display: block;
-      transition:color .25s,transform .25s,box-shadow .25s;
-      box-shadow: none; /* Elimina la sombra */
-      backdrop-filter: none; /* Elimina el efecto vidrio */
-      -webkit-backdrop-filter: none;
+      width: 32px; height: 0.5px;
+      background: var(--accent);
     }
-    nav a:hover{
-      background: none;
-      color: #fff;
-      transform:translateX(4px) translateY(-2px) scale(1.12);
-      box-shadow: none;
+    .foro-title {
+      font-family: var(--f-serif);
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 3rem;
+      color: var(--paper);
     }
-    nav a:active{
-      transform: translateY(1px) scale(0.99);
-      box-shadow: 0 0 4px rgba(0,0,0,0.3);
-    }
-    .fab {
-      display: none;
-    }
-
-    /* ===== Adaptación automática para móvil (<=768 px o UA móvil) ===== */
-
-    body.mobile nav ul{
-      flex-direction: row;
+    .foro-link {
+      display: inline-flex;
       align-items: center;
       gap: 1.2rem;
-      margin-left: 6rem;
-      margin-bottom: 6rem;
-    }
-    body.mobile .fab{
-      position:fixed;
-      top:20px;
-      left:20px;
-      transform:none;
-      width:56px;
-      height:56px;
-      border-radius:50%;
-      background:var(--accent);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:1.5rem;
-      color:#111;
-      cursor:pointer;
-      z-index:20;
-      transition:transform .1s, box-shadow .25s;
-    }
-    body.mobile .fab.active {
-      background: #111;
-      color: var(--accent);
-    }
-    body.mobile .fab:active{
-      transform: scale(0.97);
-    }
-    body.mobile header{
-      width:100%;
-      height:0;
-      overflow:visible;
-      padding:0;
-      background:transparent;
-      border:none;
-    }
-    body.mobile header nav{
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      position: fixed;
-      top: 90px;
-      left: 20px;
-      transform: none;
-      background: transparent;
-      padding: 0;
-      border-radius: 0;
-      opacity: 0;
-      max-height: none;
-      overflow: visible;
-      transition: opacity .35s ease;
-    }
-    body.mobile header.open nav{
-      opacity: 1;
-      max-height: none;
-    }
-    body.mobile header nav ul{
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 1.2rem;
-      margin: 0;
-      padding: 0;
-      transform: translateY(-20px);
-      transition: transform .35s ease;
-    }
-    body.mobile header.open nav ul{
-      transform: translateY(0);
-    }
-    body.mobile header nav li{
-      transform: translateY(-20px);
-      opacity: 0;
-      transition: transform .35s ease, opacity .35s ease;
-    }
-    body.mobile header.open nav li{
-      transform: translateY(0);
-      opacity: 1;
-    }
-    body.mobile header.open nav a {
-      box-shadow: 0 0 6px rgba(0,0,0,0.25);
-    }
-    body.mobile header.open nav a:active {
-      box-shadow: 0 0 4px rgba(0,0,0,0.35);
-    }
-    body.mobile header.open nav a:hover {
-      box-shadow: 0 0 8px rgba(0,0,0,0.35);
-    }
-    body.mobile header nav a,
-    body.mobile header.open nav a {
-      background: none !important;
-      box-shadow: none !important;
-      color: var(--accent);
-      backdrop-filter: none !important;
-      -webkit-backdrop-filter: none !important;
-      border: none !important;
-      transition: color .25s, transform .25s;
-    }
-    body.mobile header.open nav a:hover,
-    body.mobile header.open nav a:active {
-      background: none !important;
-      box-shadow: none !important;
-      color: #fff;
-    }
-    .logo-float{
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      left: auto;
-      display: block;
-      width: auto;
-      min-width: 120px;
-      max-width: 300px;
-      height: auto;
-      box-shadow: none;
-      border-radius: 0;
-      background: transparent;
-      text-shadow:
-        0 4px 16px rgba(0,0,0,0.55),
-        0 1px 1px rgba(0,0,0,0.25),
-        0 0px 0px #000;
-      color: var(--accent);
-      font-family: "Marion", serif;
-      font-size: clamp(24px, 7vw, 60px);
-      white-space: nowrap;
-      letter-spacing: .09em;
       text-decoration: none;
-      line-height: 1;
-      overflow: visible;
-      text-overflow: unset;
-      z-index: 120;
-      pointer-events: auto;
-      transition: transform .2s;
+      color: var(--paper);
+      transition: transform 0.3s;
     }
-    .logo-float:hover {
-      transform: translateY(-4px) scale(1.07);
+    .foro-link:hover { transform: translateY(-4px); }
+    .foro-logo {
+      width: clamp(56px, 8vw, 80px);
+      height: clamp(56px, 8vw, 80px);
+      object-fit: cover;
+      border-radius: 50%;
+      background: #fff;
+    }
+    .foro-link-text {
+      font-family: var(--f-mono);
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-wide);
+      color: var(--ash);
+      text-transform: uppercase;
+      position: relative;
+      transition: color 0.3s;
+    }
+    .foro-link:hover .foro-link-text { color: var(--paper); }
+    .foro-link-text::after {
+      content: '';
+      position: absolute;
+      left: 0; bottom: -4px;
+      width: 100%; height: 0.5px;
+      background: currentColor;
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s;
+    }
+    .foro-link:hover .foro-link-text::after { transform: scaleX(1); }
+
+    @keyframes fadeup {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
 
-    /* ===== Sección Foro Colibrí ===== */
-    .center-content{
-      position:absolute;
-      top:50%;
-      left:50%;
-      transform:translate(-50%, -50%);
-      display:flex;
-      flex-direction:row;          /* texto a la izquierda, logo‑enlace a la derecha */
-      align-items:center;
-      gap:clamp(1rem, 3vw, 2.5rem);
-      text-align:left;
-      z-index:200;
-      padding:0 20px;
-    }
     @media (max-width: 768px) {
-      .center-content {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-        gap: 1rem;
-        z-index: 200;
-      }
-      .center-content h1 {
-        text-align: center !important;
-        margin-bottom: .25rem;
-      }
-    }
-    .center-content h1{
-      margin:0;
-      font-size:clamp(1.5rem, 2.5vw, 3.5rem);
-      font-weight: 700;
-      line-height:1.2;
-      text-align: right;
-    }
-    .foro-link{
-      display:inline-flex;
-      align-items:center;
-      gap: clamp(0.3rem, 1.5vw, 0.8rem);
-      font-size: clamp(1rem, 3vw, 1.5rem);
-      color:var(--accent);
-      text-decoration:none;
-      transition:color .25s;
-    }
-    .foro-link:hover{
-      color:#fff;
-      text-decoration:underline;
-    }
-    .foro-logo{
-      width: clamp(50px, 8vw, 100px);
-      height: clamp(50px, 8vw, 100px);
-      object-fit:cover;
-      border-radius:50%;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.18);
-      background: #fff;
+      nav { padding: 1.5rem 1.5rem; }
+      .nav-links { gap: 1.5rem; }
     }
   </style>
 </head>
 <body>
 
-  <video id="bgVideo" class="video-bg" autoplay muted loop playsinline preload="metadata" poster="img/Fondo4.png" style="position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:cover;z-index:-1;filter:brightness(0.7);">
-    <source src="Dawn Timelapse Video.mp4" type="video/mp4">
-  </video>
-  <img
-    id="bgFallback"
-    src="img/Fondo4.png"
-    alt="Fondo oscuro artístico del estudio ANTE"
-    width="3727"
-    height="2306"
-    style="position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:cover;z-index:-1;filter:brightness(0.7);display:none;">
-  <header>
-    <nav>
-      <ul>
-        <li><a href="index.html">Inicio</a></li>
-        <li><a href="galeria.html">Galería</a></li>
-        <li><a href="nosotros.html">Nosotros</a></li>
-        <li><a href="contacto.html">Contacto</a></li>
-        <li><a href="clientes.html">Clientes</a></li>
-        <li><a href="mas.html">Más</a></li>
-      </ul>
-    </nav>
-    <div id="menuBtn" class="fab">☰</div>
-  </header>
-  <a href="index.html" class="logo-float">A&nbsp;N&nbsp;T&nbsp;E</a>
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
 
-  <div class="center-content">
-    <h1>Renta de foro en la Ciudad de México</h1>
+<!-- VIDEO BG -->
+<video class="video-bg" id="bgVideo" autoplay muted loop playsinline preload="metadata" poster="img/Fondo4.png">
+  <source src="Dawn Timelapse Video.mp4" type="video/mp4">
+</video>
+<img id="bgFallback" src="img/Fondo4.png" alt="Fondo ANTE Estudio" style="position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:cover;z-index:-1;filter:brightness(0.55) contrast(1.05);display:none;">
+<div class="video-overlay"></div>
+
+<nav>
+  <a href="index.html" class="nav-logo">Ante</a>
+  <ul class="nav-links">
+    <li><a href="galeria.html">Galería</a></li>
+    <li><a href="nosotros.html">Nosotros</a></li>
+    <li><a href="contacto.html">Contacto</a></li>
+    <li><a href="clientes.html">Clientes</a></li>
+    <li><a href="mas.html" class="active">Más</a></li>
+  </ul>
+</nav>
+
+<div class="center-wrap">
+  <div class="foro-content">
+    <p class="foro-eyebrow">También ofrecemos</p>
+    <h1 class="foro-title">Renta de foro<br>en la Ciudad de México</h1>
     <a href="https://forocolibri.com" class="foro-link" target="_blank" rel="noopener">
       <img src="img/Foro colibri.png" alt="Logo Foro Colibrí" class="foro-logo">
-      forocolibri.com
+      <span class="foro-link-text">forocolibri.com</span>
     </a>
   </div>
-  
-  <script>
-    // Detectar móvil y actualizar clase 'mobile' dinámica
-    function setDeviceClass(){
-      const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
-                       || window.matchMedia('(max-width:768px)').matches;
-      document.body.classList.toggle('mobile', isMobile);
-    }
-    setDeviceClass();
-    window.addEventListener('resize', setDeviceClass);
+</div>
 
-    // Botón flotante para menú móvil
-    const menuBtn = document.getElementById('menuBtn');
-    if(menuBtn){
-      menuBtn.addEventListener('click', ()=>{
-        const header = document.querySelector('header');
-        header.classList.toggle('open');
-        menuBtn.classList.toggle('active');
-      });
-    }
+<script>
+  // Cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
 
-    // Cerrar menú móvil automáticamente al INICIAR scroll
-    let lastScrollTop = 0;
-    window.addEventListener('scroll', () => {
-      if(document.body.classList.contains('mobile')){
-        const header = document.querySelector('header');
-        if(header.classList.contains('open')){
-          const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
-          if(Math.abs(currentScroll - lastScrollTop) > 5){
-            header.classList.remove('open');
-            menuBtn.classList.remove('active');
-          }
-          lastScrollTop = currentScroll;
-        }
-      }
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursor.style.left = mx + 'px';
+    cursor.style.top  = my + 'px';
+  });
+
+  function animateRing() {
+    rx += (mx - rx) * 0.12;
+    ry += (my - ry) * 0.12;
+    ring.style.left = rx + 'px';
+    ring.style.top  = ry + 'px';
+    requestAnimationFrame(animateRing);
+  }
+  animateRing();
+
+  document.querySelectorAll('a, button').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      ring.style.width = '56px';
+      ring.style.height = '56px';
+      ring.style.borderColor = 'rgba(200,184,154,0.6)';
     });
+    el.addEventListener('mouseleave', () => {
+      ring.style.width = '36px';
+      ring.style.height = '36px';
+      ring.style.borderColor = 'var(--accent)';
+    });
+  });
+
+  // Video fallback
+  (function() {
+    const video = document.getElementById('bgVideo');
+    const fallback = document.getElementById('bgFallback');
+    const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    const isSaveData = conn && conn.saveData;
+    const isLowNetwork = conn && (['slow-2g','2g'].includes(conn.effectiveType || ''));
+
+    function showFallback() {
+      if (video) { video.pause(); video.style.display = 'none'; }
+      if (fallback) fallback.style.display = 'block';
+    }
+
+    if (!video) return;
+    if (isSaveData || isLowNetwork) { showFallback(); return; }
+
+    video.muted = true;
+    video.playsInline = true;
+
+    const tryPlay = () => {
+      const p = video.play && video.play();
+      if (p && typeof p.then === 'function') p.catch(() => {});
+    };
+    tryPlay();
+
+    setTimeout(() => {
+      if (video.paused || video.readyState < 2) showFallback();
+    }, 1500);
+
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && fallback && fallback.style.display !== 'block') tryPlay();
+    });
+  })();
 </script>
-  <script>
-    (function(){
-      const video = document.getElementById('bgVideo');
-      const fallback = document.getElementById('bgFallback');
-      const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-      const isSaveData = conn && conn.saveData;
-      const isLowNetwork = conn && (['slow-2g','2g'].includes(conn.effectiveType || '') || (conn.downlink && conn.downlink < 0.5) || (conn.rtt && conn.rtt > 800));
-
-      function showFallback(){
-        if (video) {
-          video.pause();
-          video.removeAttribute('autoplay');
-          video.style.display = 'none';
-        }
-        if (fallback) fallback.style.display = 'block';
-      }
-
-      // Asegurar que el fallback use el mismo archivo que el poster del video
-      if (fallback && video && video.getAttribute('poster')) {
-        fallback.src = video.getAttribute('poster');
-      }
-
-      if (!video) return;
-
-      if (isSaveData || isLowNetwork) {
-        // Ahorro de datos activo o conexión lenta: usar imagen estática
-        showFallback();
-        return;
-      }
-
-      if (conn && typeof conn.addEventListener === 'function') {
-        conn.addEventListener('change', () => {
-          const nowLow = (['slow-2g','2g'].includes(conn.effectiveType || '') || (conn.downlink && conn.downlink < 0.5) || (conn.rtt && conn.rtt > 800));
-          if (conn.saveData || nowLow) {
-            showFallback();
-          }
-        });
-      }
-
-      // Asegurar flags de iOS
-      video.muted = true;
-      video.playsInline = true;
-
-      const tryPlay = () => {
-        const p = video.play && video.play();
-        if (p && typeof p.then === 'function') {
-          p.catch(() => { /* iOS puede requerir gesto del usuario */ });
-        }
-      };
-
-      // Intento inicial
-      tryPlay();
-
-      // Tras 1.5s, si no arranca, activar fallback (cubre Low Power Mode)
-      setTimeout(() => {
-        if (video.paused || video.readyState < 2) {
-          showFallback();
-        }
-      }, 1500);
-
-      // Reintento al primer toque si aún no se mostró el fallback
-      window.addEventListener('touchstart', function once(){
-        if (fallback && fallback.style.display !== 'block') {
-          tryPlay();
-        }
-        window.removeEventListener('touchstart', once, { passive: true });
-      }, { passive: true });
-
-      // Reintento al volver a la pestaña
-      document.addEventListener('visibilitychange', () => {
-        if (!document.hidden && fallback && fallback.style.display !== 'block') {
-          tryPlay();
-        }
-      });
-    })();
-  </script>
 </body>
 </html>
