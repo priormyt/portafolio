@@ -533,14 +533,15 @@
       transform: translateY(0);
     }
 
-    /* TESTIMONIOS */
+    /* TESTIMONIOS — Infinite Marquee */
     .testimonios {
-      border-top: 0.5px solid rgba(245,242,237,0.1);
-      background: var(--char);
+      padding: 9rem 0;
+      overflow: hidden;
     }
     .test-header {
       text-align: center;
-      margin-bottom: 5rem;
+      margin-bottom: 4rem;
+      padding: 0 4rem;
     }
     .test-title {
       font-family: var(--f-serif);
@@ -548,42 +549,59 @@
       font-weight: 700;
       color: var(--paper);
     }
-    .test-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 2rem;
+    .marquee-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      -webkit-mask-image: linear-gradient(to right, transparent 0%, black 7%, black 93%, transparent 100%);
+      mask-image: linear-gradient(to right, transparent 0%, black 7%, black 93%, transparent 100%);
     }
-    .test-card {
-      border: 0.5px solid rgba(245,242,237,0.1);
-      padding: 2.5rem;
-      display: grid;
-      grid-template-columns: 80px 1fr;
-      gap: 1.5rem;
-      align-items: start;
-      transition: border-color 0.3s;
+    .marquee-row { overflow: hidden; }
+    .marquee-track {
+      display: flex;
+      gap: 1rem;
+      width: max-content;
     }
-    .test-card:hover {
-      border-color: rgba(200,184,154,0.35);
+    .marquee-left  { animation: mq-left  44s linear infinite; }
+    .marquee-right { animation: mq-right 36s linear infinite; }
+    @keyframes mq-left {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
     }
-    .test-portrait {
-      width: 80px; height: 80px;
+    @keyframes mq-right {
+      from { transform: translateX(-50%); }
+      to   { transform: translateX(0); }
+    }
+    .marquee-container:hover .marquee-track { animation-play-state: paused; }
+    .marquee-item {
+      display: flex;
+      align-items: center;
+      gap: 1.4rem;
+      border: 0.5px solid rgba(245,242,237,0.08);
+      padding: 1.5rem 2rem;
+      flex-shrink: 0;
+      width: clamp(300px, 28vw, 420px);
+      transition: border-color 0.4s;
+    }
+    .marquee-item:hover { border-color: rgba(200,184,154,0.25); }
+    .marquee-portrait {
+      width: 52px; height: 52px;
+      border-radius: 50%;
       object-fit: cover;
       object-position: center 10%;
       filter: grayscale(0.3);
-      border-radius: 50%;
+      flex-shrink: 0;
     }
-    .test-quote {
-      font-family: var(--f-serif);
-      font-size: 1.15rem;
-      font-style: normal;
+    .marquee-quote {
+      font-size: var(--fs-body);
       font-weight: 300;
-      line-height: 1.7;
+      line-height: 1.65;
       color: var(--mist);
-      margin-bottom: 1.2rem;
+      margin-bottom: 0.5rem;
     }
-    .test-quote::before { content: '\201C'; color: var(--accent); margin-right: 0.1em; }
-    .test-quote::after  { content: '\201D'; color: var(--accent); margin-left: 0.1em; }
-    .test-name {
+    .marquee-quote::before { content: '\201C'; color: var(--accent); margin-right: 0.05em; }
+    .marquee-quote::after  { content: '\201D'; color: var(--accent); margin-left: 0.05em; }
+    .marquee-name {
       font-family: var(--f-mono);
       font-size: var(--fs-micro);
       letter-spacing: var(--ls-label);
@@ -736,8 +754,7 @@
         grid-template-columns: 1fr 1fr;
       }
       .galeria-item:first-child { grid-row: span 1; aspect-ratio: 4/5; }
-      .test-grid { grid-template-columns: 1fr; }
-      .test-card { grid-template-columns: 60px 1fr; }
+      .marquee-item { width: clamp(260px, 80vw, 340px); }
       footer { flex-direction: column; gap: 1.5rem; text-align: center; }
       .footer-info { text-align: center; }
     }
@@ -863,35 +880,69 @@
     <div class="section-tag section-tag--center">Clientes</div>
     <h2 class="test-title">Lo que dicen</h2>
   </div>
-  <div class="test-grid reveal">
-    <div class="test-card">
-      <img class="test-portrait" src="img/Valeria1.jpg" alt="Valeria">
-      <div>
-        <p class="test-quote">La sesión fue sencilla y tranquila. La foto final me representa: limpia, directa y humana.</p>
-        <p class="test-name">Valeria · Abogada</p>
+  <div class="marquee-container" aria-label="Testimonios de clientes">
+
+    <!-- Fila 1: izquierda -->
+    <div class="marquee-row">
+      <div class="marquee-track marquee-left" id="mq1">
+        <div class="marquee-item">
+          <img class="marquee-portrait" src="img/Valeria1.jpg" alt="Valeria" loading="lazy">
+          <div>
+            <p class="marquee-quote">La sesión fue sencilla y tranquila. La foto final me representa: limpia, directa y humana.</p>
+            <span class="marquee-name">Valeria · Abogada</span>
+          </div>
+        </div>
+        <div class="marquee-item">
+          <img class="marquee-portrait" src="img/Ricardo1.jpg" alt="Ricardo" loading="lazy">
+          <div>
+            <p class="marquee-quote">Se nota el buen gusto en la luz y en la dirección. El resultado es justo lo que necesitaba.</p>
+            <span class="marquee-name">Ricardo · Servidor público</span>
+          </div>
+        </div>
+        <div class="marquee-item">
+          <img class="marquee-portrait" src="img/Jona1.jpg" alt="Jonathan" loading="lazy">
+          <div>
+            <p class="marquee-quote">Llegué nervioso y terminé disfrutando la sesión. La dirección fue precisa y el resultado se siente auténtico.</p>
+            <span class="marquee-name">Jonathan · Gerente</span>
+          </div>
+        </div>
+        <div class="marquee-item">
+          <img class="marquee-portrait" src="img/Carlos2.jpg" alt="Carlos" loading="lazy">
+          <div>
+            <p class="marquee-quote">Necesitaba una foto formal pero moderna. En minutos obtuvimos imágenes que uso en todos mis perfiles.</p>
+            <span class="marquee-name">Carlos · Abogado</span>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="test-card">
-      <img class="test-portrait" src="img/Ricardo1.jpg" alt="Ricardo">
-      <div>
-        <p class="test-quote">Se nota el buen gusto en la luz y en la dirección. El resultado es justo lo que necesitaba.</p>
-        <p class="test-name">Ricardo · Servidor público</p>
+
+    <!-- Fila 2: derecha -->
+    <div class="marquee-row">
+      <div class="marquee-track marquee-right" id="mq2">
+        <div class="marquee-item">
+          <img class="marquee-portrait" src="img/Mich1.jpg" alt="Michelle" loading="lazy">
+          <div>
+            <p class="marquee-quote">El ambiente del estudio hace que todo fluya. Las fotos tienen una calidad que no había visto en otros lugares.</p>
+            <span class="marquee-name">Michelle · Diseñadora</span>
+          </div>
+        </div>
+        <div class="marquee-item">
+          <img class="marquee-portrait" src="img/Christian1.jpg" alt="Christian" loading="lazy">
+          <div>
+            <p class="marquee-quote">Profesionalismo en cada detalle. Me entregaron exactamente lo que pedí y en menos tiempo del esperado.</p>
+            <span class="marquee-name">Christian · Emprendedor</span>
+          </div>
+        </div>
+        <div class="marquee-item">
+          <img class="marquee-portrait" src="img/Mafer1.jpg" alt="Mafer" loading="lazy">
+          <div>
+            <p class="marquee-quote">Las fotos superaron mis expectativas. Capturaron exactamente lo que quería proyectar sin que tuviera que explicarlo mucho.</p>
+            <span class="marquee-name">Mafer · Abogada</span>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="test-card">
-      <img class="test-portrait" src="img/Jona1.jpg" alt="Jonathan">
-      <div>
-        <p class="test-quote">Llegué nervioso y terminé disfrutando la sesión. La dirección fue precisa y el resultado se siente auténtico.</p>
-        <p class="test-name">Jonathan · Gerente</p>
-      </div>
-    </div>
-    <div class="test-card">
-      <img class="test-portrait" src="img/Carlos2.jpg" alt="Carlos">
-      <div>
-        <p class="test-quote">Necesitaba una foto formal pero moderna. En minutos obtuvimos imágenes que uso en todos mis perfiles.</p>
-        <p class="test-name">Carlos · Abogado</p>
-      </div>
-    </div>
+
   </div>
 </section>
 
@@ -967,6 +1018,12 @@
   }, { threshold: 0.12 });
 
   document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // Duplicate marquee items for seamless infinite loop
+  document.querySelectorAll('.marquee-track').forEach(track => {
+    const clone = track.innerHTML;
+    track.insertAdjacentHTML('beforeend', clone.replace(/id="[^"]*"/g, '').replace(/<img /g, '<img aria-hidden="true" '));
+  });
 </script>
 </body>
 </html>
