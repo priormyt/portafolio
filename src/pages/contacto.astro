@@ -1,0 +1,519 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+<Layout title="Contacto | ANTE Estudio de Fotografía">
+<!-- PAGE HERO -->
+<section class="page-hero">
+  <p class="page-eyebrow">Hablemos</p>
+  <h1 class="page-title">Contacto</h1>
+  <p class="page-sub">Logremos capturar tu esencia.</p>
+</section>
+
+<!-- CONTACT LINKS -->
+<div class="contact-main">
+  <div class="contact-block reveal">
+    <p class="contact-block-label">WhatsApp</p>
+    <a class="contact-link" href="https://wa.me/525951220554?text=Hola%20ANTE%2C%20me%20gustar%C3%ADa%20agendar%20una%20sesi%C3%B3n." target="_blank" rel="noopener">
+      +52 595 122 0554
+    </a>
+    <p class="contact-sub">Respuesta en menos de 24 horas</p>
+  </div>
+  <div class="contact-block reveal" style="transition-delay: 0.15s">
+    <p class="contact-block-label">Correo</p>
+    <a class="contact-link" href="mailto:contacto@ante.photo">
+      contacto@ante.photo
+    </a>
+    <p class="contact-sub">Para proyectos y cotizaciones</p>
+  </div>
+</div>
+
+<!-- INFO -->
+<div class="contact-info">
+  <div class="info-block reveal">
+    <p class="info-label">Ubicación</p>
+    <p class="info-value">Ciudad de México</p>
+  </div>
+  <div class="info-block reveal" style="transition-delay: 0.1s">
+    <p class="info-label">Horario</p>
+    <p class="info-value">Contáctanos para verificar disponibilidad</p>
+  </div>
+  <div class="info-block reveal" style="transition-delay: 0.2s">
+    <p class="info-label">Anticipo</p>
+    <p class="info-value">50% para reservar, 50% el día de la sesión</p>
+  </div>
+  <div class="info-block reveal" style="transition-delay: 0.3s">
+    <p class="info-label">Entrega</p>
+    <p class="info-value">3–5 días hábiles · Edición profesional incluida</p>
+  </div>
+</div>
+
+<!-- FAQ -->
+<section class="faq-section">
+  <div class="faq-header reveal">
+    <div class="section-tag">Preguntas frecuentes</div>
+    <h2 class="faq-title">Lo que más preguntan</h2>
+  </div>
+  <div class="faq-grid reveal">
+    <details class="faq-item">
+      <summary>¿Cómo reservo una sesión?</summary>
+      <p class="faq-answer">Contáctanos por WhatsApp o correo electrónico y nos encargamos del resto. Confirmamos disponibilidad y te enviamos los detalles.</p>
+    </details>
+    <details class="faq-item">
+      <summary>¿Cuánto tarda la entrega?</summary>
+      <p class="faq-answer">Entrega digital en 3–5 días hábiles. Para impresiones o fotolibros, 7–10 días adicionales.</p>
+    </details>
+    <details class="faq-item">
+      <summary>¿Incluye edición?</summary>
+      <p class="faq-answer">Sí, todas las fotografías entregadas incluyen edición de color, luz y retoque profesional.</p>
+    </details>
+    <details class="faq-item">
+      <summary>¿Cómo se realiza el pago?</summary>
+      <p class="faq-answer">50% para reservar y 50% el día de la sesión. Aceptamos transferencia, tarjeta y efectivo.</p>
+    </details>
+    <details class="faq-item">
+      <summary>¿Puedo reprogramar mi sesión?</summary>
+      <p class="faq-answer">Sí, con 48 horas de anticipación sin costo. Menos tiempo puede generar una tarifa de reprogramación.</p>
+    </details>
+    <details class="faq-item">
+      <summary>¿Entregan archivos RAW?</summary>
+      <p class="faq-answer">No. Enviamos archivos en alta resolución, editados y listos para uso en cualquier plataforma.</p>
+    </details>
+  </div>
+</section>
+
+<!-- LEGAL -->
+<div class="legal-section reveal">
+  <span class="legal-text">Información legal</span>
+  <a href="aviso-privacidad.html" class="legal-link">Aviso de Privacidad →</a>
+</div>
+
+<style is:global>
+
+    :root {
+      --ink: #0d0d0b;
+      --paper: #f5f2ed;
+      --bone: #e8e3da;
+      --ash: #9a9690;
+      --char: #1c1b18;
+      --mist: #ccc8c0;
+      --accent: #f5f5e9;
+      --f-serif: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      --f-sans: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      --f-mono: 'DM Mono', 'Courier New', monospace;
+      --fs-label: 0.62rem;
+      --fs-body: 0.9rem;
+      --fs-micro: 0.58rem;
+      --ls-label: 0.3em;
+      --ls-wide: 0.4em;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--ink);
+      color: var(--paper);
+      font-family: var(--f-sans);
+      font-weight: 300;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    .cursor {
+      position: fixed;
+      width: 8px; height: 8px;
+      background: var(--paper);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: transform 0.1s ease, opacity 0.2s;
+    }
+    .cursor-ring {
+      position: fixed;
+      width: 36px; height: 36px;
+      border: 0.5px solid var(--accent);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9998;
+      transform: translate(-50%, -50%);
+      transition: transform 0.25s ease, width 0.2s, height 0.2s, opacity 0.2s;
+    }
+
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 2rem 4rem;
+    }
+    .nav-logo {
+      font-family: 'Marion', Georgia, serif;
+      font-size: 1.1rem;
+      font-weight: 400;
+      letter-spacing: var(--ls-wide);
+      color: var(--paper);
+      text-decoration: none;
+      text-transform: uppercase;
+    }
+    .nav-links {
+      display: flex;
+      gap: 3rem;
+      list-style: none;
+    }
+    .nav-links a {
+      font-family: var(--f-mono);
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-label);
+      color: var(--ash);
+      text-decoration: none;
+      text-transform: uppercase;
+      transition: color 0.3s;
+    }
+    .nav-links a:hover, .nav-links a.active { color: var(--paper); }
+
+    section { padding: 9rem 4rem; }
+
+    .section-tag {
+      font-family: var(--f-mono);
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-wide);
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 2.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .section-tag::before {
+      content: '';
+      display: block;
+      width: 24px; height: 0.5px;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+
+    /* PAGE HERO */
+    .page-hero {
+      padding: 14rem 4rem 7rem;
+      border-bottom: 0.5px solid rgba(245,242,237,0.1);
+    }
+    .page-eyebrow {
+      font-family: var(--f-mono);
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-wide);
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: fadeup 1s 0.3s forwards;
+    }
+    .page-title {
+      font-family: var(--f-serif);
+      font-size: clamp(3.5rem, 8vw, 7rem);
+      font-weight: 700;
+      line-height: 1.0;
+      letter-spacing: -0.01em;
+      color: var(--paper);
+      opacity: 0;
+      animation: fadeup 1.2s 0.5s forwards;
+    }
+    .page-sub {
+      font-size: var(--fs-body);
+      font-weight: 300;
+      color: var(--mist);
+      line-height: 1.85;
+      max-width: 400px;
+      margin-top: 2rem;
+      opacity: 0;
+      animation: fadeup 1s 0.8s forwards;
+    }
+
+    /* CONTACT LINKS SECTION */
+    .contact-main {
+      border-top: 0.5px solid rgba(245,242,237,0.1);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+    }
+    .contact-block {
+      padding: 5rem 4rem;
+      border-right: 0.5px solid rgba(245,242,237,0.08);
+    }
+    .contact-block:last-child { border-right: none; }
+    .contact-block-label {
+      font-family: var(--f-mono);
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-wide);
+      color: var(--accent);
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .contact-block-label::before {
+      content: '';
+      display: block;
+      width: 24px; height: 0.5px;
+      background: var(--accent);
+    }
+    .contact-link {
+      display: inline-flex;
+      align-items: center;
+      gap: .6rem;
+      font-family: var(--f-sans);
+      font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+      font-weight: 600;
+      letter-spacing: .02em;
+      color: var(--paper);
+      text-decoration: none;
+      position: relative;
+    }
+    .contact-link::after {
+      content: '';
+      position: absolute;
+      left: 0; bottom: -6px;
+      height: 1px; width: 100%;
+      background: currentColor;
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform .35s ease;
+      opacity: .5;
+    }
+    .contact-link:hover::after { transform: scaleX(1); }
+    .contact-sub {
+      font-family: var(--f-mono);
+      font-size: var(--fs-micro);
+      letter-spacing: var(--ls-label);
+      color: var(--ash);
+      text-transform: uppercase;
+      margin-top: 1rem;
+    }
+
+    /* INFO GRID */
+    .contact-info {
+      border-top: 0.5px solid rgba(245,242,237,0.1);
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0;
+    }
+    .info-block {
+      padding: 4rem;
+      border-right: 0.5px solid rgba(245,242,237,0.08);
+      border-bottom: 0.5px solid rgba(245,242,237,0.08);
+    }
+    .info-block:nth-child(2n) { border-right: none; }
+    .info-block:nth-last-child(-n+2) { border-bottom: none; }
+    .info-label {
+      font-family: var(--f-mono);
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-wide);
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+    .info-value {
+      font-size: var(--fs-body);
+      font-weight: 300;
+      line-height: 1.9;
+      color: var(--mist);
+    }
+
+    /* FAQ */
+    .faq-section {
+      border-top: 0.5px solid rgba(245,242,237,0.1);
+      background: var(--char);
+    }
+    .faq-header {
+      margin-bottom: 4rem;
+    }
+    .faq-title {
+      font-family: var(--f-serif);
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 700;
+    }
+    .faq-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1px;
+      background: rgba(245,242,237,0.08);
+    }
+    .faq-item {
+      background: var(--char);
+      padding: 2rem;
+      cursor: pointer;
+    }
+    .faq-item summary {
+      list-style: none;
+      font-family: var(--f-mono);
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-label);
+      color: var(--paper);
+      text-transform: uppercase;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      outline: none;
+    }
+    .faq-item summary::-webkit-details-marker { display: none; }
+    .faq-item summary::after {
+      content: '+';
+      font-family: var(--f-sans);
+      font-size: 1.2rem;
+      font-weight: 300;
+      color: var(--accent);
+      flex-shrink: 0;
+      transition: transform 0.25s ease;
+    }
+    .faq-item[open] summary::after {
+      transform: rotate(45deg);
+    }
+    .faq-answer {
+      font-size: var(--fs-body);
+      font-weight: 300;
+      line-height: 1.85;
+      color: var(--mist);
+      padding-top: 1.2rem;
+    }
+
+    /* LEGAL */
+    .legal-section {
+      border-top: 0.5px solid rgba(245,242,237,0.1);
+      padding: 4rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 2rem;
+    }
+    .legal-text {
+      font-family: var(--f-mono);
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-label);
+      color: var(--ash);
+      text-transform: uppercase;
+    }
+    .legal-link {
+      font-family: var(--f-mono);
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-label);
+      color: var(--ash);
+      text-decoration: none;
+      text-transform: uppercase;
+      border: 0.5px solid rgba(245,242,237,0.15);
+      padding: 0.65rem 1.2rem;
+      transition: color 0.3s, border-color 0.3s;
+    }
+    .legal-link:hover {
+      color: var(--paper);
+      border-color: rgba(245,242,237,0.35);
+    }
+
+    /* FOOTER */
+    footer {
+      border-top: 0.5px solid rgba(245,242,237,0.08);
+      padding: 3rem 4rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .footer-logo {
+      font-family: var(--f-mono);
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-wide);
+      color: var(--ash);
+      text-transform: uppercase;
+    }
+    .footer-info {
+      font-family: var(--f-mono);
+      font-size: var(--fs-micro);
+      letter-spacing: var(--ls-label);
+      color: var(--ash);
+      text-align: right;
+      line-height: 1.9;
+    }
+    .footer-info a { color: var(--ash); text-decoration: none; transition: color 0.3s; }
+    .footer-info a:hover { color: var(--paper); }
+
+    @keyframes fadeup {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.9s ease, transform 0.9s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 768px) {
+      nav { padding: 1.5rem 1.5rem; }
+      .nav-links { gap: 1.5rem; }
+      section { padding: 6rem 1.5rem; }
+      .page-hero { padding: 10rem 1.5rem 4rem; }
+      .contact-main { grid-template-columns: 1fr; }
+      .contact-block { padding: 3rem 1.5rem; border-right: none; border-bottom: 0.5px solid rgba(245,242,237,0.08); }
+      .contact-info { grid-template-columns: 1fr; }
+      .info-block { padding: 2.5rem 1.5rem; border-right: none; }
+      .faq-section { padding: 6rem 1.5rem; }
+      .faq-grid { grid-template-columns: 1fr; }
+      .legal-section { padding: 3rem 1.5rem; flex-direction: column; align-items: flex-start; }
+      footer { flex-direction: column; gap: 1.5rem; text-align: center; }
+      .footer-info { text-align: center; }
+    }
+  
+</style>
+
+<script is:inline>
+(() => {
+
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursor.style.left = mx + 'px';
+    cursor.style.top  = my + 'px';
+  });
+
+  function animateRing() {
+    rx += (mx - rx) * 0.12;
+    ry += (my - ry) * 0.12;
+    ring.style.left = rx + 'px';
+    ring.style.top  = ry + 'px';
+    requestAnimationFrame(animateRing);
+  }
+  animateRing();
+
+  document.querySelectorAll('a, button').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      ring.style.width = '56px';
+      ring.style.height = '56px';
+      ring.style.borderColor = 'rgba(200,184,154,0.6)';
+    });
+    el.addEventListener('mouseleave', () => {
+      ring.style.width = '36px';
+      ring.style.height = '36px';
+      ring.style.borderColor = 'var(--accent)';
+    });
+  });
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+})();
+</script>
+
+</Layout>

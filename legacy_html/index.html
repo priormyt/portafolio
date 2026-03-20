@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-REE0NDQ50Y"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-REE0NDQ50Y');
+  </script>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <title>ANTE | Estudio de Fotografía Profesional</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="img/favicon.ico">
+  <link rel="shortcut icon" type="image/x-icon" href="img/favicon.ico">
+  <link rel="preload" href="img/Fondo3.jpg" as="image">
+
+  <!-- SEO -->
+  <meta name="description" content="ANTE Estudio de Fotografía: retratos minimalistas, profesionales y con personalidad para personas y empresas en CDMX. Fotografía honesta que refleja tu esencia.">
+  <meta name="keywords" content="fotografía profesional, retratos minimalistas, estudio fotográfico CDMX, retratos corporativos, fotografía artística, sesión de fotos profesional">
+  <meta name="author" content="ANTE Estudio Fotográfico">
+  <link rel="canonical" href="https://www.ante.photo/">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="ANTE | Estudio de Fotografía Profesional">
+  <meta property="og:description" content="Retratos minimalistas, profesionales y con personalidad para personas y empresas en CDMX.">
+  <meta property="og:image" content="https://www.ante.photo/img/Fondo3.jpg">
+  <meta property="og:url" content="https://www.ante.photo/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="ANTE">
+  <meta property="og:locale" content="es_MX">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="ANTE | Estudio de Fotografía Profesional">
+  <meta name="twitter:description" content="Retratos minimalistas que capturan la esencia de cada persona.">
+  <meta name="twitter:image" content="https://www.ante.photo/img/Fondo3.jpg">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "ANTE Estudio de Fotografía",
+    "url": "https://www.ante.photo/",
+    "sameAs": ["https://www.instagram.com/ante.estudio"],
+    "publisher": {
+      "@type": "Organization",
+      "name": "ANTE Estudio de Fotografía",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://www.ante.photo/img/favicon.ico"
+      }
+    }
+  }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;1,300&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --ink: #0d0d0b;
+      --paper: #f5f2ed;
+      --bone: #e8e3da;
+      --ash: #9a9690;
+      --char: #1c1b18;
+      --mist: #ccc8c0;
+      --accent: #f5f5e9;
+      --f-serif: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      --f-sans: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      --f-mono: 'DM Mono', 'Courier New', monospace;
+      --fs-label: 0.62rem;
+      --fs-body: 0.9rem;
+      --fs-micro: 0.58rem;
+      --ls-label: 0.3em;
+      --ls-wide: 0.4em;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--ink);
+      color: var(--paper);
+      font-family: var(--f-sans);
+      font-weight: 300;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* Custom cursor */
+    .cursor {
+      position: fixed;
+      width: 8px; height: 8px;
+      background: var(--paper);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: transform 0.1s ease, opacity 0.2s;
+    }
+    .cursor-ring {
+      position: fixed;
+      width: 36px; height: 36px;
+      border: 0.5px solid var(--accent);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9998;
+      transform: translate(-50%, -50%);
+      transition: transform 0.25s ease, width 0.2s, height 0.2s, opacity 0.2s;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 2rem 4rem;
+    }
+    .nav-logo {
+      font-family: 'Marion', Georgia, serif;
+      font-size: 1.1rem;
+      font-weight: 400;
+      letter-spacing: var(--ls-wide);
+      color: var(--paper);
+      text-decoration: none;
+      text-transform: uppercase;
+    }
+    .nav-links {
+      display: flex;
+      gap: 3rem;
+      list-style: none;
+    }
+    .nav-links a {
+      font-family: var(--f-mono);
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-label);
+      color: var(--ash);
+      text-decoration: none;
+      text-transform: uppercase;
+      transition: color 0.3s;
+    }
+    .nav-links a:hover { color: var(--paper); }
+
+    /* HERO */
+    .hero {
+      position: relative;
+      height: 100vh;
+      display: flex;
+      align-items: flex-end;
+      overflow: hidden;
+    }
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background-image: url('img/Fondo3.jpg');
+      background-size: cover;
+      background-position: center 30%;
+      filter: brightness(0.55) contrast(1.1);
+      transform: scale(1.05);
+      animation: slowzoom 20s ease-in-out infinite alternate;
+    }
+    @keyframes slowzoom {
+      from { transform: scale(1.05); }
+      to   { transform: scale(1.12); }
+    }
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to bottom,
+        transparent 0%,
+        rgba(13,13,11,0.2) 50%,
+        rgba(13,13,11,0.85) 100%
+      );
+    }
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      padding: 0 4rem 6rem;
+      max-width: 900px;
+    }
+    .hero-eyebrow {
+      font-family: var(--f-mono);
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-wide);
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: fadeup 1s 0.3s forwards;
+    }
+    .hero-title {
+      font-family: var(--f-serif);
+      font-size: clamp(3.5rem, 8vw, 7rem);
+      font-weight: 700;
+      line-height: 1.0;
+      letter-spacing: -0.01em;
+      color: var(--paper);
+      margin-bottom: 2rem;
+      opacity: 0;
+      animation: fadeup 1.2s 0.5s forwards;
+    }
+    .hero-title em {
+      font-style: normal;
+      color: var(--accent);
+    }
+    .hero-sub {
+      font-family: var(--f-sans);
+      font-size: var(--fs-body);
+      font-weight: 300;
+      letter-spacing: 0.03em;
+      color: var(--mist);
+      max-width: 440px;
+      line-height: 1.85;
+      opacity: 0;
+      animation: fadeup 1s 0.8s forwards;
+    }
+    .hero-cta {
+      margin-top: 3rem;
+      opacity: 0;
+      animation: fadeup 1s 1.1s forwards;
+    }
+    .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: .6rem;
+      font-family: var(--f-sans);
+      font-size: clamp(1rem, 2.2vw, 1.1rem);
+      font-weight: 600;
+      letter-spacing: .04em;
+      color: var(--accent);
+      text-decoration: none;
+      position: relative;
+    }
+    .btn-ghost::after {
+      content: '';
+      position: absolute;
+      left: 0; bottom: -6px;
+      height: 2px; width: 100%;
+      background: currentColor;
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform .35s ease;
+      opacity: .9;
+    }
+    .btn-ghost:hover::after { transform: scaleX(1); }
+    .btn-ghost .arrow { transition: transform 0.3s; }
+    .btn-ghost:hover .arrow { transform: translateX(6px); }
+
+    .hero-scroll {
+      position: absolute;
+      right: 4rem;
+      bottom: 4rem;
+      z-index: 2;
+      writing-mode: vertical-rl;
+      font-family: var(--f-mono);
+      font-size: var(--fs-micro);
+      letter-spacing: var(--ls-wide);
+      color: var(--ash);
+      text-transform: uppercase;
+      opacity: 0;
+      animation: fadein 1s 1.5s forwards;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .hero-scroll::after {
+      content: '';
+      display: block;
+      width: 0.5px;
+      height: 48px;
+      background: var(--accent);
+      animation: scrollline 2s 2s infinite;
+    }
+    @keyframes scrollline {
+      0%   { transform: scaleY(0); transform-origin: top; }
+      50%  { transform: scaleY(1); transform-origin: top; }
+      51%  { transform: scaleY(1); transform-origin: bottom; }
+      100% { transform: scaleY(0); transform-origin: bottom; }
+    }
+
+    /* SECTIONS */
+    section { padding: 9rem 4rem; }
+
+    /* PRICING STRIP */
+    .pricing-strip {
+      border-top: 0.5px solid rgba(245,242,237,0.1);
+      border-bottom: 0.5px solid rgba(245,242,237,0.1);
+      padding: 2rem 4rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 2rem;
+    }
+    .pricing-strip-left {
+      display: flex;
+      align-items: center;
+      gap: 1.4rem;
+      font-family: var(--f-mono);
+      font-size: 0.78rem;
+      letter-spacing: var(--ls-label);
+      color: var(--ash);
+      text-transform: uppercase;
+    }
+    .pricing-strip-left::before {
+      content: '';
+      display: block;
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+    .pricing-strip-left strong {
+      font-weight: 400;
+      color: var(--paper);
+      font-size: 0.9rem;
+    }
+    .pricing-strip-link {
+      font-family: var(--f-mono);
+      font-size: 0.78rem;
+      letter-spacing: var(--ls-label);
+      color: var(--ash);
+      text-decoration: none;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      transition: color 0.3s;
+      white-space: nowrap;
+      border: 0.5px solid rgba(245,242,237,0.15);
+      padding: 0.65rem 1.2rem;
+    }
+    .pricing-strip-link:hover {
+      color: var(--paper);
+      border-color: rgba(245,242,237,0.35);
+    }
+    @media (max-width: 768px) {
+      .pricing-strip { padding: 1.5rem 1.5rem; }
+    }
+
+    /* FILOSOFIA */
+    .filosofia {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8rem;
+      align-items: center;
+      border-top: 0.5px solid rgba(245,242,237,0.1);
+    }
+    .section-tag {
+      font-family: var(--f-mono);
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-wide);
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 2.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .section-tag::before {
+      content: '';
+      display: block;
+      width: 24px;
+      height: 0.5px;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+    .section-tag--center {
+      justify-content: center;
+    }
+    .section-tag--center::before {
+      display: none;
+    }
+    .filosofia-title {
+      font-family: var(--f-serif);
+      font-size: clamp(2.2rem, 4vw, 3.5rem);
+      font-weight: 700;
+      line-height: 1.15;
+      letter-spacing: -0.01em;
+      margin-bottom: 2rem;
+    }
+    .filosofia-title em {
+      font-style: normal;
+      color: var(--accent);
+    }
+    .filosofia-body {
+      font-family: var(--f-sans);
+      font-size: var(--fs-body);
+      font-weight: 300;
+      line-height: 1.9;
+      color: var(--mist);
+      margin-bottom: 2rem;
+    }
+    .valores {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .valor {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      padding: 1.1rem 0;
+      border-bottom: 0.5px solid rgba(245,242,237,0.08);
+      font-family: var(--f-mono);
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-label);
+      color: var(--ash);
+      text-transform: uppercase;
+      transition: color 0.3s, gap 0.3s;
+    }
+    .valor:hover { color: var(--paper); gap: 2rem; }
+    .valor-dot {
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+    .filosofia-img {
+      position: relative;
+      aspect-ratio: 4/5;
+      overflow: hidden;
+    }
+    .filosofia-img img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      filter: grayscale(0.2) contrast(1.05);
+      transition: transform 0.8s ease;
+    }
+    .filosofia-img:hover img { transform: scale(1.04); }
+    .filosofia-img-tag {
+      position: absolute;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      font-family: var(--f-mono);
+      font-size: var(--fs-micro);
+      letter-spacing: var(--ls-label);
+      color: var(--paper);
+      background: rgba(13,13,11,0.6);
+      padding: 0.5rem 1rem;
+      text-transform: uppercase;
+      backdrop-filter: blur(4px);
+    }
+
+    /* GALERIA — Joby-style sticky scroll */
+    .galeria {
+      border-top: 0.5px solid rgba(245,242,237,0.1);
+      padding-bottom: 0;
+    }
+    .galeria-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 4rem;
+      padding: 0 4rem;
+    }
+    .galeria-title {
+      font-family: var(--f-serif);
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 700;
+      line-height: 1;
+    }
+    .galeria-link {
+      font-family: var(--f-mono);
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-label);
+      color: var(--ash);
+      text-decoration: none;
+      text-transform: uppercase;
+      transition: color 0.3s;
+    }
+    .galeria-link:hover { color: var(--paper); }
+
+    /* Tall scroll wrapper — defines how long the sticky section lasts */
+    .galeria-sticky-wrapper {
+      position: relative;
+      height: 300vh;
+    }
+    /* Sticky viewport — stays pinned while wrapper scrolls past */
+    .galeria-sticky {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: hidden;
+      background: var(--ink);
+    }
+
+    /* Each slide stacks on top via DOM order (last = highest z).
+       JS sets only --sp-in and --sp-out (0→1). */
+    .galeria-slide {
+      --sp-in:  0;
+      --sp-out: 0;
+      position: absolute;
+      inset: 0;
+    }
+    /* First slide: starts fully visible */
+    .galeria-slide:first-child { --sp-in: 1; }
+
+    /* The frame that scales and slides.
+       Entry:  comes from the right  (translateX +88% → 0),  scale 0.32 → 1.0
+       Exit:   goes to the left      (translateX 0 → -88%), scale 1.0 → 0.32
+       88% of element width ≈ 49vw — thumbnail peeks from right screen edge. */
+    .galeria-slide-image {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 56vw;
+      height: 86vh;
+      margin-left: -28vw;
+      margin-top: -43vh;
+      border-radius: calc(6px + 42px * (1 - var(--sp-in)) + 18px * var(--sp-out));
+      overflow: hidden;
+      transform-origin: center center;
+      will-change: transform, border-radius;
+      transform:
+        translateX(calc((1 - var(--sp-in)) * 88% - var(--sp-out) * 88%))
+        scale(calc(0.32 + var(--sp-in) * 0.68 - var(--sp-out) * 0.68));
+    }
+    /* First slide: already in, only exits left */
+    .galeria-slide:first-child .galeria-slide-image {
+      transform-origin: center center;
+      transform:
+        translateX(calc(-var(--sp-out) * 88%))
+        scale(calc(1 - var(--sp-out) * 0.68));
+    }
+
+    /* Inner image: NO counter-scale — avoids face/neck crop on portraits */
+    .galeria-inner-image {
+      width: 100%; height: 100%;
+    }
+    .galeria-inner-image img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      object-position: center 15%;
+      filter: grayscale(0.1) contrast(1.05);
+    }
+
+    /* Text panel — opacity/visibility driven entirely by JS, no CSS transition */
+    .galeria-slide-content {
+      position: absolute;
+      right: 4rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 200px;
+      visibility: hidden;
+      opacity: 0;
+      will-change: opacity;
+    }
+    .galeria-slide-num {
+      display: block;
+      font-family: var(--f-mono);
+      font-size: var(--fs-micro);
+      letter-spacing: var(--ls-wide);
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+    }
+    .galeria-slide-label {
+      font-family: var(--f-serif);
+      font-size: clamp(1.5rem, 2.5vw, 2.2rem);
+      font-weight: 700;
+      line-height: 1.1;
+      color: var(--paper);
+      margin-bottom: 0.8rem;
+    }
+    .galeria-slide-desc {
+      display: block;
+      font-family: var(--f-mono);
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-label);
+      color: var(--ash);
+      text-transform: uppercase;
+    }
+
+    /* Bottom-left section label */
+    .galeria-label {
+      position: absolute;
+      bottom: 2.5rem;
+      left: 4rem;
+      font-family: var(--f-mono);
+      font-size: var(--fs-micro);
+      letter-spacing: var(--ls-wide);
+      color: rgba(245,242,237,0.3);
+      text-transform: uppercase;
+    }
+    /* Bottom-right progress counter */
+    .galeria-counter {
+      position: absolute;
+      bottom: 2.5rem;
+      right: 4rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .galeria-counter-bar {
+      width: 56px;
+      height: 0.5px;
+      background: rgba(245,242,237,0.15);
+      position: relative;
+      overflow: hidden;
+    }
+    .galeria-counter-fill {
+      position: absolute;
+      inset: 0 auto 0 0;
+      background: var(--accent);
+      width: 20%; /* updated by JS */
+      transition: width 0.2s ease;
+    }
+    .galeria-counter-num {
+      font-family: var(--f-mono);
+      font-size: var(--fs-micro);
+      letter-spacing: var(--ls-label);
+      color: var(--ash);
+      text-transform: uppercase;
+    }
+
+    /* TESTIMONIOS + CTA — marquee como fondo, CTA encima */
+    .testimonios-cta {
+      position: relative;
+      border-top: 0.5px solid rgba(245,242,237,0.1);
+      overflow: hidden;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Marquee vive en el fondo, cubre todo el alto */
+    .testi-bg {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      pointer-events: none;
+      opacity: 0.18;
+    }
+    .testi-bg .marquee-row { overflow: hidden; }
+    .testi-bg .marquee-track {
+      display: flex;
+      gap: 1.5rem;
+      width: max-content;
+    }
+    /* Ítems del fondo: solo texto, sin borde ni retrato */
+    .testi-bg .marquee-item {
+      border: none;
+      padding: 0.8rem 1.2rem;
+      width: auto;
+      gap: 0;
+    }
+    .testi-bg .marquee-portrait { display: none; }
+    .testi-bg .marquee-name { display: none; }
+    .testi-bg .marquee-quote {
+      font-size: clamp(0.8rem, 1.2vw, 1rem);
+      color: var(--paper);
+      margin: 0;
+    }
+
+    /* Gradiente radial: opaco en el centro, más transparente en bordes */
+    .testi-overlay {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(
+        ellipse 70% 60% at 50% 50%,
+        rgba(13,13,11,0.82) 0%,
+        rgba(13,13,11,0.65) 50%,
+        rgba(13,13,11,0.88) 100%
+      );
+      pointer-events: none;
+    }
+
+    /* CTA flotando encima */
+    .cta-inner {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 10rem 4rem;
+      max-width: 640px;
+    }
+
+    /* Marquee animations (shared) */
+    .marquee-row { overflow: hidden; }
+    .marquee-track {
+      display: flex;
+      gap: 1rem;
+      width: max-content;
+    }
+    .marquee-left  { animation: mq-left  44s linear infinite; }
+    .marquee-right { animation: mq-right 36s linear infinite; }
+    @keyframes mq-left {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+    @keyframes mq-right {
+      from { transform: translateX(-50%); }
+      to   { transform: translateX(0); }
+    }
+    .marquee-item {
+      display: flex;
+      align-items: center;
+      gap: 1.4rem;
+      border: 0.5px solid rgba(245,242,237,0.08);
+      padding: 1.5rem 2rem;
+      flex-shrink: 0;
+      width: clamp(300px, 28vw, 420px);
+      transition: border-color 0.4s;
+    }
+    .marquee-portrait {
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      object-fit: cover;
+      object-position: center 10%;
+      filter: grayscale(0.3);
+      flex-shrink: 0;
+    }
+    .marquee-quote {
+      font-size: var(--fs-body);
+      font-weight: 300;
+      line-height: 1.65;
+      color: var(--mist);
+      margin-bottom: 0.5rem;
+    }
+    .marquee-quote::before { content: '\201C'; color: var(--accent); margin-right: 0.05em; }
+    .marquee-quote::after  { content: '\201D'; color: var(--accent); margin-left: 0.05em; }
+    .marquee-name {
+      font-family: var(--f-mono);
+      font-size: var(--fs-micro);
+      letter-spacing: var(--ls-label);
+      color: var(--ash);
+      text-transform: uppercase;
+    }
+    .cta-tag {
+      font-family: var(--f-mono);
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-wide);
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 2rem;
+    }
+    .cta-title {
+      font-family: var(--f-serif);
+      font-size: clamp(2.5rem, 6vw, 5rem);
+      font-weight: 700;
+      line-height: 1.15;
+      margin-bottom: 1.5rem;
+    }
+    .cta-title em { font-style: normal; color: var(--accent); }
+    .cta-body {
+      font-family: var(--f-sans);
+      font-size: var(--fs-body);
+      font-weight: 300;
+      color: var(--mist);
+      line-height: 1.85;
+      max-width: 420px;
+      margin: 0 auto 3rem;
+    }
+    .cta-buttons {
+      display: flex;
+      gap: 1.5rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: .6rem;
+      font-family: var(--f-sans);
+      font-size: clamp(1rem, 2.2vw, 1.1rem);
+      font-weight: 600;
+      letter-spacing: .04em;
+      color: var(--accent);
+      text-decoration: none;
+      position: relative;
+    }
+    .btn-primary::after {
+      content: '';
+      position: absolute;
+      left: 0; bottom: -6px;
+      height: 2px; width: 100%;
+      background: currentColor;
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform .35s ease;
+      opacity: .9;
+    }
+    .btn-primary:hover::after { transform: scaleX(1); }
+
+    /* FOOTER */
+    footer {
+      border-top: 0.5px solid rgba(245,242,237,0.08);
+      padding: 3rem 4rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .footer-logo {
+      font-family: var(--f-mono);
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-wide);
+      color: var(--ash);
+      text-transform: uppercase;
+    }
+    .footer-info {
+      font-family: var(--f-mono);
+      font-size: var(--fs-micro);
+      letter-spacing: var(--ls-label);
+      color: var(--ash);
+      text-align: right;
+      line-height: 1.9;
+    }
+    .footer-info a {
+      color: var(--ash);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    .footer-info a:hover { color: var(--paper); }
+
+    /* ANIMATIONS */
+    @keyframes fadeup {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadein {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.9s ease, transform 0.9s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      nav { padding: 1.5rem 1.5rem; }
+      .nav-links { gap: 1.5rem; }
+      section { padding: 6rem 1.5rem; }
+      .hero-content { padding: 0 1.5rem 4rem; }
+      .hero-scroll { right: 1.5rem; bottom: 2rem; }
+      .filosofia {
+        grid-template-columns: 1fr;
+        gap: 4rem;
+      }
+      .galeria-header { padding: 0 1.5rem; }
+      .galeria-slide-image {
+        width: 88vw; height: 55vh;
+        margin-left: -44vw; margin-top: -42vh;
+      }
+      .galeria-slide-content {
+        right: 1.5rem; top: auto; bottom: 7rem; transform: none; width: 130px;
+      }
+      .galeria-label { left: 1.5rem; }
+      .galeria-counter { right: 1.5rem; }
+      .marquee-item { width: clamp(260px, 80vw, 340px); }
+      footer { flex-direction: column; gap: 1.5rem; text-align: center; }
+      .footer-info { text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">Ante</a>
+  <ul class="nav-links">
+    <li><a href="#galeria">Galería</a></li>
+    <li><a href="nosotros.html">Nosotros</a></li>
+    <li><a href="contacto.html">Contacto</a></li>
+    <li><a href="clientes.html">Clientes</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <p class="hero-eyebrow">Estudio de retrato · Ciudad de México</p>
+    <h1 class="hero-title">La imagen<br><em>honesta.</em></h1>
+    <p class="hero-sub">Retratos que reflejan el carácter único de cada persona. Luz cuidada, dirección suave, resultado que perdura.</p>
+    <div class="hero-cta">
+      <a href="https://wa.me/525951220554" class="btn-ghost" target="_blank" rel="noopener">
+        Agendar sesión
+        <span class="arrow">→</span>
+      </a>
+    </div>
+  </div>
+  <div class="hero-scroll">Desplazar</div>
+</section>
+
+<!-- PRICING STRIP -->
+<div class="pricing-strip">
+  <span class="pricing-strip-left">Paquetes desde&nbsp;<strong>$900 MXN</strong></span>
+  <a href="img/lista-precios.jpg" target="_blank" rel="noopener" class="pricing-strip-link">
+    Lista de precios&nbsp;→
+  </a>
+</div>
+
+<!-- FILOSOFIA -->
+<section class="filosofia" id="nosotros">
+  <div class="reveal">
+    <div class="section-tag">Filosofía</div>
+    <h2 class="filosofia-title">
+      En oposición<br>
+      a la prisa<br>
+      <em>y al exceso.</em>
+    </h2>
+    <p class="filosofia-body">
+      ANTE nace de la mirada atenta a las personas. Cada sesión es un espacio para reencontrarse con uno mismo: luz precisa, encuadre esencial, ritmo tranquilo.
+    </p>
+    <p class="filosofia-body">
+      En un mundo de imágenes saturadas, elegimos la pausa. Un solo fin: que cada persona se reconozca y se afirme.
+    </p>
+    <div class="valores">
+      <div class="valor"><span class="valor-dot"></span>Calidad</div>
+      <div class="valor"><span class="valor-dot"></span>Honestidad</div>
+      <div class="valor"><span class="valor-dot"></span>Empatía</div>
+      <div class="valor"><span class="valor-dot"></span>Respeto a la individualidad</div>
+      <div class="valor"><span class="valor-dot"></span>Humanidad</div>
+    </div>
+  </div>
+  <div class="filosofia-img reveal" style="transition-delay: 0.2s">
+    <img src="img/Valeria1.jpg" alt="Retrato ANTE · Valeria" loading="lazy">
+    <div class="filosofia-img-tag">Retrato · Valeria</div>
+  </div>
+</section>
+
+<!-- GALERIA -->
+<section class="galeria" id="galeria">
+  <div class="galeria-header reveal">
+    <div>
+      <div class="section-tag">Trabajo reciente</div>
+      <h2 class="galeria-title">Galería</h2>
+    </div>
+    <a href="galeria.html" class="galeria-link">Ver todo →</a>
+  </div>
+
+  <div class="galeria-sticky-wrapper" id="galeriaWrapper">
+    <div class="galeria-sticky">
+
+      <div class="galeria-slide" data-index="0">
+        <div class="galeria-slide-image">
+          <div class="galeria-inner-image">
+            <img src="img/Ricardo1.jpg" alt="Retrato Ricardo" loading="eager">
+          </div>
+        </div>
+        <div class="galeria-slide-content">
+          <span class="galeria-slide-num">01 / 03</span>
+          <h3 class="galeria-slide-label">Retrato<br>editorial</h3>
+          <span class="galeria-slide-desc">Ricardo</span>
+        </div>
+      </div>
+
+      <div class="galeria-slide" data-index="1">
+        <div class="galeria-slide-image">
+          <div class="galeria-inner-image">
+            <img src="img/Mich1.jpg" alt="Retrato Michelle" loading="lazy">
+          </div>
+        </div>
+        <div class="galeria-slide-content">
+          <span class="galeria-slide-num">02 / 03</span>
+          <h3 class="galeria-slide-label">Retrato<br>artístico</h3>
+          <span class="galeria-slide-desc">Michelle</span>
+        </div>
+      </div>
+
+      <div class="galeria-slide" data-index="2">
+        <div class="galeria-slide-image">
+          <div class="galeria-inner-image">
+            <img src="img/Valeria1.jpg" alt="Retrato Valeria" loading="lazy">
+          </div>
+        </div>
+        <div class="galeria-slide-content">
+          <span class="galeria-slide-num">03 / 03</span>
+          <h3 class="galeria-slide-label">Retrato<br>personal</h3>
+          <span class="galeria-slide-desc">Valeria</span>
+        </div>
+      </div>
+
+      <span class="galeria-label">Trabajo reciente</span>
+      <div class="galeria-counter">
+        <div class="galeria-counter-bar">
+          <div class="galeria-counter-fill" id="galeriaFill"></div>
+        </div>
+        <span class="galeria-counter-num" id="galeriaCount">01 / 03</span>
+      </div>
+    </div>
+  </div>
+  <div style="height:9rem"></div>
+</section>
+
+<!-- TESTIMONIOS + CTA — testimonios como fondo en movimiento -->
+<section class="testimonios-cta" id="contacto">
+
+  <!-- Fondo: frases corriendo (aria-hidden, solo decorativo) -->
+  <div class="testi-bg" aria-hidden="true">
+    <div class="marquee-row">
+      <div class="marquee-track marquee-left">
+        <div class="marquee-item"><p class="marquee-quote">La foto final me representa: limpia, directa y humana.</p></div>
+        <div class="marquee-item"><p class="marquee-quote">Se nota el buen gusto en la luz y en la dirección.</p></div>
+        <div class="marquee-item"><p class="marquee-quote">La dirección fue precisa y el resultado se siente auténtico.</p></div>
+        <div class="marquee-item"><p class="marquee-quote">En minutos obtuvimos imágenes que uso en todos mis perfiles.</p></div>
+        <div class="marquee-item"><p class="marquee-quote">Las fotos tienen una calidad que no había visto en otros lugares.</p></div>
+        <div class="marquee-item"><p class="marquee-quote">La foto final me representa: limpia, directa y humana.</p></div>
+        <div class="marquee-item"><p class="marquee-quote">Se nota el buen gusto en la luz y en la dirección.</p></div>
+        <div class="marquee-item"><p class="marquee-quote">La dirección fue precisa y el resultado se siente auténtico.</p></div>
+        <div class="marquee-item"><p class="marquee-quote">En minutos obtuvimos imágenes que uso en todos mis perfiles.</p></div>
+        <div class="marquee-item"><p class="marquee-quote">Las fotos tienen una calidad que no había visto en otros lugares.</p></div>
+      </div>
+    </div>
+    <div class="marquee-row">
+      <div class="marquee-track marquee-right">
+        <div class="marquee-item"><p class="marquee-quote">Capturaron exactamente lo que quería proyectar.</p></div>
+        <div class="marquee-item"><p class="marquee-quote">Profesionalismo en cada detalle. Resultado en menos tiempo.</p></div>
+        <div class="marquee-item"><p class="marquee-quote">El ambiente del estudio hace que todo fluya.</p></div>
+        <div class="marquee-item"><p class="marquee-quote">Llegué nervioso y terminé disfrutando la sesión.</p></div>
+        <div class="marquee-item"><p class="marquee-quote">Necesitaba una foto formal pero moderna.</p></div>
+        <div class="marquee-item"><p class="marquee-quote">Capturaron exactamente lo que quería proyectar.</p></div>
+        <div class="marquee-item"><p class="marquee-quote">Profesionalismo en cada detalle. Resultado en menos tiempo.</p></div>
+        <div class="marquee-item"><p class="marquee-quote">El ambiente del estudio hace que todo fluya.</p></div>
+        <div class="marquee-item"><p class="marquee-quote">Llegué nervioso y terminé disfrutando la sesión.</p></div>
+        <div class="marquee-item"><p class="marquee-quote">Necesitaba una foto formal pero moderna.</p></div>
+      </div>
+    </div>
+    <div class="marquee-row">
+      <div class="marquee-track marquee-left" style="animation-duration:52s">
+        <div class="marquee-item"><p class="marquee-quote">La sesión fue sencilla y tranquila. Resultado que perdura.</p></div>
+        <div class="marquee-item"><p class="marquee-quote">El resultado es justo lo que necesitaba.</p></div>
+        <div class="marquee-item"><p class="marquee-quote">Las fotos superaron mis expectativas completamente.</p></div>
+        <div class="marquee-item"><p class="marquee-quote">Me entregaron exactamente lo que pedí.</p></div>
+        <div class="marquee-item"><p class="marquee-quote">Una foto que me representa sin que tuviera que explicarlo.</p></div>
+        <div class="marquee-item"><p class="marquee-quote">La sesión fue sencilla y tranquila. Resultado que perdura.</p></div>
+        <div class="marquee-item"><p class="marquee-quote">El resultado es justo lo que necesitaba.</p></div>
+        <div class="marquee-item"><p class="marquee-quote">Las fotos superaron mis expectativas completamente.</p></div>
+        <div class="marquee-item"><p class="marquee-quote">Me entregaron exactamente lo que pedí.</p></div>
+        <div class="marquee-item"><p class="marquee-quote">Una foto que me representa sin que tuviera que explicarlo.</p></div>
+      </div>
+    </div>
+    <div class="marquee-row">
+      <div class="marquee-track marquee-right" style="animation-duration:38s">
+        <div class="marquee-item"><p class="marquee-quote">Retratos que reflejan el carácter único de cada persona.</p></div>
+        <div class="marquee-item"><p class="marquee-quote">Luz cuidada, dirección suave, resultado que perdura.</p></div>
+        <div class="marquee-item"><p class="marquee-quote">La foto final me representa: limpia, directa y humana.</p></div>
+        <div class="marquee-item"><p class="marquee-quote">Se nota el buen gusto en la luz y en la dirección.</p></div>
+        <div class="marquee-item"><p class="marquee-quote">El ambiente del estudio hace que todo fluya.</p></div>
+        <div class="marquee-item"><p class="marquee-quote">Retratos que reflejan el carácter único de cada persona.</p></div>
+        <div class="marquee-item"><p class="marquee-quote">Luz cuidada, dirección suave, resultado que perdura.</p></div>
+        <div class="marquee-item"><p class="marquee-quote">La foto final me representa: limpia, directa y humana.</p></div>
+        <div class="marquee-item"><p class="marquee-quote">Se nota el buen gusto en la luz y en la dirección.</p></div>
+        <div class="marquee-item"><p class="marquee-quote">El ambiente del estudio hace que todo fluya.</p></div>
+      </div>
+    </div>
+    <div class="marquee-row">
+      <div class="marquee-track marquee-left" style="animation-duration:48s">
+        <div class="marquee-item"><p class="marquee-quote">Capturaron exactamente lo que quería proyectar.</p></div>
+        <div class="marquee-item"><p class="marquee-quote">Profesionalismo en cada detalle.</p></div>
+        <div class="marquee-item"><p class="marquee-quote">Llegué nervioso y terminé disfrutando la sesión.</p></div>
+        <div class="marquee-item"><p class="marquee-quote">La dirección fue precisa y el resultado se siente auténtico.</p></div>
+        <div class="marquee-item"><p class="marquee-quote">En minutos obtuvimos imágenes que uso en todos mis perfiles.</p></div>
+        <div class="marquee-item"><p class="marquee-quote">Capturaron exactamente lo que quería proyectar.</p></div>
+        <div class="marquee-item"><p class="marquee-quote">Profesionalismo en cada detalle.</p></div>
+        <div class="marquee-item"><p class="marquee-quote">Llegué nervioso y terminé disfrutando la sesión.</p></div>
+        <div class="marquee-item"><p class="marquee-quote">La dirección fue precisa y el resultado se siente auténtico.</p></div>
+        <div class="marquee-item"><p class="marquee-quote">En minutos obtuvimos imágenes que uso en todos mis perfiles.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Overlay radial: más opaco en bordes, más transparente al centro -->
+  <div class="testi-overlay"></div>
+
+  <!-- CTA flotando al centro -->
+  <div class="cta-inner">
+    <p class="cta-tag">¿Agendamos?</p>
+    <h2 class="cta-title">Tu retrato<br><em>te espera.</em></h2>
+    <p class="cta-body">
+      Ejecutivos, artistas, cualquier persona que quiera una foto que la represente. Contacta directamente por WhatsApp o escríbenos.
+    </p>
+    <div class="cta-buttons">
+      <a href="https://wa.me/525951220554?text=Hola%20ANTE%2C%20me%20gustar%C3%ADa%20agendar%20una%20sesi%C3%B3n." class="btn-primary" target="_blank" rel="noopener">
+        WhatsApp · +52 595 122 0554
+      </a>
+      <a href="mailto:contacto@ante.photo" class="btn-ghost">
+        contacto@ante.photo
+      </a>
+    </div>
+  </div>
+
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">A N T E · Estudio de Fotografía</div>
+  <div class="footer-info">
+    <a href="mailto:contacto@ante.photo">contacto@ante.photo</a><br>
+    Ciudad de México · México
+  </div>
+</footer>
+
+<script>
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursor.style.left = mx + 'px';
+    cursor.style.top  = my + 'px';
+  });
+
+  function animateRing() {
+    rx += (mx - rx) * 0.12;
+    ry += (my - ry) * 0.12;
+    ring.style.left = rx + 'px';
+    ring.style.top  = ry + 'px';
+    requestAnimationFrame(animateRing);
+  }
+  animateRing();
+
+  document.querySelectorAll('a, button').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      ring.style.width = '56px';
+      ring.style.height = '56px';
+      ring.style.borderColor = 'rgba(200,184,154,0.6)';
+    });
+    el.addEventListener('mouseleave', () => {
+      ring.style.width = '36px';
+      ring.style.height = '36px';
+      ring.style.borderColor = 'var(--accent)';
+    });
+  });
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // Sticky gallery
+  (function () {
+    const wrapper  = document.getElementById('galeriaWrapper');
+    if (!wrapper) return;
+    const slides   = wrapper.querySelectorAll('.galeria-slide');
+    const contents = wrapper.querySelectorAll('.galeria-slide-content');
+    const fill     = document.getElementById('galeriaFill');
+    const count    = document.getElementById('galeriaCount');
+    const N        = slides.length;
+    // Each slide gets exactly 1/N of the scroll range
+    const SLOT     = 1 / N;
+
+    function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
+    function map(v, a, b)   { return clamp((v - a) / (b - a), 0, 1); }
+    function easeOut(t)     { return 1 - (1 - t) * (1 - t) * (1 - t); }  // power3.out
+    function easeInOut(t)   { return t < 0.5 ? 4*t*t*t : 1 - (-2*t+2)**3/2; }
+
+    function update() {
+      const scrolled = -wrapper.getBoundingClientRect().top;
+      const total    = wrapper.offsetHeight - window.innerHeight;
+      // Don't bail at scrolled==0 — we need to set initial CSS vars
+      if (total <= 0) return;
+
+      const p = clamp(scrolled / total, 0, 1);
+
+      slides.forEach((slide, d) => {
+        const m   = d * SLOT;
+        const end = m + SLOT;
+
+        // spIn: 0→1 during this slide's entry slot
+        const spIn  = d === 0 ? 1 : easeOut(map(p, m, end));
+
+        // spOut: starts right when the next slide begins arriving,
+        //        fully exits by the time the next slide is fully in.
+        //        Range: [end, end + SLOT] — a full slot to exit cleanly.
+        const spOut = d < N - 1 ? easeOut(map(p, end, end + SLOT)) : 0;
+
+        slide.style.setProperty('--sp-in',  spIn);
+        slide.style.setProperty('--sp-out', spOut);
+
+        // Dynamic z-index: the entering slide rises above the exiting one.
+        // Fully exited slides drop to z=0 so they never ghost above anything.
+        if (spOut >= 0.999) {
+          slide.style.zIndex = 0;
+        } else if (spIn > 0) {
+          // Incoming slide gets a z proportional to how far it has entered
+          // (higher than any exiting slide's z)
+          slide.style.zIndex = d + 1 + Math.round(spIn * 10);
+        } else {
+          slide.style.zIndex = d + 1;
+        }
+
+        // Text: fades in once mostly arrived, fades out as it begins leaving
+        const fadeIn  = clamp((spIn  - 0.6) / 0.3, 0, 1);
+        const fadeOut = clamp(1 - spOut / 0.4,      0, 1);
+        const opacity = easeInOut(fadeIn) * fadeOut;
+        contents[d].style.opacity    = opacity;
+        contents[d].style.visibility = opacity > 0.01 ? 'visible' : 'hidden';
+      });
+
+      const active = Math.min(N - 1, Math.floor(p * N));
+      if (fill)  fill.style.width  = `${((active + 1) / N) * 100}%`;
+      if (count) count.textContent = `0${active + 1} / 0${N}`;
+    }
+
+    let rafPending = false;
+    window.addEventListener('scroll', () => {
+      if (rafPending) return;
+      rafPending = true;
+      requestAnimationFrame(() => { update(); rafPending = false; });
+    }, { passive: true });
+
+    // Run once immediately to set correct initial state
+    update();
+  })();
+
+  // Duplicate marquee items for seamless infinite loop
+  document.querySelectorAll('.marquee-track').forEach(track => {
+    const clone = track.innerHTML;
+    track.insertAdjacentHTML('beforeend', clone.replace(/id="[^"]*"/g, '').replace(/<img /g, '<img aria-hidden="true" '));
+  });
+</script>
+</body>
+</html>

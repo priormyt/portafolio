@@ -1,0 +1,149 @@
+<!DOCTYPE html><html lang="es"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="robots" content="index,follow,max-image-preview:large"><title>My Page Title</title><link rel="icon" type="image/x-icon" href="/img/favicon.ico"><link rel="shortcut icon" type="image/x-icon" href="/img/favicon.ico"><link rel="preload" href="/img/Fondo3.jpg" as="image"><meta name="description" content="ANTE Estudio de Fotografía: retratos minimalistas, profesionales y con personalidad para personas y empresas en CDMX. Fotografía honesta que refleja tu esencia."><meta name="keywords" content="fotografía profesional, retratos minimalistas, estudio fotográfico CDMX, retratos corporativos, fotografía artística, sesión de fotos profesional"><meta name="author" content="ANTE Estudio Fotográfico"><link rel="canonical" href="https://www.ante.photo/"><meta property="og:title" content="My Page Title"><meta property="og:description" content="ANTE Estudio de Fotografía: retratos minimalistas, profesionales y con personalidad para personas y empresas en CDMX. Fotografía honesta que refleja tu esencia."><meta property="og:image" content="https://www.ante.photo/img/Fondo3.jpg"><meta property="og:url" content="https://www.ante.photo/"><meta property="og:type" content="website"><meta property="og:site_name" content="ANTE"><meta property="og:locale" content="es_MX"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="My Page Title"><meta name="twitter:description" content="ANTE Estudio de Fotografía: retratos minimalistas, profesionales y con personalidad para personas y empresas en CDMX. Fotografía honesta que refleja tu esencia."><meta name="twitter:image" content="https://www.ante.photo/img/Fondo3.jpg"><script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "ANTE Estudio de Fotografía",
+    "url": "https://www.ante.photo/",
+    "sameAs": ["https://www.instagram.com/ante.estudio"],
+    "publisher": {
+      "@type": "Organization",
+      "name": "ANTE Estudio de Fotografía",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://www.ante.photo/img/favicon.ico"
+      }
+    }
+  }
+  </script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;1,300&display=swap" rel="stylesheet"><script async src="https://www.googletagmanager.com/gtag/js?id=G-REE0NDQ50Y"></script><script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-REE0NDQ50Y');
+  </script><link rel="stylesheet" href="/_astro/Layout.z62Oj5EO.css"></head> <body> <div class="cursor" id="cursor"></div> <div class="cursor-ring" id="cursorRing"></div> <nav> <a href="/" class="nav-logo">Ante</a> <ul class="nav-links"> <li><a href="/#galeria">Galería</a></li> <li><a href="/nosotros">Nosotros</a></li> <li><a href="/contacto">Contacto</a></li> <li><a href="/clientes">Clientes</a></li> </ul> </nav>  <h1>This is a Heading</h1> <p>This is a paragraph.</p>  <footer> <div class="footer-logo">A N T E · Estudio de Fotografía</div> <div class="footer-info"> <a href="mailto:contacto@ante.photo">contacto@ante.photo</a><br>
+Ciudad de México · México
+</div> </footer> <script>
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursor.style.left = mx + 'px';
+    cursor.style.top  = my + 'px';
+  });
+
+  function animateRing() {
+    rx += (mx - rx) * 0.12;
+    ry += (my - ry) * 0.12;
+    ring.style.left = rx + 'px';
+    ring.style.top  = ry + 'px';
+    requestAnimationFrame(animateRing);
+  }
+  animateRing();
+
+  document.querySelectorAll('a, button').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      ring.style.width = '56px';
+      ring.style.height = '56px';
+      ring.style.borderColor = 'rgba(200,184,154,0.6)';
+    });
+    el.addEventListener('mouseleave', () => {
+      ring.style.width = '36px';
+      ring.style.height = '36px';
+      ring.style.borderColor = 'var(--accent)';
+    });
+  });
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // Sticky gallery
+  (function () {
+    const wrapper  = document.getElementById('galeriaWrapper');
+    if (!wrapper) return;
+    const slides   = wrapper.querySelectorAll('.galeria-slide');
+    const contents = wrapper.querySelectorAll('.galeria-slide-content');
+    const fill     = document.getElementById('galeriaFill');
+    const count    = document.getElementById('galeriaCount');
+    const N        = slides.length;
+    // Each slide gets exactly 1/N of the scroll range
+    const SLOT     = 1 / N;
+
+    function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
+    function map(v, a, b)   { return clamp((v - a) / (b - a), 0, 1); }
+    function easeOut(t)     { return 1 - (1 - t) * (1 - t) * (1 - t); }  // power3.out
+    function easeInOut(t)   { return t < 0.5 ? 4*t*t*t : 1 - (-2*t+2)**3/2; }
+
+    function update() {
+      const scrolled = -wrapper.getBoundingClientRect().top;
+      const total    = wrapper.offsetHeight - window.innerHeight;
+      // Don't bail at scrolled==0 — we need to set initial CSS vars
+      if (total <= 0) return;
+
+      const p = clamp(scrolled / total, 0, 1);
+
+      slides.forEach((slide, d) => {
+        const m   = d * SLOT;
+        const end = m + SLOT;
+
+        // spIn: 0→1 during this slide's entry slot
+        const spIn  = d === 0 ? 1 : easeOut(map(p, m, end));
+
+        // spOut: starts right when the next slide begins arriving,
+        //        fully exits by the time the next slide is fully in.
+        //        Range: [end, end + SLOT] — a full slot to exit cleanly.
+        const spOut = d < N - 1 ? easeOut(map(p, end, end + SLOT)) : 0;
+
+        slide.style.setProperty('--sp-in',  spIn);
+        slide.style.setProperty('--sp-out', spOut);
+
+        // Dynamic z-index: the entering slide rises above the exiting one.
+        // Fully exited slides drop to z=0 so they never ghost above anything.
+        if (spOut >= 0.999) {
+          slide.style.zIndex = 0;
+        } else if (spIn > 0) {
+          // Incoming slide gets a z proportional to how far it has entered
+          // (higher than any exiting slide's z)
+          slide.style.zIndex = d + 1 + Math.round(spIn * 10);
+        } else {
+          slide.style.zIndex = d + 1;
+        }
+
+        // Text: fades in once mostly arrived, fades out as it begins leaving
+        const fadeIn  = clamp((spIn  - 0.6) / 0.3, 0, 1);
+        const fadeOut = clamp(1 - spOut / 0.4,      0, 1);
+        const opacity = easeInOut(fadeIn) * fadeOut;
+        contents[d].style.opacity    = opacity;
+        contents[d].style.visibility = opacity > 0.01 ? 'visible' : 'hidden';
+      });
+
+      const active = Math.min(N - 1, Math.floor(p * N));
+      if (fill)  fill.style.width  = `${((active + 1) / N) * 100}%`;
+      if (count) count.textContent = `0${active + 1} / 0${N}`;
+    }
+
+    let rafPending = false;
+    window.addEventListener('scroll', () => {
+      if (rafPending) return;
+      rafPending = true;
+      requestAnimationFrame(() => { update(); rafPending = false; });
+    }, { passive: true });
+
+    // Run once immediately to set correct initial state
+    update();
+  })();
+
+  // Duplicate marquee items for seamless infinite loop
+  document.querySelectorAll('.marquee-track').forEach(track => {
+    const clone = track.innerHTML;
+    track.insertAdjacentHTML('beforeend', clone.replace(/id="[^"]*"/g, '').replace(/<img /g, '<img aria-hidden="true" '));
+  });
+  </script> </body> </html>

@@ -1,0 +1,105 @@
+    /* ===== DISEÑO MINIMALISTA – ANTE ===== */
+    :root{
+      --bg:#ffffff;      /* fondo neutro */
+      --text:#111111;    /* tipografía negra suave */
+      --accent:#3a8bc0;  /* azul del logotipo para detalles */
+    }
+    *,*::before,*::after{box-sizing:border-box;}
+    html{scroll-behavior:smooth;}
+
+    body{
+      margin:0;
+      font-family:Helvetica,Arial,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      font-size:16px;
+      line-height:1.6;
+      -webkit-font-smoothing:antialiased;
+    }
+    a{color:inherit;text-decoration:none;}
+
+    /* ========= CABECERA ========= */
+    header{
+      position:sticky;
+      top:0;
+      background:var(--bg);
+      padding:1.2rem 1rem;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      border-bottom:1px solid rgba(0,0,0,.05);
+      z-index:10;
+    }
+    .logo{height:28px;width:auto;}
+
+    nav ul{
+      list-style:none;
+      margin:0;
+      padding:0;
+      display:flex;
+      gap:2rem;
+    }
+    nav a{
+      text-transform:uppercase;
+      letter-spacing:.05em;
+      font-size:.85rem;
+      color:var(--text);
+      text-decoration:none;
+      transition:color .3s ease;
+    }
+    nav a:hover{color:var(--accent);}
+
+    /* ========= HERO ========= */
+    .hero{
+      padding:12rem 1rem 4rem;
+      text-align:center;
+    }
+    .hero h1{
+      margin:0;
+      font-size:2.2rem;
+      font-weight:500;
+    }
+
+    /* ========= GALERÍA HORIZONTAL ========= */
+    .gallery{
+      display:flex;
+      overflow-x:auto;
+      scroll-snap-type:x mandatory;
+      -webkit-overflow-scrolling:touch;
+    }
+    .gallery img{
+      flex:0 0 100%;
+      width:100%;
+      height:90vh;
+      object-fit:cover;
+      scroll-snap-align:center;
+      filter:grayscale(100%);
+      transition:filter .4s ease;
+    }
+    .gallery img:hover{filter:grayscale(0%);} /* color al pasar el cursor */
+
+    @media (min-width:900px){
+      .gallery img{height:100vh;}
+    }
+
+    /* ========= CONTACTO ========= */
+    #contacto{
+      padding:4rem 1rem;
+      max-width:500px;
+      margin:0 auto;
+      text-align:center;
+    }
+
+    /* ========= PIE DE PÁGINA ========= */
+    footer{
+      padding:2rem 1rem;
+      text-align:center;
+      font-size:.8rem;
+      color:#555;
+
+      /* Pon esto al final de tu estilos.css (ajusta 80 px si tu <header> es más alto) */
+section[id]{
+  scroll-margin-top:80px;   /* altura aproximada de la cabecera */
+}
+      
+    }

@@ -1,0 +1,253 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+<Layout title="ANTE | Estudio de Fotografía Profesional">
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <p class="hero-eyebrow">Estudio de retrato · Ciudad de México</p>
+    <h1 class="hero-title">La imagen<br><em>honesta.</em></h1>
+    <p class="hero-sub">Retratos que reflejan el carácter único de cada persona. Luz cuidada, dirección suave, resultado que perdura.</p>
+    <div class="hero-cta">
+      <a href="https://wa.me/525951220554" class="btn-ghost" target="_blank" rel="noopener">
+        Agendar sesión
+        <span class="arrow">→</span>
+      </a>
+    </div>
+  </div>
+  <div class="hero-scroll">Desplazar</div>
+</section>
+
+<!-- PRICING STRIP -->
+<div class="pricing-strip">
+  <span class="pricing-strip-left">Paquetes desde&nbsp;<strong>$900 MXN</strong></span>
+  <a href="img/lista-precios.jpg" target="_blank" rel="noopener" class="pricing-strip-link">
+    Lista de precios&nbsp;→
+  </a>
+</div>
+
+<!-- FILOSOFIA -->
+<section class="filosofia" id="nosotros">
+  <div class="reveal">
+    <div class="section-tag">Filosofía</div>
+    <h2 class="filosofia-title">
+      En oposición<br>
+      a la prisa<br>
+      <em>y al exceso.</em>
+    </h2>
+    <p class="filosofia-body">
+      ANTE nace de la mirada atenta a las personas. Cada sesión es un espacio para reencontrarse con uno mismo: luz precisa, encuadre esencial, ritmo tranquilo.
+    </p>
+    <p class="filosofia-body">
+      En un mundo de imágenes saturadas, elegimos la pausa. Un solo fin: que cada persona se reconozca y se afirme.
+    </p>
+    <div class="valores">
+      <div class="valor"><span class="valor-dot"></span>Calidad</div>
+      <div class="valor"><span class="valor-dot"></span>Honestidad</div>
+      <div class="valor"><span class="valor-dot"></span>Empatía</div>
+      <div class="valor"><span class="valor-dot"></span>Respeto a la individualidad</div>
+      <div class="valor"><span class="valor-dot"></span>Humanidad</div>
+    </div>
+  </div>
+  <div class="filosofia-img reveal" style="transition-delay: 0.2s">
+    <img src="img/Valeria1.jpg" alt="Retrato ANTE · Valeria" loading="lazy">
+    <div class="filosofia-img-tag">Retrato · Valeria</div>
+  </div>
+</section>
+
+<!-- GALERIA -->
+<section class="galeria" id="galeria">
+  <div class="galeria-header reveal">
+    <div>
+      <div class="section-tag">Trabajo reciente</div>
+      <h2 class="galeria-title">Galería</h2>
+    </div>
+    <a href="galeria.html" class="galeria-link">Ver todo →</a>
+  </div>
+
+  <div class="galeria-sticky-wrapper" id="galeriaWrapper">
+    <div class="galeria-sticky">
+
+      <div class="galeria-slide" data-index="0">
+        <div class="galeria-slide-image">
+          <div class="galeria-inner-image">
+            <img src="img/Ricardo1.jpg" alt="Retrato Ricardo" loading="eager">
+          </div>
+        </div>
+        <div class="galeria-slide-content">
+          <span class="galeria-slide-num">01 / 03</span>
+          <h3 class="galeria-slide-label">Retrato<br>editorial</h3>
+          <span class="galeria-slide-desc">Ricardo</span>
+        </div>
+      </div>
+
+      <div class="galeria-slide" data-index="1">
+        <div class="galeria-slide-image">
+          <div class="galeria-inner-image">
+            <img src="img/Mich1.jpg" alt="Retrato Michelle" loading="lazy">
+          </div>
+        </div>
+        <div class="galeria-slide-content">
+          <span class="galeria-slide-num">02 / 03</span>
+          <h3 class="galeria-slide-label">Retrato<br>artístico</h3>
+          <span class="galeria-slide-desc">Michelle</span>
+        </div>
+      </div>
+
+      <div class="galeria-slide" data-index="2">
+        <div class="galeria-slide-image">
+          <div class="galeria-inner-image">
+            <img src="img/Valeria1.jpg" alt="Retrato Valeria" loading="lazy">
+          </div>
+        </div>
+        <div class="galeria-slide-content">
+          <span class="galeria-slide-num">03 / 03</span>
+          <h3 class="galeria-slide-label">Retrato<br>personal</h3>
+          <span class="galeria-slide-desc">Valeria</span>
+        </div>
+      </div>
+
+      <span class="galeria-label">Trabajo reciente</span>
+      <div class="galeria-counter">
+        <div class="galeria-counter-bar">
+          <div class="galeria-counter-fill" id="galeriaFill"></div>
+        </div>
+        <span class="galeria-counter-num" id="galeriaCount">01 / 03</span>
+      </div>
+    </div>
+  </div>
+  <div style="height:9rem"></div>
+</section>
+
+<!-- TESTIMONIOS + CTA -->
+<section class="testimonios-cta" id="contacto">
+
+  <!-- Marquee cards flowing behind the CTA -->
+  <div class="testi-marquee" aria-label="Testimonios de clientes">
+
+    <!-- Row 1 — left -->
+    <div class="marquee-row">
+      <div class="marquee-track marquee-left">
+        <div class="marquee-item">
+          <img class="marquee-portrait" src="img/thumb/Valeria1.jpg" alt="Valeria" loading="lazy">
+          <div>
+            <p class="marquee-quote">La sesión fue sencilla y tranquila. La foto final me representa: limpia, directa y humana.</p>
+            <span class="marquee-name">Valeria · Abogada</span>
+          </div>
+        </div>
+        <div class="marquee-item">
+          <img class="marquee-portrait" src="img/thumb/Ricardo1.jpg" alt="Ricardo" loading="lazy">
+          <div>
+            <p class="marquee-quote">Se nota el buen gusto en la luz y en la dirección. El resultado es justo lo que necesitaba.</p>
+            <span class="marquee-name">Ricardo · Servidor público</span>
+          </div>
+        </div>
+        <div class="marquee-item">
+          <img class="marquee-portrait" src="img/thumb/Jona1.jpg" alt="Jonathan" loading="lazy">
+          <div>
+            <p class="marquee-quote">Llegué nervioso y terminé disfrutando la sesión. La dirección fue precisa y el resultado se siente auténtico.</p>
+            <span class="marquee-name">Jonathan · Gerente</span>
+          </div>
+        </div>
+        <div class="marquee-item">
+          <img class="marquee-portrait" src="img/thumb/Carlos2.jpg" alt="Carlos" loading="lazy">
+          <div>
+            <p class="marquee-quote">Necesitaba una foto formal pero moderna. En minutos obtuvimos imágenes que uso en todos mis perfiles.</p>
+            <span class="marquee-name">Carlos · Abogado</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 2 — right -->
+    <div class="marquee-row">
+      <div class="marquee-track marquee-right">
+        <div class="marquee-item">
+          <img class="marquee-portrait" src="img/thumb/Mich1.jpg" alt="Michelle" loading="lazy">
+          <div>
+            <p class="marquee-quote">El ambiente del estudio hace que todo fluya. Las fotos tienen una calidad que no había visto en otros lugares.</p>
+            <span class="marquee-name">Michelle · Diseñadora</span>
+          </div>
+        </div>
+        <div class="marquee-item">
+          <img class="marquee-portrait" src="img/thumb/Christian1.jpg" alt="Christian" loading="lazy">
+          <div>
+            <p class="marquee-quote">Profesionalismo en cada detalle. Me entregaron exactamente lo que pedí y en menos tiempo del esperado.</p>
+            <span class="marquee-name">Christian · Emprendedor</span>
+          </div>
+        </div>
+        <div class="marquee-item">
+          <img class="marquee-portrait" src="img/thumb/Mafer1.jpg" alt="Mafer" loading="lazy">
+          <div>
+            <p class="marquee-quote">Las fotos superaron mis expectativas. Capturaron exactamente lo que quería proyectar sin que tuviera que explicarlo mucho.</p>
+            <span class="marquee-name">Mafer · Abogada</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 3 — left (different speed) -->
+    <div class="marquee-row">
+      <div class="marquee-track marquee-left" style="animation-duration:52s">
+        <div class="marquee-item">
+          <img class="marquee-portrait" src="img/thumb/Christian1.jpg" alt="Christian" loading="lazy">
+          <div>
+            <p class="marquee-quote">Capturaron exactamente lo que quería proyectar sin que tuviera que explicarlo mucho.</p>
+            <span class="marquee-name">Christian · Emprendedor</span>
+          </div>
+        </div>
+        <div class="marquee-item">
+          <img class="marquee-portrait" src="img/thumb/Valeria1.jpg" alt="Valeria" loading="lazy">
+          <div>
+            <p class="marquee-quote">Una foto que me representa sin que tuviera que explicarlo. Resultado que perdura.</p>
+            <span class="marquee-name">Valeria · Abogada</span>
+          </div>
+        </div>
+        <div class="marquee-item">
+          <img class="marquee-portrait" src="img/thumb/Mich1.jpg" alt="Michelle" loading="lazy">
+          <div>
+            <p class="marquee-quote">Las fotos superaron mis expectativas completamente. El estudio hace que todo fluya.</p>
+            <span class="marquee-name">Michelle · Diseñadora</span>
+          </div>
+        </div>
+        <div class="marquee-item">
+          <img class="marquee-portrait" src="img/thumb/Carlos2.jpg" alt="Carlos" loading="lazy">
+          <div>
+            <p class="marquee-quote">El resultado es justo lo que necesitaba. Profesionalismo en cada detalle.</p>
+            <span class="marquee-name">Carlos · Abogado</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Circular frame overlay: radial mask that clears the center for CTA -->
+  <div class="testi-circle-overlay"></div>
+
+  <!-- CTA content floating at center -->
+  <div class="testi-cta-center">
+    <div class="testi-cta-ring">
+      <p class="cta-tag">¿Agendamos?</p>
+      <h2 class="cta-title">Tu retrato<br><em>te espera.</em></h2>
+      <p class="cta-body">
+        Ejecutivos, artistas, cualquier persona que quiera una foto que la represente.
+      </p>
+      <div class="cta-buttons">
+        <a href="https://wa.me/525951220554?text=Hola%20ANTE%2C%20me%20gustar%C3%ADa%20agendar%20una%20sesi%C3%B3n." class="btn-primary" target="_blank" rel="noopener">
+          WhatsApp · +52 595 122 0554
+        </a>
+        <a href="mailto:contacto@ante.photo" class="btn-ghost">
+          contacto@ante.photo
+        </a>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<!-- FOOTER -->
+
+</Layout>
