@@ -430,36 +430,35 @@
       background: var(--ink);
     }
 
-    /* Each slide stacks on top via DOM order (last = highest z).
-       JS sets only --sp-in and --sp-out (0→1). */
+    /* Each slide stacks on top via DOM order defaults.
+       JS sets --offset (rel distance from center) and --abs-offset */
     .galeria-slide {
-      --sp-in:  0;
-      --sp-out: 0;
+      --offset: 0;
+      --abs-offset: 0;
       position: absolute;
       inset: 0;
+      pointer-events: none; /* Let clicks pass through inactive layers */
     }
-    /* First slide: starts fully visible */
-    .galeria-slide:first-child { --sp-in: 1; }
+    .galeria-slide[style*="z-index: 100"] {
+      pointer-events: auto;
+    }
 
-    /* The frame that scales and slides.
-       Entry:  comes from the right  (translateX +88% → 0),  scale 0.32 → 1.0
-       Exit:   goes to the left      (translateX 0 → -88%), scale 1.0 → 0.32
-       88% of element width ≈ 49vw — thumbnail peeks from right screen edge. */
+    /* The rocola / cover flow frame.
+       Uses calculated offset spacing and scale shrinking to represent depth. */
     .galeria-slide-image {
       position: absolute;
-      left: 50%;
-      top: 50%;
-      width: 56vw;
-      height: 86vh;
-      margin-left: -28vw;
-      margin-top: -43vh;
-      border-radius: calc(6px + 42px * (1 - var(--sp-in)) + 18px * var(--sp-out));
+      inset: 0;
+      margin: auto;
+      width: min(75vw, 65vh);
+      aspect-ratio: 1;
+      border-radius: 50%;
       overflow: hidden;
       transform-origin: center center;
-      will-change: transform, border-radius;
+      will-change: transform, filter;
       transform:
-        translateX(calc((1 - var(--sp-in)) * 88% - var(--sp-out) * 88%))
-        scale(calc(0.32 + var(--sp-in) * 0.68 - var(--sp-out) * 0.68));
+        translateX(calc(var(--offset) * 65%))
+        scale(calc(max(0.4, 1 - var(--abs-offset) * 0.35)));
+      filter: brightness(calc(max(0.3, 1 - var(--abs-offset) * 0.45)));
     }
 
     /* Inner image: NO counter-scale — avoids face/neck crop on portraits */
@@ -793,8 +792,10 @@
       }
       .galeria-header { padding: 0 1.5rem; }
       .galeria-slide-image {
-        width: 88vw; height: 55vh;
-        margin-left: -44vw; margin-top: -42vh;
+        width: 88vw;
+        aspect-ratio: 1;
+        height: auto;
+        margin: auto;
       }
       .galeria-slide-content {
         right: 1.5rem; top: auto; bottom: 7rem; transform: none; width: 130px;

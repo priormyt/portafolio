@@ -148,13 +148,9 @@ const {
     const contents = wrapper.querySelectorAll('.galeria-slide-content');
     const fill     = document.getElementById('galeriaFill');
     const count    = document.getElementById('galeriaCount');
-    const N        = slides.length;
-    // Each slide gets exactly 1/N of the scroll range
-    const SLOT     = 1 / N;
+    const N = slides.length;
 
     function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
-    function map(v, a, b)   { return clamp((v - a) / (b - a), 0, 1); }
-    function easeOut(t)     { return 1 - (1 - t) * (1 - t) * (1 - t); }  // power3.out
     function easeInOut(t)   { return t < 0.5 ? 4*t*t*t : 1 - (-2*t+2)**3/2; }
 
     function update() {
@@ -166,38 +162,23 @@ const {
       const p = clamp(scrolled / total, 0, 1);
 
       slides.forEach((slide, d) => {
-        const m   = d * SLOT;
-        const end = m + SLOT;
+        // Continuous offset for Rocola style
+        const activeIndex = p * (N - 1);
+        const offset = d - activeIndex;
+        const absOffset = Math.abs(offset);
 
-        // spIn: 0→1 during this slide's entry slot
-        const spIn  = d === 0 ? 1 : easeOut(map(p, m, end));
+        slide.style.setProperty('--offset', offset);
+        slide.style.setProperty('--abs-offset', absOffset);
 
-        // spOut: starts right when the next slide begins arriving,
-        //        fully exits by the time the next slide is fully in.
-        //        Range: [end, end + SLOT] — a full slot to exit cleanly.
-        const spOut = d < N - 1 ? easeOut(map(p, end, end + SLOT)) : 0;
+        // Z-Index: Center image has the highest z-index
+        slide.style.zIndex = Math.round(100 - absOffset * 10);
 
-        slide.style.setProperty('--sp-in',  spIn);
-        slide.style.setProperty('--sp-out', spOut);
-
-        // Dynamic z-index: the entering slide rises above the exiting one.
-        // Fully exited slides drop to z=0 so they never ghost above anything.
-        if (spOut >= 0.999) {
-          slide.style.zIndex = 0;
-        } else if (spIn > 0) {
-          // Incoming slide gets a z proportional to how far it has entered
-          // (higher than any exiting slide's z)
-          slide.style.zIndex = d + 1 + Math.round(spIn * 10);
-        } else {
-          slide.style.zIndex = d + 1;
-        }
-
-        // Text: fades in once mostly arrived, fades out as it begins leaving
-        const fadeIn  = clamp((spIn  - 0.6) / 0.3, 0, 1);
-        const fadeOut = clamp(1 - spOut / 0.4,      0, 1);
-        const opacity = easeInOut(fadeIn) * fadeOut;
-        contents[d].style.opacity    = opacity;
-        contents[d].style.visibility = opacity > 0.01 ? 'visible' : 'hidden';
+        // Text opacity peaks strictly at offset 0
+        const opacity = clamp(1 - absOffset * 2.5, 0, 1);
+        const textOpacity = easeInOut(opacity);
+        
+        contents[d].style.opacity    = textOpacity;
+        contents[d].style.visibility = textOpacity > 0.01 ? 'visible' : 'hidden';
       });
 
       const active = Math.min(N - 1, Math.floor(p * N));
