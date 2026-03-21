@@ -48,14 +48,14 @@ const schemaGraph = {
       "publisher": {
         "@type": "Organization",
         "name": "ANTE Estudio de Fotografía",
-        "logo": { "@type": "ImageObject", "url": siteUrl + "/img/favicon.ico" },
+        "logo": { "@type": "ImageObject", "url": siteUrl + "/favicon-512.png" },
       },
     },
     {
       "@type": "PhotographyBusiness",
       "name": "ANTE Estudio de Fotografía",
       "url": siteUrl,
-      "logo": { "@type": "ImageObject", "url": siteUrl + "/img/favicon.ico" },
+      "logo": { "@type": "ImageObject", "url": siteUrl + "/favicon-512.png" },
       "image": siteUrl + "/img/Fondo3.jpg",
       "telephone": "+52-595-122-0554",
       "email": "contacto@ante.photo",
@@ -95,8 +95,9 @@ const schemaGraph = {
   <meta name="robots" content="index,follow,max-image-preview:large">
   <title>{title}</title>
 
-  <link rel="icon" type="image/x-icon" href="/img/favicon.ico">
-  <link rel="shortcut icon" type="image/x-icon" href="/img/favicon.ico">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <link rel="preload" href="/img/Fondo3.jpg" as="image">
 
   <meta name="description" content={description}>
