@@ -4,12 +4,88 @@ import '../styles/global.css';
 export interface Props {
   title?: string;
   description?: string;
+  canonical?: string;
+  ogImage?: string;
 }
 
-const { 
-  title = "ANTE | Estudio de Fotografía Profesional", 
-  description = "ANTE Estudio de Fotografía: retratos minimalistas, profesionales y con personalidad para personas y empresas en CDMX. Fotografía honesta que refleja tu esencia." 
+const {
+  title = "ANTE | Estudio de Fotografía Profesional",
+  description = "ANTE Estudio de Fotografía: retratos minimalistas, profesionales y con personalidad para personas y empresas en CDMX. Fotografía honesta que refleja tu esencia.",
+  canonical: canonicalProp,
+  ogImage = "https://www.ante.photo/img/Fondo3.jpg",
 } = Astro.props;
+
+const siteUrl = "https://www.ante.photo";
+const rawPath = Astro.url.pathname.replace(/\.html$/, '').replace(/\/index$/, '/');
+const canonical = canonicalProp ?? (siteUrl + rawPath);
+
+const pageNames: Record<string, string> = {
+  '/': 'Inicio',
+  '/contacto': 'Contacto',
+  '/nosotros': 'Nosotros',
+  '/galeria': 'Galería',
+  '/mas': 'Más',
+  '/aviso-privacidad': 'Aviso de Privacidad',
+  '/clientes': 'Clientes',
+};
+const currentPageName = pageNames[rawPath] ?? 'Página';
+
+const breadcrumbItems = rawPath === '/'
+  ? [{ "@type": "ListItem", "position": 1, "name": "Inicio", "item": siteUrl + '/' }]
+  : [
+      { "@type": "ListItem", "position": 1, "name": "Inicio", "item": siteUrl + '/' },
+      { "@type": "ListItem", "position": 2, "name": currentPageName, "item": canonical },
+    ];
+
+const schemaGraph = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "name": "ANTE Estudio de Fotografía",
+      "url": siteUrl + "/",
+      "sameAs": ["https://www.instagram.com/ante.estudio"],
+      "publisher": {
+        "@type": "Organization",
+        "name": "ANTE Estudio de Fotografía",
+        "logo": { "@type": "ImageObject", "url": siteUrl + "/img/favicon.ico" },
+      },
+    },
+    {
+      "@type": "PhotographyBusiness",
+      "name": "ANTE Estudio de Fotografía",
+      "url": siteUrl,
+      "logo": { "@type": "ImageObject", "url": siteUrl + "/img/favicon.ico" },
+      "image": siteUrl + "/img/Fondo3.jpg",
+      "telephone": "+52-595-122-0554",
+      "email": "contacto@ante.photo",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Ciudad de México",
+        "addressRegion": "CDMX",
+        "addressCountry": "MX",
+      },
+      "priceRange": "$$",
+      "openingHoursSpecification": [{
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+        "opens": "09:00",
+        "closes": "18:00",
+      }],
+      "sameAs": ["https://www.instagram.com/ante.estudio"],
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "5",
+        "ratingCount": "7",
+      },
+      "description": "Estudio de fotografía profesional en Ciudad de México especializado en retratos minimalistas, corporativos y artísticos. Sesiones desde $900 MXN.",
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": breadcrumbItems,
+    },
+  ],
+};
 ---
 <!DOCTYPE html>
 <html lang="es">
@@ -26,12 +102,16 @@ const {
   <meta name="description" content={description}>
   <meta name="keywords" content="fotografía profesional, retratos minimalistas, estudio fotográfico CDMX, retratos corporativos, fotografía artística, sesión de fotos profesional">
   <meta name="author" content="ANTE Estudio Fotográfico">
-  <link rel="canonical" href="https://www.ante.photo/">
+  <meta name="geo.region" content="MX-CMX">
+  <meta name="geo.placename" content="Ciudad de México">
+  <meta name="geo.position" content="19.4326;-99.1332">
+  <meta name="ICBM" content="19.4326, -99.1332">
+  <link rel="canonical" href={canonical}>
 
   <meta property="og:title" content={title}>
   <meta property="og:description" content={description}>
-  <meta property="og:image" content="https://www.ante.photo/img/Fondo3.jpg">
-  <meta property="og:url" content="https://www.ante.photo/">
+  <meta property="og:image" content={ogImage}>
+  <meta property="og:url" content={canonical}>
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="ANTE">
   <meta property="og:locale" content="es_MX">
@@ -39,25 +119,9 @@ const {
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content={title}>
   <meta name="twitter:description" content={description}>
-  <meta name="twitter:image" content="https://www.ante.photo/img/Fondo3.jpg">
+  <meta name="twitter:image" content={ogImage}>
 
-  <script type="application/ld+json" is:inline>
-  {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    "name": "ANTE Estudio de Fotografía",
-    "url": "https://www.ante.photo/",
-    "sameAs": ["https://www.instagram.com/ante.estudio"],
-    "publisher": {
-      "@type": "Organization",
-      "name": "ANTE Estudio de Fotografía",
-      "logo": {
-        "@type": "ImageObject",
-        "url": "https://www.ante.photo/img/favicon.ico"
-      }
-    }
-  }
-  </script>
+  <script type="application/ld+json" set:html={JSON.stringify(schemaGraph)}></script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -75,25 +139,32 @@ const {
   <div class="cursor" id="cursor"></div>
   <div class="cursor-ring" id="cursorRing"></div>
 
-  <nav>
-    <a href="/" class="nav-logo">Ante</a>
-    <ul class="nav-links">
-      <li><a href="/#galeria">Galería</a></li>
-      <li><a href="/nosotros">Nosotros</a></li>
-      <li><a href="/contacto">Contacto</a></li>
-      <li><a href="/clientes">Clientes</a></li>
-      <li><a href="/mas">Más</a></li>
-    </ul>
-  </nav>
+  <header>
+    <nav>
+      <a href="/" class="nav-logo">Ante</a>
+      <ul class="nav-links">
+        <li><a href="/#galeria">Galería</a></li>
+        <li><a href="/nosotros">Nosotros</a></li>
+        <li><a href="/contacto">Contacto</a></li>
+        <li><a href="/clientes">Clientes</a></li>
+        <li><a href="/mas">Más</a></li>
+      </ul>
+    </nav>
+  </header>
 
-  <slot />
+  <main>
+    <slot />
+  </main>
 
-  <footer>
-    <div class="footer-logo">A N T E · Estudio de Fotografía</div>
-    <div class="footer-info">
-      <a href="mailto:contacto@ante.photo">contacto@ante.photo</a><br>
-      Ciudad de México · México
-    </div>
+  <footer itemscope itemtype="https://schema.org/Organization">
+    <div class="footer-logo" itemprop="name">A N T E · Estudio de Fotografía</div>
+    <address class="footer-info">
+      <a href="mailto:contacto@ante.photo" itemprop="email">contacto@ante.photo</a><br>
+      <a href="tel:+525951220554" itemprop="telephone" class="footer-tel">+52 595 122 0554</a><br>
+      <span itemprop="address" itemscope itemtype="https://schema.org/PostalAddress">
+        <span itemprop="addressLocality">Ciudad de México</span> · <span itemprop="addressCountry">México</span>
+      </span>
+    </address>
   </footer>
 
   <script is:inline>

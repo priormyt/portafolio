@@ -1,9 +1,12 @@
 ---
 import Layout from '../layouts/Layout.astro';
 ---
-<Layout title="ANTE | Estudio de Fotografía Profesional">
+<Layout
+  title="ANTE | Estudio de Fotografía Profesional en CDMX"
+  description="Estudio de fotografía profesional en Ciudad de México. Retratos honestos y minimalistas para personas y empresas. Paquetes desde $900 MXN. Edición incluida, entrega en 3–5 días."
+>
 <!-- HERO -->
-<section class="hero">
+<section class="hero" aria-label="Presentación de ANTE Estudio de Fotografía">
   <div class="hero-bg"></div>
   <div class="hero-overlay"></div>
   <div class="hero-content">
@@ -29,26 +32,28 @@ import Layout from '../layouts/Layout.astro';
 </div>
 
 <!-- FILOSOFIA -->
-<section class="filosofia" id="nosotros">
-  <div class="reveal">
-    <div class="section-tag">Filosofía</div>
-    <h2 class="filosofia-title">
-      En oposición<br>
-      a la prisa<br>
-      <em>y al exceso.</em>
-    </h2>
-    <p class="filosofia-body">
-      ANTE nace de la mirada atenta a las personas. Cada sesión es un espacio para reencontrarse con uno mismo: luz precisa, encuadre esencial, ritmo tranquilo.
-    </p>
-    <p class="filosofia-body">
-      En un mundo de imágenes saturadas, elegimos la pausa. Un solo fin: que cada persona se reconozca y se afirme.
-    </p>
-    <div class="valores">
-      <div class="valor"><span class="valor-dot"></span>Calidad</div>
-      <div class="valor"><span class="valor-dot"></span>Honestidad</div>
-      <div class="valor"><span class="valor-dot"></span>Empatía</div>
-      <div class="valor"><span class="valor-dot"></span>Respeto a la individualidad</div>
-      <div class="valor"><span class="valor-dot"></span>Humanidad</div>
+<section class="filosofia" id="nosotros" aria-label="Filosofía y valores de ANTE Estudio">
+  <div class="filosofia-left">
+    <div class="reveal">
+      <div class="section-tag">Filosofía</div>
+      <h2 class="filosofia-title">
+        En oposición<br>
+        a la prisa<br>
+        <em>y al exceso.</em>
+      </h2>
+      <p class="filosofia-body">
+        ANTE nace de la mirada atenta a las personas. Cada sesión es un espacio para reencontrarse con uno mismo: luz precisa, encuadre esencial, ritmo tranquilo.
+      </p>
+      <p class="filosofia-body">
+        En un mundo de imágenes saturadas, elegimos la pausa. Un solo fin: que cada persona se reconozca y se afirme.
+      </p>
+    </div>
+    <div class="valores valores--ready">
+      <div class="valor" style="--i:0"><span class="valor-dot"></span>Calidad</div>
+      <div class="valor" style="--i:1"><span class="valor-dot"></span>Honestidad</div>
+      <div class="valor" style="--i:2"><span class="valor-dot"></span>Empatía</div>
+      <div class="valor" style="--i:3"><span class="valor-dot"></span>Respeto a la individualidad</div>
+      <div class="valor" style="--i:4"><span class="valor-dot"></span>Humanidad</div>
     </div>
   </div>
   <div class="filosofia-img reveal" style="transition-delay: 0.2s">
@@ -58,7 +63,7 @@ import Layout from '../layouts/Layout.astro';
 </section>
 
 <!-- GALERIA -->
-<section class="galeria" id="galeria">
+<section class="galeria" id="galeria" aria-label="Galería de trabajo reciente">
   <div class="galeria-header reveal">
     <div>
       <div class="section-tag">Trabajo reciente</div>
@@ -143,7 +148,7 @@ import Layout from '../layouts/Layout.astro';
 </section>
 
 <!-- TESTIMONIOS + CTA -->
-<section class="testimonios-cta" id="contacto">
+<section class="testimonios-cta" id="contacto" aria-label="Testimonios y contacto">
 
   <!-- Marquee cards flowing behind the CTA -->
   <div class="testi-marquee" aria-label="Testimonios de clientes">
@@ -269,6 +274,260 @@ import Layout from '../layouts/Layout.astro';
 
 </section>
 
+<!-- AEO ACCORDION -->
+<section class="faq-acc-section" aria-label="Preguntas frecuentes sobre ANTE Estudio de Fotografía">
+  <div class="faq-acc-header reveal">
+    <div class="section-tag">Frecuentes</div>
+  </div>
+  <div class="faq-acc-list">
+
+    <div class="faq-acc-item reveal" style="transition-delay:0.05s" data-faq>
+      <button class="faq-acc-trigger" aria-expanded="false">
+        <span class="faq-acc-num">01</span>
+        <h2 class="faq-acc-q">¿Qué tipo de fotografía hace ANTE?</h2>
+        <span class="faq-acc-icon" aria-hidden="true">+</span>
+      </button>
+      <div class="faq-acc-body" aria-hidden="true">
+        <div class="faq-acc-body-inner">
+          <p class="faq-acc-answer">ANTE Estudio de Fotografía se especializa en retrato profesional en Ciudad de México: corporativo para LinkedIn y presentaciones, retrato personal editorial y fotografía para artistas y emprendedores. Cada sesión incluye dirección de pose, iluminación de estudio controlada y edición profesional. Paquetes desde $900 MXN.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-acc-item reveal" style="transition-delay:0.1s" data-faq>
+      <button class="faq-acc-trigger" aria-expanded="false">
+        <span class="faq-acc-num">02</span>
+        <h2 class="faq-acc-q">¿Cuánto cuesta una sesión de fotos profesional en CDMX?</h2>
+        <span class="faq-acc-icon" aria-hidden="true">+</span>
+      </button>
+      <div class="faq-acc-body" aria-hidden="true">
+        <div class="faq-acc-body-inner">
+          <p class="faq-acc-answer">Los paquetes de sesión fotográfica en ANTE comienzan desde $900 MXN e incluyen dirección de pose, iluminación profesional y edición de las imágenes seleccionadas. La entrega digital es en 3 a 5 días hábiles. Se requiere anticipo del 50% para reservar la fecha.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-acc-item reveal" style="transition-delay:0.15s" data-faq>
+      <button class="faq-acc-trigger" aria-expanded="false">
+        <span class="faq-acc-num">03</span>
+        <h2 class="faq-acc-q">¿Cómo agendar una sesión de fotografía profesional en Ciudad de México?</h2>
+        <span class="faq-acc-icon" aria-hidden="true">+</span>
+      </button>
+      <div class="faq-acc-body" aria-hidden="true">
+        <div class="faq-acc-body-inner">
+          <p class="faq-acc-answer">Para agendar con ANTE Estudio escribe por WhatsApp al +52 595 122 0554 o envía un correo a contacto@ante.photo. Confirmamos disponibilidad y enviamos todos los detalles. Tiempo de respuesta menor a 24 horas.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
 <!-- FOOTER -->
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Service",
+      "serviceType": "Fotografía profesional",
+      "provider": { "@type": "PhotographyBusiness", "name": "ANTE Estudio de Fotografía", "url": "https://www.ante.photo" },
+      "areaServed": { "@type": "City", "name": "Ciudad de México" },
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "Servicios de fotografía ANTE",
+        "itemListElement": [
+          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Retrato profesional corporativo", "description": "Retratos para LinkedIn, presentaciones y perfiles corporativos. Iluminación de estudio, dirección de pose y edición profesional incluida." } },
+          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Retrato personal y editorial", "description": "Sesiones de retrato personal con estética limpia y minimalista. Para artistas, emprendedores y cualquier persona que quiera una imagen auténtica." } },
+          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Fotografía para equipos y empresas", "description": "Sesiones grupales o individuales para equipos corporativos. Imagen consistente y profesional para toda la organización." } }
+        ]
+      },
+      "offers": { "@type": "Offer", "priceCurrency": "MXN", "price": "900", "priceSpecification": { "@type": "PriceSpecification", "minPrice": "900", "priceCurrency": "MXN", "description": "Paquetes desde $900 MXN" } }
+    },
+    {
+      "@type": "Review",
+      "reviewBody": "La sesión fue sencilla y tranquila. La foto final me representa: limpia, directa y humana.",
+      "author": { "@type": "Person", "name": "Valeria" },
+      "reviewRating": { "@type": "Rating", "ratingValue": "5", "bestRating": "5" },
+      "itemReviewed": { "@type": "PhotographyBusiness", "name": "ANTE Estudio de Fotografía" }
+    },
+    {
+      "@type": "Review",
+      "reviewBody": "Se nota el buen gusto en la luz y en la dirección. El resultado es justo lo que necesitaba.",
+      "author": { "@type": "Person", "name": "Ricardo" },
+      "reviewRating": { "@type": "Rating", "ratingValue": "5", "bestRating": "5" },
+      "itemReviewed": { "@type": "PhotographyBusiness", "name": "ANTE Estudio de Fotografía" }
+    },
+    {
+      "@type": "Review",
+      "reviewBody": "Llegué nervioso y terminé disfrutando la sesión. La dirección fue precisa y el resultado se siente auténtico.",
+      "author": { "@type": "Person", "name": "Jonathan" },
+      "reviewRating": { "@type": "Rating", "ratingValue": "5", "bestRating": "5" },
+      "itemReviewed": { "@type": "PhotographyBusiness", "name": "ANTE Estudio de Fotografía" }
+    },
+    {
+      "@type": "Review",
+      "reviewBody": "Necesitaba una foto formal pero moderna. En minutos obtuvimos imágenes que uso en todos mis perfiles.",
+      "author": { "@type": "Person", "name": "Carlos" },
+      "reviewRating": { "@type": "Rating", "ratingValue": "5", "bestRating": "5" },
+      "itemReviewed": { "@type": "PhotographyBusiness", "name": "ANTE Estudio de Fotografía" }
+    },
+    {
+      "@type": "Review",
+      "reviewBody": "El ambiente del estudio hace que todo fluya. Las fotos tienen una calidad que no había visto en otros lugares.",
+      "author": { "@type": "Person", "name": "Michelle" },
+      "reviewRating": { "@type": "Rating", "ratingValue": "5", "bestRating": "5" },
+      "itemReviewed": { "@type": "PhotographyBusiness", "name": "ANTE Estudio de Fotografía" }
+    },
+    {
+      "@type": "Review",
+      "reviewBody": "Profesionalismo en cada detalle. Me entregaron exactamente lo que pedí y en menos tiempo del esperado.",
+      "author": { "@type": "Person", "name": "Christian" },
+      "reviewRating": { "@type": "Rating", "ratingValue": "5", "bestRating": "5" },
+      "itemReviewed": { "@type": "PhotographyBusiness", "name": "ANTE Estudio de Fotografía" }
+    },
+    {
+      "@type": "Review",
+      "reviewBody": "Las fotos superaron mis expectativas. Capturaron exactamente lo que quería proyectar sin que tuviera que explicarlo mucho.",
+      "author": { "@type": "Person", "name": "Mafer" },
+      "reviewRating": { "@type": "Rating", "ratingValue": "5", "bestRating": "5" },
+      "itemReviewed": { "@type": "PhotographyBusiness", "name": "ANTE Estudio de Fotografía" }
+    }
+  ]
+}
+</script>
+
+<style is:global>
+  /* ── FAQ Accordion ── */
+  .faq-acc-section {
+    padding: 0 4rem 7rem;
+    border-top: 0.5px solid rgba(245,242,237,0.08);
+  }
+  .faq-acc-header { padding: 6rem 0 3rem; }
+  .faq-acc-list { border-top: 0.5px solid rgba(245,242,237,0.08); }
+  .faq-acc-item { border-bottom: 0.5px solid rgba(245,242,237,0.08); }
+  .faq-acc-trigger {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    width: 100%;
+    padding: 2.2rem 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    position: relative;
+  }
+  .faq-acc-trigger::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(245,242,237,0.018);
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    pointer-events: none;
+  }
+  .faq-acc-trigger:hover::before { opacity: 1; }
+  .faq-acc-num {
+    font-family: var(--f-mono);
+    font-size: var(--fs-micro);
+    letter-spacing: var(--ls-wide);
+    color: rgba(154,150,144,0.4);
+    flex-shrink: 0;
+    min-width: 2rem;
+    transition: color 0.35s ease;
+    user-select: none;
+  }
+  .faq-acc-trigger:hover .faq-acc-num,
+  .faq-acc-item[data-open] .faq-acc-num { color: var(--accent); }
+  .faq-acc-q {
+    font-family: var(--f-sans);
+    font-size: clamp(0.85rem, 1.4vw, 1rem);
+    font-weight: 300;
+    letter-spacing: 0.01em;
+    color: var(--ash);
+    flex: 1;
+    line-height: 1.5;
+    transition: color 0.35s ease;
+  }
+  .faq-acc-trigger:hover .faq-acc-q,
+  .faq-acc-item[data-open] .faq-acc-q { color: var(--paper); }
+  .faq-acc-icon {
+    flex-shrink: 0;
+    font-family: var(--f-sans);
+    font-size: 1.1rem;
+    font-weight: 300;
+    color: var(--ash);
+    line-height: 1;
+    width: 1.5rem;
+    text-align: center;
+    transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1), color 0.35s ease;
+    user-select: none;
+  }
+  .faq-acc-trigger:hover .faq-acc-icon { color: var(--paper); }
+  .faq-acc-item[data-open] .faq-acc-icon { transform: rotate(45deg); color: var(--paper); }
+  /* Smooth height animation via CSS grid */
+  .faq-acc-body {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .faq-acc-item[data-open] .faq-acc-body { grid-template-rows: 1fr; }
+  .faq-acc-body-inner { overflow: hidden; }
+  .faq-acc-answer {
+    padding: 0 0 2.5rem calc(2rem + 2rem);
+    font-size: var(--fs-body);
+    font-weight: 300;
+    line-height: 1.95;
+    color: var(--mist);
+    max-width: 600px;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+  .faq-acc-item[data-open] .faq-acc-answer { opacity: 1; transform: translateY(0); }
+  @media (max-width: 768px) {
+    .faq-acc-section { padding: 0 1.5rem 5rem; }
+    .faq-acc-header { padding: 5rem 0 2rem; }
+    .faq-acc-trigger { gap: 1.2rem; padding: 1.8rem 0; }
+    .faq-acc-answer { padding-left: calc(1.2rem + 1.2rem); }
+  }
+</style>
+
+<script is:inline>
+  (function () {
+    var valores = document.querySelector('.valores');
+    if (!valores) return;
+    new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        e.target.classList.toggle('valores--in', e.isIntersecting);
+      });
+    }, { threshold: 0.1 }).observe(valores);
+  })();
+</script>
+
+<script is:inline>
+(function () {
+  var items = document.querySelectorAll('[data-faq]');
+  items.forEach(function (item) {
+    var trigger = item.querySelector('.faq-acc-trigger');
+    var body    = item.querySelector('.faq-acc-body');
+    trigger.addEventListener('click', function () {
+      var isOpen = item.hasAttribute('data-open');
+      items.forEach(function (i) {
+        i.removeAttribute('data-open');
+        i.querySelector('.faq-acc-trigger').setAttribute('aria-expanded', 'false');
+        i.querySelector('.faq-acc-body').setAttribute('aria-hidden', 'true');
+      });
+      if (!isOpen) {
+        item.setAttribute('data-open', '');
+        trigger.setAttribute('aria-expanded', 'true');
+        body.setAttribute('aria-hidden', 'false');
+      }
+    });
+  });
+})();
+</script>
 
 </Layout>

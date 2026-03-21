@@ -361,6 +361,31 @@
       background: var(--accent);
       flex-shrink: 0;
     }
+
+    /* columna izquierda de filosofia: contiene .reveal (texto) + .valores (animados) */
+    .filosofia-left {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Stagger reveal/hide — bidireccional con scroll */
+    .valores--ready .valor {
+      opacity: 0;
+      transform: translateY(10px);
+      /* delay escalonado en opacity/transform; hover (color, gap) sin delay */
+      transition:
+        opacity   0.6s cubic-bezier(0.16, 1, 0.3, 1) calc(var(--i, 0) * 0.13s),
+        transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) calc(var(--i, 0) * 0.13s),
+        color 0.3s ease 0s,
+        gap   0.3s ease 0s;
+    }
+    .valores--in .valor {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .valores--ready .valor { opacity: 1; transform: none; transition: color 0.3s, gap 0.3s; }
+    }
     .filosofia-img {
       position: relative;
       aspect-ratio: 4/5;

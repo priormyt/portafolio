@@ -1,7 +1,10 @@
 ---
 import Layout from '../layouts/Layout.astro';
 ---
-<Layout title="Galería | ANTE Estudio de Fotografía">
+<Layout
+  title="Galería de Retratos | ANTE Estudio de Fotografía CDMX"
+  description="Galería de retratos profesionales de ANTE Estudio de Fotografía en Ciudad de México. Corporativos, personales y editoriales. Fotografía minimalista y honesta."
+>
 <!-- PAGE HEADER -->
 <div class="page-header">
   <div>
@@ -11,7 +14,7 @@ import Layout from '../layouts/Layout.astro';
 </div>
 
 <!-- GALLERY -->
-<section class="gallery-section">
+<section class="gallery-section" aria-label="Galería de retratos profesionales ANTE">
   <div class="gallery-grid" id="gallery"></div>
 </section>
 
@@ -22,6 +25,30 @@ import Layout from '../layouts/Layout.astro';
   <img id="lightboxImg" src="" alt="">
   <span class="lightbox-nav lightbox-next" id="lightboxNext">›</span>
 </div>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ImageGallery",
+  "name": "Galería de retratos · ANTE Estudio de Fotografía",
+  "description": "Colección de retratos profesionales, corporativos y personales realizados por ANTE Estudio de Fotografía en Ciudad de México.",
+  "url": "https://www.ante.photo/galeria",
+  "author": {
+    "@type": "PhotographyBusiness",
+    "name": "ANTE Estudio de Fotografía",
+    "url": "https://www.ante.photo"
+  },
+  "image": [
+    { "@type": "ImageObject", "contentUrl": "https://www.ante.photo/img/thumb/Ricardo1.jpg", "name": "Retrato profesional · Ricardo", "description": "Retrato profesional para perfil corporativo" },
+    { "@type": "ImageObject", "contentUrl": "https://www.ante.photo/img/thumb/Jona1.jpg", "name": "Retrato profesional · Jonathan", "description": "Retrato para perfil ejecutivo" },
+    { "@type": "ImageObject", "contentUrl": "https://www.ante.photo/img/thumb/Valeria1.jpg", "name": "Retrato profesional · Valeria", "description": "Retrato personal y editorial" },
+    { "@type": "ImageObject", "contentUrl": "https://www.ante.photo/img/thumb/Mich1.jpg", "name": "Retrato artístico · Michelle", "description": "Retrato artístico con iluminación de estudio" },
+    { "@type": "ImageObject", "contentUrl": "https://www.ante.photo/img/thumb/Carlos1.jpg", "name": "Retrato corporativo · Carlos", "description": "Retrato corporativo para presentaciones" },
+    { "@type": "ImageObject", "contentUrl": "https://www.ante.photo/img/thumb/Mafer2.jpg", "name": "Retrato personal · Mafer", "description": "Retrato personal minimalista" },
+    { "@type": "ImageObject", "contentUrl": "https://www.ante.photo/img/thumb/Christian1.jpg", "name": "Retrato profesional · Christian", "description": "Retrato profesional para emprendedor" }
+  ]
+}
+</script>
 
 <style is:global>
 

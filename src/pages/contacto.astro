@@ -1,9 +1,12 @@
 ---
 import Layout from '../layouts/Layout.astro';
 ---
-<Layout title="Contacto | ANTE Estudio de Fotografía">
+<Layout
+  title="Contacto | ANTE Estudio de Fotografía en CDMX"
+  description="Agenda tu sesión de fotografía profesional en ANTE Estudio, Ciudad de México. WhatsApp: +52 595 122 0554 · contacto@ante.photo. Respuesta en menos de 24 horas."
+>
 <!-- PAGE HERO -->
-<section class="page-hero">
+<section class="page-hero" aria-label="Contacto con ANTE Estudio de Fotografía">
   <p class="page-eyebrow">Hablemos</p>
   <h1 class="page-title">Contacto</h1>
   <p class="page-sub">Logremos capturar tu esencia.</p>
@@ -48,7 +51,7 @@ import Layout from '../layouts/Layout.astro';
 </div>
 
 <!-- FAQ -->
-<section class="faq-section">
+<section class="faq-section" aria-label="Preguntas frecuentes sobre ANTE Estudio">
   <div class="faq-header reveal">
     <div class="section-tag">Preguntas frecuentes</div>
     <h2 class="faq-title">Lo que más preguntan</h2>
@@ -86,6 +89,63 @@ import Layout from '../layouts/Layout.astro';
   <span class="legal-text">Información legal</span>
   <a href="aviso-privacidad.html" class="legal-link">Aviso de Privacidad →</a>
 </div>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "¿Cómo reservo una sesión?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Contáctanos por WhatsApp o correo electrónico y nos encargamos del resto. Confirmamos disponibilidad y te enviamos los detalles."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Cuánto tarda la entrega?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Entrega digital en 3–5 días hábiles. Para impresiones o fotolibros, 7–10 días adicionales."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Incluye edición?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Sí, todas las fotografías entregadas incluyen edición de color, luz y retoque profesional."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Cómo se realiza el pago?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "50% para reservar y 50% el día de la sesión. Aceptamos transferencia, tarjeta y efectivo."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Puedo reprogramar mi sesión?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Sí, con 48 horas de anticipación sin costo. Menos tiempo puede generar una tarifa de reprogramación."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Entregan archivos RAW?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. Enviamos archivos en alta resolución, editados y listos para uso en cualquier plataforma."
+      }
+    }
+  ]
+}
+</script>
 
 <style is:global>
 
