@@ -328,53 +328,53 @@ import Layout from '../layouts/Layout.astro';
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@graph": [
+  "@type": "FAQPage",
+  "mainEntity": [
     {
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "¿Qué tipo de fotografía hace ANTE?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "ANTE Estudio de Fotografía se especializa en retrato profesional en Ciudad de México: corporativo para LinkedIn y presentaciones, retrato personal editorial y fotografía para artistas y emprendedores. Cada sesión incluye dirección de pose, iluminación de estudio controlada y edición profesional. Paquetes desde $900 MXN."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "¿Cuánto cuesta una sesión de fotos profesional en CDMX?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Los paquetes de sesión fotográfica en ANTE comienzan desde $900 MXN e incluyen dirección de pose, iluminación profesional y edición de las imágenes seleccionadas. La entrega digital es en 3 a 5 días hábiles. Se requiere anticipo del 50% para reservar la fecha."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "¿Cómo agendar una sesión de fotografía profesional en Ciudad de México?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Para agendar con ANTE Estudio escribe por WhatsApp al +52 595 122 0554 o envía un correo a contacto@ante.photo. Confirmamos disponibilidad y enviamos todos los detalles. Tiempo de respuesta menor a 24 horas."
-          }
-        }
-      ]
+      "@type": "Question",
+      "name": "¿Qué tipo de fotografía hace ANTE?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "ANTE Estudio de Fotografía se especializa en retrato profesional en Ciudad de México: corporativo para LinkedIn y presentaciones, retrato personal editorial y fotografía para artistas y emprendedores. Cada sesión incluye dirección de pose, iluminación de estudio controlada y edición profesional. Paquetes desde $900 MXN."
+      }
     },
     {
-      "@type": "Service",
-      "serviceType": "Fotografía profesional",
-      "provider": { "@type": "PhotographyBusiness", "name": "ANTE Estudio de Fotografía", "url": "https://www.ante.photo" },
-      "areaServed": { "@type": "City", "name": "Ciudad de México" },
-      "hasOfferCatalog": {
-        "@type": "OfferCatalog",
-        "name": "Servicios de fotografía ANTE",
-        "itemListElement": [
-          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Retrato profesional corporativo", "description": "Retratos para LinkedIn, presentaciones y perfiles corporativos. Iluminación de estudio, dirección de pose y edición profesional incluida." } },
-          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Retrato personal y editorial", "description": "Sesiones de retrato personal con estética limpia y minimalista. Para artistas, emprendedores y cualquier persona que quiera una imagen auténtica." } },
-          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Fotografía para equipos y empresas", "description": "Sesiones grupales o individuales para equipos corporativos. Imagen consistente y profesional para toda la organización." } }
-        ]
-      },
-      "offers": { "@type": "Offer", "priceCurrency": "MXN", "price": "900", "priceSpecification": { "@type": "PriceSpecification", "minPrice": "900", "priceCurrency": "MXN", "description": "Paquetes desde $900 MXN" } }
+      "@type": "Question",
+      "name": "¿Cuánto cuesta una sesión de fotos profesional en CDMX?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Los paquetes de sesión fotográfica en ANTE comienzan desde $900 MXN e incluyen dirección de pose, iluminación profesional y edición de las imágenes seleccionadas. La entrega digital es en 3 a 5 días hábiles. Se requiere anticipo del 50% para reservar la fecha."
+      }
     },
+    {
+      "@type": "Question",
+      "name": "¿Cómo agendar una sesión de fotografía profesional en Ciudad de México?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Para agendar con ANTE Estudio escribe por WhatsApp al +52 595 122 0554 o envía un correo a contacto@ante.photo. Confirmamos disponibilidad y enviamos todos los detalles. Tiempo de respuesta menor a 24 horas."
+      }
+    }
   ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "serviceType": "Fotografía profesional",
+  "provider": { "@type": "PhotographyBusiness", "name": "ANTE Estudio de Fotografía", "url": "https://www.ante.photo" },
+  "areaServed": { "@type": "City", "name": "Ciudad de México" },
+  "hasOfferCatalog": {
+    "@type": "OfferCatalog",
+    "name": "Servicios de fotografía ANTE",
+    "itemListElement": [
+      { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Retrato profesional corporativo", "description": "Retratos para LinkedIn, presentaciones y perfiles corporativos. Iluminación de estudio, dirección de pose y edición profesional incluida." } },
+      { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Retrato personal y editorial", "description": "Sesiones de retrato personal con estética limpia y minimalista. Para artistas, emprendedores y cualquier persona que quiera una imagen auténtica." } },
+      { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Fotografía para equipos y empresas", "description": "Sesiones grupales o individuales para equipos corporativos. Imagen consistente y profesional para toda la organización." } }
+    ]
+  },
+  "offers": { "@type": "Offer", "priceCurrency": "MXN", "price": "900", "priceSpecification": { "@type": "PriceSpecification", "minPrice": "900", "priceCurrency": "MXN", "description": "Paquetes desde $900 MXN" } }
 }
 </script>
 
