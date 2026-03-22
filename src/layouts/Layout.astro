@@ -6,6 +6,7 @@ export interface Props {
   description?: string;
   canonical?: string;
   ogImage?: string;
+  noindex?: boolean;
 }
 
 const {
@@ -13,6 +14,7 @@ const {
   description = "ANTE Estudio de Fotografía: retratos minimalistas, profesionales y con personalidad para personas y empresas en CDMX. Fotografía honesta que refleja tu esencia.",
   canonical: canonicalProp,
   ogImage = "https://www.ante.photo/img/Fondo3.jpg",
+  noindex = false,
 } = Astro.props;
 
 const siteUrl = "https://www.ante.photo";
@@ -75,8 +77,9 @@ const schemaGraph = {
       "sameAs": ["https://www.instagram.com/ante.estudio"],
       "aggregateRating": {
         "@type": "AggregateRating",
-        "ratingValue": "5",
-        "ratingCount": "7",
+        "ratingValue": 5,
+        "bestRating": 5,
+        "ratingCount": 7,
       },
       "description": "Estudio de fotografía profesional en Ciudad de México especializado en retratos minimalistas, corporativos y artísticos. Sesiones desde $900 MXN.",
     },
@@ -92,7 +95,7 @@ const schemaGraph = {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="robots" content="index,follow,max-image-preview:large">
+  <meta name="robots" content={noindex ? "noindex,nofollow" : "index,follow,max-image-preview:large"}>
   <title>{title}</title>
 
   <link rel="icon" href="/favicon.ico" sizes="any">
