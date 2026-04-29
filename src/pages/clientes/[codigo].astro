@@ -2,12 +2,14 @@
 export const prerender = false;
 
 import Layout from '../../layouts/Layout.astro';
-import { getSesionByCodigo, fotoUrl } from '../../lib/sesiones';
+import { getSesionByCodigo, fotoUrl, readEnv } from '../../lib/sesiones';
 
 const { codigo } = Astro.params;
 const codigoNormalizado = (codigo ?? '').toUpperCase();
 
-const data = codigoNormalizado ? await getSesionByCodigo(codigoNormalizado) : null;
+const runtimeEnv = (Astro.locals as any)?.runtime?.env;
+const env = readEnv(runtimeEnv);
+const data = codigoNormalizado ? await getSesionByCodigo(env, codigoNormalizado) : null;
 
 if (!data) {
   return Astro.redirect('/clientes?err=no-encontrado', 302);
@@ -48,15 +50,15 @@ const fotosParaSeleccion = fotosPreview.length > 0 ? fotosPreview : fotosFinales
             <figure class="galeria-item" data-index={i}>
               <div class="galeria-frame">
                 <img
-                  src={fotoUrl(foto.r2_key)}
+                  src={fotoUrl(env, foto.r2_key)}
                   alt={`${sesion.nombre_cliente} – foto ${i + 1}`}
                   loading="lazy"
                   draggable="false"
-                  data-full={fotoUrl(foto.r2_key)}
+                  data-full={fotoUrl(env, foto.r2_key)}
                 />
                 <a
                   class="galeria-download"
-                  href={fotoUrl(foto.r2_key)}
+                  href={fotoUrl(env, foto.r2_key)}
                   download={foto.original_filename ?? `${sesion.codigo}_${i + 1}.jpg`}
                   aria-label="Descargar foto"
                   onclick="event.stopPropagation()"
@@ -109,11 +111,11 @@ const fotosParaSeleccion = fotosPreview.length > 0 ? fotosPreview : fotosFinales
             >
               <div class="galeria-frame">
                 <img
-                  src={fotoUrl(foto.r2_key)}
+                  src={fotoUrl(env, foto.r2_key)}
                   alt={`Foto ${i + 1} de la sesión de ${sesion.nombre_cliente}`}
                   loading="lazy"
                   draggable="false"
-                  data-full={fotoUrl(foto.r2_key)}
+                  data-full={fotoUrl(env, foto.r2_key)}
                 />
                 <span class="watermark-corner">A</span>
                 <span class="check-mark" aria-hidden="true">✓</span>
@@ -161,7 +163,7 @@ const fotosParaSeleccion = fotosPreview.length > 0 ? fotosPreview : fotosFinales
                 <figure class="galeria-item">
                   <div class="galeria-frame">
                     <img
-                      src={fotoUrl(foto.r2_key)}
+                      src={fotoUrl(env, foto.r2_key)}
                       alt={`Selección ${i + 1}`}
                       loading="lazy"
                       draggable="false"

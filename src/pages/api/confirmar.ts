@@ -4,9 +4,10 @@ import type { APIRoute } from 'astro';
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '../../lib/database.types';
 
-export const POST: APIRoute = async ({ request }) => {
-  const url = import.meta.env.PUBLIC_SUPABASE_URL;
-  const key = import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
+export const POST: APIRoute = async ({ request, locals }) => {
+  const runtimeEnv = (locals as any)?.runtime?.env;
+  const url = runtimeEnv?.PUBLIC_SUPABASE_URL ?? import.meta.env.PUBLIC_SUPABASE_URL;
+  const key = runtimeEnv?.SUPABASE_SERVICE_ROLE_KEY ?? import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) return json({ error: 'misconfigured' }, 500);
 
   let body: { sesionId?: string };

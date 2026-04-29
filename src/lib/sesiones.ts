@@ -1,32 +1,45 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database, Sesion, Foto, Seleccion, Paquete } from './database.types';
 
-const url = import.meta.env.PUBLIC_SUPABASE_URL;
-const serviceKey = import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
-const anonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+export type Env = {
+  PUBLIC_SUPABASE_URL?: string;
+  PUBLIC_SUPABASE_ANON_KEY?: string;
+  SUPABASE_SERVICE_ROLE_KEY?: string;
+  R2_PUBLIC_URL?: string;
+  PUBLIC_R2_PUBLIC_URL?: string;
+};
 
-function admin() {
-  if (!url || !serviceKey) {
+/**
+ * Lee env vars priorizando el runtime (Cloudflare Workers) y cayendo a build-time.
+ * El runtime se obtiene de Astro.locals.runtime.env o context.locals.runtime.env.
+ */
+export function readEnv(runtimeEnv?: Env): Env {
+  return {
+    PUBLIC_SUPABASE_URL:
+      runtimeEnv?.PUBLIC_SUPABASE_URL ?? import.meta.env.PUBLIC_SUPABASE_URL,
+    PUBLIC_SUPABASE_ANON_KEY:
+      runtimeEnv?.PUBLIC_SUPABASE_ANON_KEY ?? import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
+    SUPABASE_SERVICE_ROLE_KEY:
+      runtimeEnv?.SUPABASE_SERVICE_ROLE_KEY ?? import.meta.env.SUPABASE_SERVICE_ROLE_KEY,
+    R2_PUBLIC_URL:
+      runtimeEnv?.R2_PUBLIC_URL ?? import.meta.env.R2_PUBLIC_URL,
+    PUBLIC_R2_PUBLIC_URL:
+      runtimeEnv?.PUBLIC_R2_PUBLIC_URL ?? import.meta.env.PUBLIC_R2_PUBLIC_URL,
+  };
+}
+
+function admin(env: Env) {
+  if (!env.PUBLIC_SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) {
     throw new Error('Missing Supabase URL or service role key');
   }
-  return createClient<Database>(url, serviceKey, {
+  return createClient<Database>(env.PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 }
 
-function publicClient() {
-  if (!url || !anonKey) {
-    throw new Error('Missing Supabase URL or anon key');
-  }
-  return createClient<Database>(url, anonKey);
-}
-
-export const r2PublicUrl = (
-  import.meta.env.R2_PUBLIC_URL ?? import.meta.env.PUBLIC_R2_PUBLIC_URL ?? ''
-).replace(/\/$/, '');
-
-export function fotoUrl(r2Key: string): string {
-  return `${r2PublicUrl}/${r2Key}`;
+export function fotoUrl(env: Env, r2Key: string): string {
+  const base = (env.R2_PUBLIC_URL ?? env.PUBLIC_R2_PUBLIC_URL ?? '').replace(/\/$/, '');
+  return `${base}/${r2Key}`;
 }
 
 export type SesionCompleta = {
@@ -37,8 +50,11 @@ export type SesionCompleta = {
   selecciones: Seleccion[];
 };
 
-export async function getSesionByCodigo(codigo: string): Promise<SesionCompleta | null> {
-  const sb = admin();
+export async function getSesionByCodigo(
+  env: Env,
+  codigo: string,
+): Promise<SesionCompleta | null> {
+  const sb = admin(env);
 
   const { data: sesion, error } = await sb
     .from('sesiones')
@@ -72,10 +88,11 @@ export async function getSesionByCodigo(codigo: string): Promise<SesionCompleta 
 }
 
 export async function toggleSeleccion(
+  env: Env,
   sesionId: string,
   fotoId: string,
 ): Promise<{ seleccionada: boolean }> {
-  const sb = admin();
+  const sb = admin(env);
   const { data: existing } = await sb
     .from('selecciones')
     .select('id')
@@ -91,5 +108,3 @@ export async function toggleSeleccion(
   await sb.from('selecciones').insert({ sesion_id: sesionId, foto_id: fotoId });
   return { seleccionada: true };
 }
-
-export { publicClient };
