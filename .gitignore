@@ -10,6 +10,12 @@ dist/
 # environment variables
 .env
 .env.production
+.env.local
+.dev.vars
+
+# Cloudflare Wrangler
+.wrangler/
+wrangler.toml.local
 
 # macOS
 .DS_Store

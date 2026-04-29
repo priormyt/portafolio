@@ -293,21 +293,21 @@ import Layout from '../layouts/Layout.astro';
     });
   });
 
-  // Access galleries map
-  const galleries = {
-    "VALERIA2024":   "Galerias_privadas/cliente-valeria.html",
-    "JON2024":       "Galerias_privadas/cliente-jonathan.html",
-    "MOOT":          "Galerias_privadas/cliente-moot.html",
-    "RICARDITO":     "Galerias_privadas/cliente-ricardo.html",
-    "MAFER2025":     "Galerias_privadas/cliente-mafer.html",
-    "MICH2025":      "Galerias_privadas/cliente-mich.html",
-    "CHRISTIAN2025": "Galerias_privadas/cliente-christian.html",
+  // Códigos cuya URL no debe cambiar todavía (sesiones activas en HTML legacy).
+  // Quita una entrada de aquí cuando hayas migrado al cliente al sistema nuevo.
+  const legacyOverrides = {
     "JAVIERAMEZCUA2026": "Galerias_privadas/cliente-javier-amezcua.html"
   };
 
   const form = document.getElementById('accessForm');
   const codeInput = document.getElementById('code');
   const errorMsg = document.getElementById('errorMsg');
+
+  // Si veníamos rebotados de una galería que no existía
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('err') === 'no-encontrado') {
+    errorMsg.textContent = 'Código no reconocido. Revisa que esté escrito igual que en el correo.';
+  }
 
   form.addEventListener('submit', function(e) {
     e.preventDefault();
@@ -318,12 +318,11 @@ import Layout from '../layouts/Layout.astro';
       return;
     }
     const key = raw.toUpperCase();
-    const target = galleries[key];
-    if (target) {
-      window.location.href = target;
-    } else {
-      errorMsg.textContent = 'Código no reconocido. Revisa que esté escrito igual que en el correo.';
+    if (legacyOverrides[key]) {
+      window.location.href = legacyOverrides[key];
+      return;
     }
+    window.location.href = '/clientes/' + encodeURIComponent(key);
   });
 
 })();

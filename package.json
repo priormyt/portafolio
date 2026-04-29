@@ -9,9 +9,17 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "migrate:clientes": "tsx --env-file=.env.local scripts/migrar-clientes.ts"
   },
   "dependencies": {
+    "@astrojs/cloudflare": "^13.2.2",
+    "@supabase/supabase-js": "^2.105.1",
     "astro": "^6.0.8"
+  },
+  "devDependencies": {
+    "@aws-sdk/client-s3": "^3.1038.0",
+    "dotenv": "^17.4.2",
+    "tsx": "^4.21.0"
   }
 }

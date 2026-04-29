@@ -1,0 +1,589 @@
+---
+export const prerender = false;
+
+import Layout from '../../layouts/Layout.astro';
+import { getSesionByCodigo, fotoUrl } from '../../lib/sesiones';
+
+const { codigo } = Astro.params;
+const codigoNormalizado = (codigo ?? '').toUpperCase();
+
+const data = codigoNormalizado ? await getSesionByCodigo(codigoNormalizado) : null;
+
+if (!data) {
+  return Astro.redirect('/clientes?err=no-encontrado', 302);
+}
+
+const { sesion, paquete, fotosFinales, fotosPreview, selecciones } = data;
+const seleccionadas = new Set(selecciones.map((s) => s.foto_id));
+const limite = sesion.limite_fotos ?? paquete?.fotos_incluidas ?? 0;
+const seleccionadasCount = selecciones.length;
+const extras = Math.max(0, seleccionadasCount - limite);
+const costoExtras = extras * Number(sesion.precio_extra ?? 0);
+
+const fotosParaSeleccion = fotosPreview.length > 0 ? fotosPreview : fotosFinales;
+---
+<Layout
+  title={`Galería · ${sesion.nombre_cliente} | ANTE`}
+  noindex={true}
+>
+  <main class="cliente-main">
+    <section class="cliente-intro">
+      <p class="cliente-eyebrow">Galería privada</p>
+      <h1 class="cliente-name">{sesion.nombre_cliente}</h1>
+      {paquete && (
+        <p class="cliente-paquete">
+          Paquete {paquete.nombre} · {paquete.fotos_incluidas} fotos · {paquete.looks} look{paquete.looks > 1 ? 's' : ''}
+        </p>
+      )}
+    </section>
+
+    {sesion.estado === 'entregada' && (
+      <section class="estado-entregada" data-fotos-count={fotosFinales.length}>
+        <p class="estado-texto">
+          Tus fotos están listas. Da click en cualquiera para verla en grande, o en el ícono de descarga.
+        </p>
+
+        <div class="galeria-grid">
+          {fotosFinales.map((foto, i) => (
+            <figure class="galeria-item" data-index={i}>
+              <div class="galeria-frame">
+                <img
+                  src={fotoUrl(foto.r2_key)}
+                  alt={`${sesion.nombre_cliente} – foto ${i + 1}`}
+                  loading="lazy"
+                  draggable="false"
+                  data-full={fotoUrl(foto.r2_key)}
+                />
+                <a
+                  class="galeria-download"
+                  href={fotoUrl(foto.r2_key)}
+                  download={foto.original_filename ?? `${sesion.codigo}_${i + 1}.jpg`}
+                  aria-label="Descargar foto"
+                  onclick="event.stopPropagation()"
+                >
+                  ↓
+                </a>
+              </div>
+              <figcaption class="galeria-caption">
+                {String(i + 1).padStart(2, '0')} / {String(fotosFinales.length).padStart(2, '0')}
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+      </section>
+    )}
+
+    {sesion.estado === 'seleccion' && (
+      <section
+        class="estado-seleccion"
+        data-sesion-id={sesion.id}
+        data-limite={limite}
+        data-precio-extra={sesion.precio_extra}
+      >
+        <div class="seleccion-status">
+          <p class="seleccion-instructions">
+            Elige tus fotos favoritas. Tu paquete incluye <strong>{limite}</strong>.
+            Si quieres más, cada foto extra cuesta <strong>${sesion.precio_extra} MXN</strong>.
+          </p>
+
+          <div class="contador-bar">
+            <div class="contador-label">
+              Seleccionadas:
+              <span id="contadorActual">{seleccionadasCount}</span>
+              /
+              <span>{limite}</span>
+            </div>
+            <div id="extrasInfo" class="contador-extras" style={extras > 0 ? '' : 'display:none'}>
+              <span id="extrasCount">{extras}</span> extra{extras !== 1 ? 's' : ''} ·
+              <strong>+$<span id="extrasMonto">{costoExtras}</span> MXN</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="galeria-grid galeria-grid-seleccion">
+          {fotosParaSeleccion.map((foto, i) => (
+            <figure
+              class={`galeria-item galeria-item-selectable ${seleccionadas.has(foto.id) ? 'selected' : ''}`}
+              data-foto-id={foto.id}
+              data-index={i}
+            >
+              <div class="galeria-frame">
+                <img
+                  src={fotoUrl(foto.r2_key)}
+                  alt={`Foto ${i + 1} de la sesión de ${sesion.nombre_cliente}`}
+                  loading="lazy"
+                  draggable="false"
+                  data-full={fotoUrl(foto.r2_key)}
+                />
+                <span class="watermark-corner">A</span>
+                <span class="check-mark" aria-hidden="true">✓</span>
+              </div>
+              <figcaption class="galeria-caption">
+                {String(i + 1).padStart(2, '0')} / {String(fotosParaSeleccion.length).padStart(2, '0')}
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+
+        <div class="confirmar-bar">
+          <button id="btnConfirmar" class="btn-confirmar" type="button" disabled={seleccionadasCount === 0}>
+            Confirmar selección
+            {extras > 0 && ` y pagar $${costoExtras} MXN`}
+          </button>
+        </div>
+      </section>
+    )}
+
+    {sesion.estado === 'pago_pendiente' && (
+      <section class="estado-pendiente">
+        <p class="estado-titulo">Esperando confirmación de pago</p>
+        <p class="estado-texto">
+          Recibimos tu selección. Cuando se confirme el pago de las {extras} foto{extras !== 1 ? 's' : ''} extra,
+          comenzaremos a editar tus fotos. Te avisaremos por correo en cuanto estén listas.
+        </p>
+      </section>
+    )}
+
+    {sesion.estado === 'editando' && (
+      <section class="estado-editando">
+        <p class="estado-titulo">Estamos editando tus fotos</p>
+        <p class="estado-texto">
+          Recibimos tu selección{sesion.fecha_confirmacion ? ` el ${new Date(sesion.fecha_confirmacion).toLocaleDateString('es-MX', { day: 'numeric', month: 'long' })}` : ''}.
+          Vuelve aquí cuando recibas el correo de "tus fotos están listas" para descargarlas.
+        </p>
+
+        <details class="seleccion-resumen">
+          <summary>Ver mi selección ({selecciones.length} foto{selecciones.length !== 1 ? 's' : ''})</summary>
+          <div class="galeria-grid galeria-grid-readonly">
+            {fotosParaSeleccion
+              .filter((f) => seleccionadas.has(f.id))
+              .map((foto, i) => (
+                <figure class="galeria-item">
+                  <div class="galeria-frame">
+                    <img
+                      src={fotoUrl(foto.r2_key)}
+                      alt={`Selección ${i + 1}`}
+                      loading="lazy"
+                      draggable="false"
+                    />
+                    <span class="watermark-corner">A</span>
+                  </div>
+                </figure>
+              ))}
+          </div>
+        </details>
+      </section>
+    )}
+  </main>
+
+  <div id="lightbox" class="lightbox" hidden>
+    <button class="lightbox-close" aria-label="Cerrar">×</button>
+    <button class="lightbox-prev" aria-label="Anterior">‹</button>
+    <img id="lightboxImg" src="" alt="" />
+    <button class="lightbox-next" aria-label="Siguiente">›</button>
+    <div class="lightbox-counter" id="lightboxCounter"></div>
+  </div>
+
+  <style is:global>
+    .cliente-main {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 8rem 2rem 4rem;
+    }
+
+    .cliente-intro {
+      margin-bottom: 3rem;
+      text-align: center;
+    }
+    .cliente-eyebrow {
+      font-family: var(--f-mono);
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-wide);
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+    .cliente-name {
+      font-family: var(--f-serif);
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 300;
+      letter-spacing: 0.02em;
+      margin-bottom: 0.6rem;
+    }
+    .cliente-paquete {
+      font-family: var(--f-mono);
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-label);
+      color: var(--ash);
+      text-transform: uppercase;
+    }
+
+    /* GALERIA GRID */
+    .galeria-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+    .galeria-grid-readonly { gap: 1.2rem; margin-top: 1.5rem; }
+
+    .galeria-item {
+      position: relative;
+      transition: opacity 0.3s;
+    }
+    .galeria-frame {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 3 / 4;
+      overflow: hidden;
+      background: var(--char);
+    }
+    .galeria-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      cursor: zoom-in;
+      transition: transform 0.4s ease, filter 0.3s;
+      -webkit-user-drag: none;
+      user-select: none;
+    }
+    .galeria-item:hover .galeria-frame img { transform: scale(1.03); }
+
+    .galeria-caption {
+      margin-top: 0.6rem;
+      font-family: var(--f-mono);
+      font-size: var(--fs-micro);
+      letter-spacing: var(--ls-label);
+      color: var(--ash);
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    /* DESCARGA (entregada) */
+    .galeria-download {
+      position: absolute;
+      top: 0.7rem;
+      right: 0.7rem;
+      width: 2rem; height: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(13,13,11,0.65);
+      color: var(--paper);
+      border: 0.5px solid rgba(245,242,237,0.3);
+      text-decoration: none;
+      font-family: var(--f-mono);
+      font-size: 0.95rem;
+      opacity: 0;
+      transition: opacity 0.25s, background 0.2s;
+    }
+    .galeria-item:hover .galeria-download { opacity: 1; }
+    .galeria-download:hover { background: var(--paper); color: var(--ink); }
+
+    /* WATERMARK (selección) */
+    .watermark-corner {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: 'Marion', Georgia, serif;
+      font-size: 4rem;
+      color: rgba(245,242,237,0.35);
+      pointer-events: none;
+      user-select: none;
+    }
+
+    /* SELECCIÓN */
+    .galeria-item-selectable .galeria-frame { cursor: pointer; }
+    .galeria-item-selectable .check-mark {
+      position: absolute;
+      top: 0.7rem;
+      right: 0.7rem;
+      width: 2rem; height: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--paper);
+      color: var(--ink);
+      font-size: 1rem;
+      opacity: 0;
+      transform: scale(0.6);
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .galeria-item-selectable.selected .check-mark {
+      opacity: 1;
+      transform: scale(1);
+    }
+    .galeria-item-selectable.selected .galeria-frame { outline: 2px solid var(--paper); outline-offset: 4px; }
+    .galeria-item-selectable.selected .galeria-frame img { filter: brightness(0.7); }
+
+    /* CONTADOR (selección) */
+    .seleccion-status {
+      position: sticky;
+      top: 1rem;
+      z-index: 50;
+      background: var(--ink);
+      padding: 1.25rem 1.5rem;
+      border: 0.5px solid rgba(245,242,237,0.12);
+      margin-bottom: 2rem;
+    }
+    .seleccion-instructions {
+      font-family: var(--f-sans);
+      font-size: var(--fs-body);
+      color: var(--mist);
+      margin-bottom: 0.8rem;
+      line-height: 1.6;
+    }
+    .seleccion-instructions strong { color: var(--paper); }
+    .contador-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      font-family: var(--f-mono);
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-label);
+      text-transform: uppercase;
+      color: var(--paper);
+    }
+    .contador-extras { color: var(--accent); }
+    .contador-extras strong { color: var(--paper); }
+
+    .confirmar-bar {
+      margin-top: 3rem;
+      display: flex;
+      justify-content: center;
+    }
+    .btn-confirmar {
+      padding: 1rem 3rem;
+      background: var(--paper);
+      color: var(--ink);
+      border: none;
+      font-family: var(--f-mono);
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-wide);
+      text-transform: uppercase;
+      cursor: none;
+      transition: background 0.2s, opacity 0.2s;
+    }
+    .btn-confirmar:hover { background: var(--accent); }
+    .btn-confirmar:disabled { opacity: 0.4; pointer-events: none; }
+
+    /* ESTADOS NO INTERACTIVOS */
+    .estado-pendiente, .estado-editando {
+      max-width: 600px;
+      margin: 4rem auto;
+      text-align: center;
+      padding: 2.5rem;
+      border: 0.5px solid rgba(245,242,237,0.12);
+    }
+    .estado-titulo {
+      font-family: var(--f-serif);
+      font-size: 1.4rem;
+      margin-bottom: 1rem;
+      color: var(--paper);
+    }
+    .estado-texto {
+      font-family: var(--f-sans);
+      color: var(--mist);
+      line-height: 1.7;
+      font-size: var(--fs-body);
+    }
+    .estado-entregada > .estado-texto {
+      text-align: center;
+      max-width: 600px;
+      margin: 0 auto 2rem;
+    }
+    .seleccion-resumen { margin-top: 2rem; text-align: left; }
+    .seleccion-resumen summary {
+      font-family: var(--f-mono);
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-label);
+      color: var(--ash);
+      text-transform: uppercase;
+      cursor: pointer;
+      padding: 0.6rem 0;
+    }
+    .seleccion-resumen summary:hover { color: var(--paper); }
+
+    /* LIGHTBOX */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(13,13,11,0.96);
+    }
+    .lightbox[hidden] { display: none; }
+    .lightbox img {
+      max-width: 92vw;
+      max-height: 88vh;
+      object-fit: contain;
+      -webkit-user-drag: none;
+      user-select: none;
+    }
+    .lightbox-close, .lightbox-prev, .lightbox-next {
+      position: absolute;
+      background: transparent;
+      border: 0.5px solid rgba(245,242,237,0.3);
+      color: var(--paper);
+      font-size: 1.6rem;
+      width: 3rem; height: 3rem;
+      display: flex; align-items: center; justify-content: center;
+      cursor: none;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .lightbox-close:hover, .lightbox-prev:hover, .lightbox-next:hover {
+      background: rgba(245,242,237,0.1);
+      border-color: var(--paper);
+    }
+    .lightbox-close { top: 1.5rem; right: 1.5rem; }
+    .lightbox-prev  { left: 1.5rem;  top: 50%; transform: translateY(-50%); }
+    .lightbox-next  { right: 1.5rem; top: 50%; transform: translateY(-50%); }
+    .lightbox-counter {
+      position: absolute;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: var(--f-mono);
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-wide);
+      color: var(--ash);
+      text-transform: uppercase;
+    }
+
+    @media (max-width: 768px) {
+      .cliente-main { padding: 6.5rem 1.2rem 3rem; }
+      .galeria-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+      .seleccion-status { padding: 1rem 1.1rem; }
+      .contador-bar { font-size: var(--fs-micro); }
+      .watermark-corner { font-size: 3rem; }
+      .galeria-download { opacity: 1; }
+    }
+  </style>
+
+  <script>
+    (() => {
+      // ─── Lightbox ────────────────────────────────────
+      const lightbox = document.getElementById('lightbox') as HTMLDivElement | null;
+      const lbImg = document.getElementById('lightboxImg') as HTMLImageElement | null;
+      const lbCounter = document.getElementById('lightboxCounter') as HTMLDivElement | null;
+      const items = Array.from(document.querySelectorAll<HTMLImageElement>('.galeria-frame img[data-full]'));
+      let currentIdx = 0;
+
+      const openLightbox = (i: number) => {
+        if (!lightbox || !lbImg || !lbCounter) return;
+        currentIdx = i;
+        lbImg.src = items[i].dataset.full ?? items[i].src;
+        lbImg.alt = items[i].alt;
+        lbCounter.textContent = `${String(i + 1).padStart(2, '0')} / ${String(items.length).padStart(2, '0')}`;
+        lightbox.hidden = false;
+      };
+      const closeLightbox = () => { if (lightbox) lightbox.hidden = true; };
+      const nav = (delta: number) => {
+        if (items.length === 0) return;
+        openLightbox((currentIdx + delta + items.length) % items.length);
+      };
+
+      items.forEach((img, i) => {
+        img.addEventListener('click', () => openLightbox(i));
+      });
+
+      document.querySelector('.lightbox-close')?.addEventListener('click', closeLightbox);
+      document.querySelector('.lightbox-prev')?.addEventListener('click', () => nav(-1));
+      document.querySelector('.lightbox-next')?.addEventListener('click', () => nav(1));
+      document.addEventListener('keydown', (e) => {
+        if (lightbox?.hidden) return;
+        if (e.key === 'Escape') closeLightbox();
+        if (e.key === 'ArrowLeft') nav(-1);
+        if (e.key === 'ArrowRight') nav(1);
+      });
+      lightbox?.addEventListener('click', (e) => {
+        if (e.target === lightbox) closeLightbox();
+      });
+
+      // ─── Selección ───────────────────────────────────
+      const seccion = document.querySelector<HTMLElement>('.estado-seleccion');
+      if (!seccion) return;
+
+      const sesionId = seccion.dataset.sesionId!;
+      const limite = parseInt(seccion.dataset.limite ?? '0', 10);
+      const precioExtra = parseFloat(seccion.dataset.precioExtra ?? '0');
+
+      const contadorEl = document.getElementById('contadorActual')!;
+      const extrasInfo = document.getElementById('extrasInfo')!;
+      const extrasCount = document.getElementById('extrasCount')!;
+      const extrasMonto = document.getElementById('extrasMonto')!;
+      const btnConfirmar = document.getElementById('btnConfirmar') as HTMLButtonElement;
+
+      const refresh = () => {
+        const seleccionadas = document.querySelectorAll('.galeria-item-selectable.selected').length;
+        contadorEl.textContent = String(seleccionadas);
+
+        const extras = Math.max(0, seleccionadas - limite);
+        const monto = extras * precioExtra;
+        extrasCount.textContent = String(extras);
+        extrasMonto.textContent = String(monto);
+        extrasInfo.style.display = extras > 0 ? '' : 'none';
+
+        btnConfirmar.disabled = seleccionadas === 0;
+        btnConfirmar.textContent = extras > 0
+          ? `Confirmar selección y pagar $${monto} MXN`
+          : 'Confirmar selección';
+      };
+
+      document.querySelectorAll<HTMLElement>('.galeria-item-selectable').forEach((item) => {
+        const fotoId = item.dataset.fotoId!;
+        const frame = item.querySelector('.galeria-frame');
+        // Click en la foto (excluyendo el download): toggle selección
+        frame?.addEventListener('click', async (e) => {
+          // Si dieron click en la imagen para zoom, abrir lightbox en vez de seleccionar
+          // Mantenemos seleccionar como acción por click en frame; el zoom se hace con dblclick
+          e.preventDefault();
+          item.classList.toggle('selected');
+          refresh();
+
+          try {
+            const res = await fetch('/api/seleccionar', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ sesionId, fotoId }),
+            });
+            if (!res.ok) throw new Error('Error al guardar');
+          } catch (err) {
+            // Revertir UI
+            item.classList.toggle('selected');
+            refresh();
+            console.error(err);
+            alert('No se pudo guardar la selección. Intenta de nuevo.');
+          }
+        });
+      });
+
+      btnConfirmar?.addEventListener('click', async () => {
+        if (!confirm('¿Confirmar tu selección? Después de esto ya no podrás cambiarla.')) return;
+        btnConfirmar.disabled = true;
+        btnConfirmar.textContent = 'Procesando...';
+        try {
+          const res = await fetch('/api/confirmar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sesionId }),
+          });
+          if (!res.ok) throw new Error('Error al confirmar');
+          const json = await res.json() as { redirect?: string };
+          window.location.href = json.redirect ?? window.location.href;
+        } catch (err) {
+          console.error(err);
+          alert('No se pudo confirmar. Intenta de nuevo.');
+          btnConfirmar.disabled = false;
+          refresh();
+        }
+      });
+
+      refresh();
+    })();
+  </script>
+</Layout>
