@@ -1,0 +1,223 @@
+---
+export const prerender = false;
+
+import Layout from '../../layouts/Layout.astro';
+import { readEnv } from '../../lib/sesiones';
+import { requireAdmin } from '../../lib/admin-auth';
+
+const env = await readEnv();
+const auth = await requireAdmin(env, Astro.request);
+if (auth.ok) {
+  return Astro.redirect('/admin', 302);
+}
+
+const url = new URL(Astro.request.url);
+const error = url.searchParams.get('error');
+---
+<Layout title="Admin · ANTE" noindex={true}>
+  <main class="admin-login">
+    <section class="admin-card">
+      <p class="admin-eyebrow">Acceso administrador</p>
+      <h1 class="admin-title">ANTE Admin</h1>
+
+      <form id="emailForm" class="admin-form">
+        <label for="adminEmail">Correo</label>
+        <input
+          id="adminEmail"
+          name="email"
+          type="email"
+          required
+          autocomplete="email"
+          placeholder="priormyt99@gmail.com"
+          value="priormyt99@gmail.com"
+        />
+        <button type="submit">Enviar código de acceso</button>
+      </form>
+
+      <form id="codeForm" class="admin-form" style="display:none">
+        <p class="admin-info">Te enviamos un código de 6 dígitos a <strong id="emailLabel"></strong>.</p>
+        <label for="adminCode">Código</label>
+        <input
+          id="adminCode"
+          name="code"
+          type="text"
+          required
+          autocomplete="one-time-code"
+          inputmode="numeric"
+          maxlength="6"
+          pattern="[0-9]{6}"
+          placeholder="000000"
+        />
+        <button type="submit">Entrar</button>
+        <button type="button" id="backBtn" class="link-btn">Cambiar correo</button>
+      </form>
+
+      {error && <p class="admin-error">{error}</p>}
+      <p id="formError" class="admin-error" aria-live="polite"></p>
+    </section>
+  </main>
+
+  <style is:global>
+    .admin-login { min-height: 70vh; display: flex; align-items: center; justify-content: center; padding: 8rem 2rem 4rem; }
+    .admin-card {
+      width: min(440px, 100%);
+      border: 0.5px solid rgba(245,242,237,0.12);
+      padding: 3rem 2.5rem;
+    }
+    .admin-eyebrow {
+      font-family: var(--f-mono);
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-wide);
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+    }
+    .admin-title {
+      font-family: var(--f-serif);
+      font-size: 1.8rem;
+      font-weight: 300;
+      margin-bottom: 2rem;
+    }
+    .admin-form label {
+      display: block;
+      font-family: var(--f-mono);
+      font-size: var(--fs-micro);
+      letter-spacing: var(--ls-label);
+      color: var(--ash);
+      text-transform: uppercase;
+      margin-bottom: 0.6rem;
+    }
+    .admin-form input {
+      width: 100%;
+      padding: 0.85rem 1rem;
+      background: transparent;
+      border: 0.5px solid rgba(245,242,237,0.2);
+      color: var(--paper);
+      font-family: var(--f-mono);
+      font-size: var(--fs-label);
+      outline: none;
+    }
+    .admin-form input:focus { border-color: rgba(245,242,237,0.5); }
+    .admin-form button[type="submit"] {
+      margin-top: 1.5rem;
+      width: 100%;
+      padding: 0.9rem 1rem;
+      background: var(--paper);
+      color: var(--ink);
+      border: none;
+      font-family: var(--f-mono);
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-wide);
+      text-transform: uppercase;
+      cursor: none;
+    }
+    .admin-form button[type="submit"]:hover { background: var(--accent); }
+    .admin-form button[type="submit"]:disabled { opacity: 0.5; pointer-events: none; }
+    .admin-form .link-btn {
+      margin-top: 1rem;
+      background: transparent;
+      border: none;
+      color: var(--ash);
+      font-family: var(--f-mono);
+      font-size: var(--fs-micro);
+      letter-spacing: var(--ls-label);
+      text-transform: uppercase;
+      cursor: none;
+      padding: 0.5rem;
+    }
+    .admin-form .link-btn:hover { color: var(--paper); }
+    .admin-info { font-family: var(--f-sans); color: var(--mist); margin-bottom: 1.5rem; line-height: 1.6; font-size: var(--fs-body); }
+    .admin-info strong { color: var(--paper); }
+    .admin-error { color: #e07070; font-family: var(--f-mono); font-size: var(--fs-micro); margin-top: 1rem; min-height: 1.2em; }
+  </style>
+
+  <script>
+    const emailForm = document.getElementById('emailForm') as HTMLFormElement;
+    const codeForm = document.getElementById('codeForm') as HTMLFormElement;
+    const emailLabel = document.getElementById('emailLabel')!;
+    const errorEl = document.getElementById('formError')!;
+    const backBtn = document.getElementById('backBtn')!;
+
+    function showError(msg: string) { errorEl.textContent = msg; }
+    function clearError() { errorEl.textContent = ''; }
+
+    let currentEmail = '';
+
+    emailForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearError();
+      const fd = new FormData(emailForm);
+      const email = String(fd.get('email') ?? '').trim().toLowerCase();
+      if (!email) return;
+
+      const btn = emailForm.querySelector('button[type="submit"]') as HTMLButtonElement;
+      btn.disabled = true;
+      btn.textContent = 'Enviando...';
+
+      try {
+        const res = await fetch('/admin/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        });
+        const j = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          showError(j.error ?? 'No se pudo enviar el código');
+          btn.disabled = false;
+          btn.textContent = 'Enviar código de acceso';
+          return;
+        }
+        currentEmail = email;
+        emailLabel.textContent = email;
+        emailForm.style.display = 'none';
+        codeForm.style.display = '';
+        (document.getElementById('adminCode') as HTMLInputElement).focus();
+      } catch (err) {
+        showError(String(err));
+        btn.disabled = false;
+        btn.textContent = 'Enviar código de acceso';
+      }
+    });
+
+    codeForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearError();
+      const fd = new FormData(codeForm);
+      const code = String(fd.get('code') ?? '').trim();
+      if (!code) return;
+
+      const btn = codeForm.querySelector('button[type="submit"]') as HTMLButtonElement;
+      btn.disabled = true;
+      btn.textContent = 'Verificando...';
+
+      try {
+        const res = await fetch('/admin/api/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: currentEmail, code }),
+        });
+        const j = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          showError(j.error ?? 'Código incorrecto');
+          btn.disabled = false;
+          btn.textContent = 'Entrar';
+          return;
+        }
+        window.location.href = '/admin';
+      } catch (err) {
+        showError(String(err));
+        btn.disabled = false;
+        btn.textContent = 'Entrar';
+      }
+    });
+
+    backBtn.addEventListener('click', () => {
+      codeForm.style.display = 'none';
+      emailForm.style.display = '';
+      const btn = emailForm.querySelector('button[type="submit"]') as HTMLButtonElement;
+      btn.disabled = false;
+      btn.textContent = 'Enviar código de acceso';
+      clearError();
+    });
+  </script>
+</Layout>

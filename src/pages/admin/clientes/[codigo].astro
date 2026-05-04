@@ -1,0 +1,365 @@
+---
+export const prerender = false;
+
+import Layout from '../../../layouts/Layout.astro';
+import { getSesionByCodigo, fotoUrl, readEnv } from '../../../lib/sesiones';
+import { requireAdmin } from '../../../lib/admin-auth';
+
+const env = await readEnv();
+const auth = await requireAdmin(env, Astro.request);
+if (!auth.ok) return Astro.redirect('/admin/login', 302);
+
+const { codigo } = Astro.params;
+const codigoNorm = (codigo ?? '').toUpperCase();
+const data = codigoNorm ? await getSesionByCodigo(env, codigoNorm) : null;
+if (!data) return Astro.redirect('/admin?err=no-encontrado', 302);
+
+const { sesion, paquete, fotosFinales, fotosPreview, selecciones } = data;
+const seleccionadas = new Set(selecciones.map((s) => s.foto_id));
+const limite = sesion.limite_fotos ?? paquete?.fotos_incluidas ?? 0;
+
+const estadoLabel: Record<string, string> = {
+  seleccion: 'Seleccionando',
+  pago_pendiente: 'Pago pendiente',
+  editando: 'Editando',
+  entregada: 'Entregada',
+};
+---
+<Layout title={`${sesion.codigo} · Admin · ANTE`} noindex={true}>
+  <main class="admin-main">
+    <header class="admin-header">
+      <div>
+        <p class="admin-eyebrow"><a href="/admin" class="back-link">← Clientes</a></p>
+        <h1 class="admin-h1">{sesion.nombre_cliente}</h1>
+        <p class="admin-sub">
+          Código <span class="mono">{sesion.codigo}</span>
+          {paquete && ` · Paquete ${paquete.nombre} · ${limite} fotos`}
+        </p>
+      </div>
+      <div class="admin-actions">
+        <span class={`badge badge-${sesion.estado}`}>{estadoLabel[sesion.estado]}</span>
+      </div>
+    </header>
+
+    <section class="admin-block">
+      <h2 class="admin-h2">Estado</h2>
+      <div class="estado-controls">
+        <select id="estadoSelect">
+          <option value="seleccion" selected={sesion.estado === 'seleccion'}>Seleccionando</option>
+          <option value="pago_pendiente" selected={sesion.estado === 'pago_pendiente'}>Pago pendiente</option>
+          <option value="editando" selected={sesion.estado === 'editando'}>Editando</option>
+          <option value="entregada" selected={sesion.estado === 'entregada'}>Entregada</option>
+        </select>
+        <button id="btnCambiarEstado" type="button" class="btn-ghost">Cambiar estado</button>
+      </div>
+      <p class="form-hint">
+        Recuerda: la página del cliente cambia según este estado. Pasa a "Editando" cuando recibas el pago de extras (si los hay), y a "Entregada" cuando subas las fotos finales.
+      </p>
+    </section>
+
+    <section class="admin-block">
+      <h2 class="admin-h2">Fotos preview ({fotosPreview.length})</h2>
+      <p class="form-hint">Las que el cliente ve para seleccionar. Con marca de agua, baja resolución.</p>
+
+      {fotosPreview.length === 0 ? (
+        <p class="empty-block">Sin fotos preview todavía.</p>
+      ) : (
+        <div class="thumb-grid">
+          {fotosPreview.map((foto) => (
+            <figure class={`thumb ${seleccionadas.has(foto.id) ? 'selected' : ''}`}>
+              <img src={fotoUrl(env, foto.r2_key)} alt={foto.original_filename ?? ''} loading="lazy" />
+              {seleccionadas.has(foto.id) && <span class="thumb-mark">SELECCIONADA</span>}
+              <figcaption>{foto.original_filename}</figcaption>
+            </figure>
+          ))}
+        </div>
+      )}
+    </section>
+
+    <section class="admin-block">
+      <h2 class="admin-h2">Fotos finales ({fotosFinales.length})</h2>
+      <p class="form-hint">JPG en alta calidad sin marca de agua. Visibles para el cliente solo cuando estado = "Entregada".</p>
+
+      <div id="finalDropzone" class="dropzone">
+        <p class="dropzone-text">Arrastra las fotos finales editadas aquí</p>
+        <p class="dropzone-sub">Se procesarán a 2400px JPG calidad alta</p>
+        <input id="finalFileInput" type="file" accept="image/jpeg,image/png" multiple hidden />
+      </div>
+      <ul id="finalFileList" class="file-list"></ul>
+      <button id="btnSubirFinales" type="button" class="btn-primary" style="margin-top:1rem;display:none">Subir fotos finales</button>
+      <p id="finalMsg" class="form-msg" aria-live="polite"></p>
+
+      {fotosFinales.length > 0 && (
+        <div class="thumb-grid" style="margin-top: 1.5rem">
+          {fotosFinales.map((foto) => (
+            <figure class="thumb">
+              <img src={fotoUrl(env, foto.r2_key)} alt={foto.original_filename ?? ''} loading="lazy" />
+              <figcaption>{foto.original_filename}</figcaption>
+            </figure>
+          ))}
+        </div>
+      )}
+    </section>
+
+    <section class="admin-block">
+      <h2 class="admin-h2">Selección del cliente</h2>
+      {selecciones.length === 0 ? (
+        <p class="empty-block">El cliente aún no ha seleccionado fotos.</p>
+      ) : (
+        <ul class="selection-list">
+          {selecciones.map((s) => {
+            const foto = fotosPreview.find((f) => f.id === s.foto_id) ?? fotosFinales.find((f) => f.id === s.foto_id);
+            return (
+              <li>
+                <span class="mono">{foto?.original_filename ?? s.foto_id}</span>
+                {s.nota && <span class="nota">"{s.nota}"</span>}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+
+      {selecciones.length > limite && limite > 0 && (
+        <p class="extras-info">
+          {selecciones.length - limite} foto{selecciones.length - limite !== 1 ? 's' : ''} extra ·
+          <strong> ${(selecciones.length - limite) * Number(sesion.precio_extra)} MXN</strong>
+        </p>
+      )}
+    </section>
+
+    <p class="admin-footer-link">
+      <a href={`/clientes/${sesion.codigo}`} target="_blank" class="link">Ver galería como cliente →</a>
+    </p>
+  </main>
+
+  <style is:global>
+    .admin-sub {
+      font-family: var(--f-mono);
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-label);
+      color: var(--ash);
+      text-transform: uppercase;
+      margin-top: 0.4rem;
+    }
+    .admin-sub .mono { color: var(--paper); }
+
+    .admin-block {
+      margin-top: 3rem;
+      padding-top: 2.5rem;
+      border-top: 0.5px solid rgba(245,242,237,0.1);
+    }
+    .admin-h2 {
+      font-family: var(--f-serif);
+      font-size: 1.3rem;
+      font-weight: 300;
+      margin-bottom: 1rem;
+    }
+
+    .estado-controls {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 0.6rem;
+    }
+    #estadoSelect {
+      padding: 0.7rem 1rem;
+      background: transparent;
+      border: 0.5px solid rgba(245,242,237,0.2);
+      color: var(--paper);
+      font-family: var(--f-mono);
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-label);
+      text-transform: uppercase;
+    }
+    #estadoSelect option { background: var(--ink); }
+
+    .thumb-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .thumb {
+      position: relative;
+      background: var(--char);
+    }
+    .thumb img {
+      width: 100%;
+      aspect-ratio: 3/4;
+      object-fit: cover;
+      display: block;
+    }
+    .thumb.selected { outline: 2px solid var(--accent); outline-offset: 3px; }
+    .thumb-mark {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      background: var(--paper);
+      color: var(--ink);
+      padding: 0.25rem 0.6rem;
+      font-family: var(--f-mono);
+      font-size: var(--fs-micro);
+      letter-spacing: var(--ls-label);
+    }
+    .thumb figcaption {
+      padding: 0.4rem 0.6rem;
+      font-family: var(--f-mono);
+      font-size: var(--fs-micro);
+      color: var(--ash);
+      letter-spacing: 0.05em;
+      word-break: break-all;
+    }
+
+    .empty-block {
+      padding: 1.5rem;
+      font-family: var(--f-mono);
+      font-size: var(--fs-micro);
+      letter-spacing: var(--ls-label);
+      color: var(--ash);
+      text-transform: uppercase;
+      border: 0.5px dashed rgba(245,242,237,0.15);
+      text-align: center;
+    }
+
+    .selection-list { list-style: none; padding: 0; display: grid; gap: 0.4rem; }
+    .selection-list li {
+      padding: 0.5rem 0.8rem;
+      border: 0.5px solid rgba(245,242,237,0.1);
+      font-family: var(--f-mono);
+      font-size: var(--fs-micro);
+      color: var(--mist);
+      display: flex;
+      gap: 1rem;
+    }
+    .selection-list .nota {
+      color: var(--accent);
+      font-style: italic;
+    }
+    .extras-info {
+      margin-top: 1rem;
+      padding: 0.8rem 1rem;
+      background: rgba(224,158,111,0.08);
+      border: 0.5px solid rgba(224,158,111,0.3);
+      font-family: var(--f-mono);
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-label);
+      color: var(--paper);
+      text-transform: uppercase;
+    }
+    .admin-footer-link {
+      margin-top: 4rem;
+      text-align: center;
+    }
+  </style>
+
+  <script src="/js/image-processor.js" is:inline></script>
+  <script define:vars={{ codigo: sesion.codigo }}>
+    // Cambiar estado
+    const estadoSelect = document.getElementById('estadoSelect');
+    const btnCambiar = document.getElementById('btnCambiarEstado');
+    btnCambiar.addEventListener('click', async () => {
+      const nuevo = estadoSelect.value;
+      btnCambiar.disabled = true;
+      btnCambiar.textContent = 'Cambiando...';
+      try {
+        const res = await fetch('/admin/api/cambiar-estado', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ codigo, estado: nuevo }),
+        });
+        if (!res.ok) {
+          const j = await res.json().catch(() => ({}));
+          alert(j.error || 'Error cambiando estado');
+        } else {
+          window.location.reload();
+        }
+      } catch (e) {
+        alert(String(e));
+      } finally {
+        btnCambiar.disabled = false;
+        btnCambiar.textContent = 'Cambiar estado';
+      }
+    });
+
+    // Drag & drop fotos finales
+    const dropzone = document.getElementById('finalDropzone');
+    const fileInput = document.getElementById('finalFileInput');
+    const fileList = document.getElementById('finalFileList');
+    const btnSubir = document.getElementById('btnSubirFinales');
+    const msg = document.getElementById('finalMsg');
+    const archivos = [];
+
+    dropzone.addEventListener('click', () => fileInput.click());
+    dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('drag-over'); });
+    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('drag-over');
+      addFiles(Array.from(e.dataTransfer.files));
+    });
+    fileInput.addEventListener('change', () => addFiles(Array.from(fileInput.files)));
+
+    function addFiles(files) {
+      for (const f of files) {
+        if (!f.type.startsWith('image/')) continue;
+        if (archivos.some((a) => a.name === f.name && a.size === f.size)) continue;
+        archivos.push(f);
+      }
+      render();
+    }
+
+    function render() {
+      fileList.innerHTML = '';
+      archivos.forEach((f, i) => {
+        const li = document.createElement('li');
+        li.id = `final-file-${i}`;
+        li.innerHTML = `<span>${f.name} · ${(f.size / 1024 / 1024).toFixed(1)} MB</span><span class="file-status">Pendiente</span>`;
+        fileList.appendChild(li);
+      });
+      btnSubir.style.display = archivos.length > 0 ? '' : 'none';
+    }
+
+    function setStatus(i, txt, cls = '') {
+      const el = document.querySelector(`#final-file-${i} .file-status`);
+      if (el) { el.textContent = txt; el.className = `file-status ${cls}`; }
+    }
+
+    btnSubir.addEventListener('click', async () => {
+      btnSubir.disabled = true;
+      btnSubir.textContent = 'Subiendo...';
+      msg.textContent = '';
+      msg.className = 'form-msg';
+      let ok = 0, fail = 0;
+      for (let i = 0; i < archivos.length; i++) {
+        const file = archivos[i];
+        try {
+          setStatus(i, 'Procesando...');
+          const blob = await window.imageProcessor.generaFinal(file);
+          setStatus(i, 'Subiendo...');
+          const fd = new FormData();
+          fd.set('codigo', codigo);
+          fd.set('tipo', 'final');
+          fd.set('orden', String(i + 1));
+          fd.set('file', new File([blob], file.name.replace(/\.[^.]+$/, '') + '.jpg', { type: 'image/jpeg' }));
+          const res = await fetch('/admin/api/upload', { method: 'POST', body: fd });
+          if (!res.ok) {
+            const j = await res.json().catch(() => ({}));
+            throw new Error(j.error || `HTTP ${res.status}`);
+          }
+          setStatus(i, 'Listo', 'ok');
+          ok++;
+        } catch (err) {
+          setStatus(i, 'Error', 'error');
+          console.error(err);
+          fail++;
+        }
+      }
+      msg.textContent = `${ok} subidas${fail ? `, ${fail} fallidas` : ''}.`;
+      msg.className = `form-msg ${fail ? 'error' : 'ok'}`;
+      btnSubir.disabled = false;
+      btnSubir.textContent = 'Subir fotos finales';
+      if (fail === 0) setTimeout(() => window.location.reload(), 1200);
+    });
+  </script>
+</Layout>

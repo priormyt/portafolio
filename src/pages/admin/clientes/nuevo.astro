@@ -1,0 +1,324 @@
+---
+export const prerender = false;
+
+import Layout from '../../../layouts/Layout.astro';
+import { createClient } from '@supabase/supabase-js';
+import type { Database } from '../../../lib/database.types';
+import { readEnv } from '../../../lib/sesiones';
+import { requireAdmin } from '../../../lib/admin-auth';
+
+const env = await readEnv();
+const auth = await requireAdmin(env, Astro.request);
+if (!auth.ok) return Astro.redirect('/admin/login', 302);
+
+const sb = createClient<Database>(
+  env.PUBLIC_SUPABASE_URL!,
+  env.SUPABASE_SERVICE_ROLE_KEY!,
+  { auth: { persistSession: false, autoRefreshToken: false } },
+);
+
+const { data: paquetes } = await sb
+  .from('paquetes')
+  .select('id, nombre, fotos_incluidas, duracion_min, looks')
+  .eq('activo', true)
+  .order('orden');
+---
+<Layout title="Nuevo cliente · Admin · ANTE" noindex={true}>
+  <main class="admin-main">
+    <header class="admin-header">
+      <div>
+        <p class="admin-eyebrow"><a href="/admin" class="back-link">← Clientes</a></p>
+        <h1 class="admin-h1">Nuevo cliente</h1>
+      </div>
+    </header>
+
+    <form id="nuevoForm" class="admin-form-grid">
+      <div class="form-group">
+        <label for="codigo">Código de acceso</label>
+        <input id="codigo" name="codigo" type="text" required placeholder="MOOT, JUAN2026..." pattern="[A-Z0-9]+" />
+        <p class="form-hint">Solo mayúsculas y números. El cliente lo usará para entrar a su galería.</p>
+      </div>
+
+      <div class="form-group">
+        <label for="nombre">Nombre del cliente</label>
+        <input id="nombre" name="nombre" type="text" required placeholder="Ana García" />
+      </div>
+
+      <div class="form-group">
+        <label for="email">Correo (opcional)</label>
+        <input id="email" name="email" type="email" placeholder="cliente@email.com" />
+      </div>
+
+      <div class="form-group">
+        <label for="paquete">Paquete</label>
+        <select id="paquete" name="paquete">
+          <option value="">— Selecciona —</option>
+          {paquetes?.map((p) => (
+            <option value={p.id} data-fotos={p.fotos_incluidas}>
+              {p.nombre} · {p.fotos_incluidas} fotos · {p.duracion_min} min · {p.looks} look{p.looks > 1 ? 's' : ''}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="fecha">Fecha de la sesión (opcional)</label>
+        <input id="fecha" name="fecha" type="date" />
+      </div>
+
+      <div class="form-group form-group-full">
+        <label>Fotos para selección (preview con marca de agua)</label>
+        <div id="dropzone" class="dropzone">
+          <p class="dropzone-text">Arrastra las fotos aquí o haz click para elegir</p>
+          <p class="dropzone-sub">Las fotos se procesan en tu navegador antes de subir (resize + watermark)</p>
+          <input id="fileInput" type="file" accept="image/jpeg,image/png" multiple hidden />
+        </div>
+        <ul id="fileList" class="file-list"></ul>
+      </div>
+
+      <div class="form-group form-group-full">
+        <button type="submit" id="submitBtn" class="btn-primary btn-full">Crear cliente y subir fotos</button>
+        <p id="formMsg" class="form-msg" aria-live="polite"></p>
+      </div>
+    </form>
+  </main>
+
+  <style is:global>
+    .back-link { color: var(--accent); text-decoration: none; }
+    .back-link:hover { color: var(--paper); }
+
+    .admin-form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.8rem 2rem;
+      max-width: 900px;
+    }
+    .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
+    .form-group-full { grid-column: 1 / -1; }
+
+    .form-group label {
+      font-family: var(--f-mono);
+      font-size: var(--fs-micro);
+      letter-spacing: var(--ls-label);
+      color: var(--ash);
+      text-transform: uppercase;
+    }
+    .form-group input, .form-group select {
+      padding: 0.85rem 1rem;
+      background: transparent;
+      border: 0.5px solid rgba(245,242,237,0.2);
+      color: var(--paper);
+      font-family: var(--f-mono);
+      font-size: var(--fs-label);
+      outline: none;
+    }
+    .form-group input:focus, .form-group select:focus { border-color: rgba(245,242,237,0.5); }
+    .form-group select option { background: var(--ink); color: var(--paper); }
+    .form-hint { font-family: var(--f-mono); font-size: var(--fs-micro); color: var(--ash); letter-spacing: 0.05em; margin-top: 0.2rem; }
+
+    .dropzone {
+      border: 1px dashed rgba(245,242,237,0.25);
+      padding: 3rem 2rem;
+      text-align: center;
+      cursor: none;
+      transition: border-color 0.25s, background 0.25s;
+    }
+    .dropzone:hover, .dropzone.drag-over {
+      border-color: var(--accent);
+      background: rgba(245,242,237,0.02);
+    }
+    .dropzone-text {
+      font-family: var(--f-sans);
+      font-size: var(--fs-body);
+      color: var(--paper);
+      margin-bottom: 0.5rem;
+    }
+    .dropzone-sub {
+      font-family: var(--f-mono);
+      font-size: var(--fs-micro);
+      letter-spacing: var(--ls-label);
+      color: var(--ash);
+    }
+
+    .file-list { list-style: none; padding: 0; margin-top: 1rem; display: grid; gap: 0.4rem; }
+    .file-list li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0.8rem;
+      border: 0.5px solid rgba(245,242,237,0.1);
+      font-family: var(--f-mono);
+      font-size: var(--fs-micro);
+      color: var(--mist);
+    }
+    .file-list .file-status {
+      color: var(--ash);
+      letter-spacing: var(--ls-label);
+      text-transform: uppercase;
+    }
+    .file-list .file-status.ok { color: #a4c486; }
+    .file-list .file-status.error { color: #e07070; }
+
+    .btn-full { width: 100%; padding: 1.1rem; }
+    .btn-primary:disabled { opacity: 0.5; pointer-events: none; }
+    .form-msg {
+      margin-top: 1rem;
+      font-family: var(--f-mono);
+      font-size: var(--fs-micro);
+      letter-spacing: var(--ls-label);
+      color: var(--ash);
+      text-transform: uppercase;
+      min-height: 1.2em;
+    }
+    .form-msg.error { color: #e07070; }
+    .form-msg.ok { color: #a4c486; }
+
+    @media (max-width: 768px) {
+      .admin-form-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+
+  <script src="/js/image-processor.js" is:inline></script>
+  <script>
+    const dropzone = document.getElementById('dropzone') as HTMLDivElement;
+    const fileInput = document.getElementById('fileInput') as HTMLInputElement;
+    const fileList = document.getElementById('fileList') as HTMLUListElement;
+    const form = document.getElementById('nuevoForm') as HTMLFormElement;
+    const submitBtn = document.getElementById('submitBtn') as HTMLButtonElement;
+    const formMsg = document.getElementById('formMsg') as HTMLParagraphElement;
+    const codigoInput = document.getElementById('codigo') as HTMLInputElement;
+
+    const archivos: File[] = [];
+
+    codigoInput.addEventListener('input', () => {
+      codigoInput.value = codigoInput.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    });
+
+    dropzone.addEventListener('click', () => fileInput.click());
+    dropzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropzone.classList.add('drag-over');
+    });
+    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('drag-over');
+      if (e.dataTransfer?.files) addFiles(Array.from(e.dataTransfer.files));
+    });
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files) addFiles(Array.from(fileInput.files));
+    });
+
+    function addFiles(files: File[]) {
+      for (const f of files) {
+        if (!f.type.startsWith('image/')) continue;
+        if (archivos.some((a) => a.name === f.name && a.size === f.size)) continue;
+        archivos.push(f);
+      }
+      renderList();
+    }
+
+    function renderList() {
+      fileList.innerHTML = '';
+      archivos.forEach((f, i) => {
+        const li = document.createElement('li');
+        li.id = `file-${i}`;
+        li.innerHTML = `<span>${f.name} · ${(f.size / 1024 / 1024).toFixed(1)} MB</span><span class="file-status">Pendiente</span>`;
+        fileList.appendChild(li);
+      });
+    }
+
+    function setStatus(i: number, txt: string, cls = '') {
+      const el = document.querySelector(`#file-${i} .file-status`);
+      if (el) {
+        el.textContent = txt;
+        el.className = `file-status ${cls}`;
+      }
+    }
+
+    function setMsg(txt: string, cls = '') {
+      formMsg.textContent = txt;
+      formMsg.className = `form-msg ${cls}`;
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      setMsg('');
+
+      const fd = new FormData(form);
+      const codigo = String(fd.get('codigo') ?? '').trim().toUpperCase();
+      const nombre = String(fd.get('nombre') ?? '').trim();
+      if (!codigo || !nombre) { setMsg('Código y nombre son requeridos', 'error'); return; }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Creando sesión...';
+
+      // 1) crear sesión
+      const resCrea = await fetch('/admin/api/sesion-nueva', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          codigo,
+          nombre_cliente: nombre,
+          email_cliente: String(fd.get('email') ?? '') || null,
+          paquete_id: String(fd.get('paquete') ?? '') || null,
+          fecha_sesion: String(fd.get('fecha') ?? '') || null,
+        }),
+      });
+      const jc = await resCrea.json().catch(() => ({}));
+      if (!resCrea.ok) {
+        setMsg(jc.error ?? 'Error creando sesión', 'error');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Crear cliente y subir fotos';
+        return;
+      }
+
+      // 2) procesar y subir cada foto como preview
+      let ok = 0;
+      let fail = 0;
+      for (let i = 0; i < archivos.length; i++) {
+        const file = archivos[i];
+        try {
+          setStatus(i, 'Procesando...');
+          const blob = await window.imageProcessor.generaPreview(file);
+          setStatus(i, 'Subiendo...');
+
+          const upForm = new FormData();
+          upForm.set('codigo', codigo);
+          upForm.set('tipo', 'preview');
+          upForm.set('orden', String(i + 1));
+          upForm.set(
+            'file',
+            new File([blob], file.name.replace(/\.[^.]+$/, '') + '.jpg', { type: 'image/jpeg' }),
+          );
+
+          const upRes = await fetch('/admin/api/upload', { method: 'POST', body: upForm });
+          if (!upRes.ok) {
+            const j = await upRes.json().catch(() => ({}));
+            throw new Error(j.error ?? `HTTP ${upRes.status}`);
+          }
+          setStatus(i, 'Listo', 'ok');
+          ok++;
+        } catch (err) {
+          setStatus(i, 'Error', 'error');
+          console.error(err);
+          fail++;
+        }
+      }
+
+      setMsg(
+        archivos.length === 0
+          ? `Sesión ${codigo} creada (sin fotos todavía).`
+          : `Sesión ${codigo} creada. ${ok} fotos subidas${fail ? `, ${fail} con error` : ''}.`,
+        fail > 0 ? 'error' : 'ok',
+      );
+
+      if (fail === 0) {
+        setTimeout(() => { window.location.href = `/admin/clientes/${codigo}`; }, 1200);
+      } else {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Reintentar fallidas';
+      }
+    });
+  </script>
+</Layout>
