@@ -20,7 +20,7 @@
   <link rel="icon" type="image/x-icon" href="https://www.ante.photo/img/favicon.ico">
   <link rel="shortcut icon" type="image/x-icon" href="https://www.ante.photo/img/favicon.ico">
 
-  <meta name="description" content="Galería privada de la sesión de Javier Amezcua en ANTE Estudio. Acceso exclusivo para previsualizar sus fotografías.">
+  <meta name="description" content="Galería privada de la sesión de Javier Amezcua en ANTE Estudio. Tus fotos están listas para descarga en alta resolución.">
 
   <style>
     :root {
@@ -251,6 +251,31 @@
       text-transform:uppercase;
       word-break:break-all;
     }
+    .download-btn{
+      position:absolute;
+      top:.7rem;
+      right:.7rem;
+      width:2.4rem;
+      height:2.4rem;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:rgba(17,17,17,0.7);
+      color:var(--accent);
+      border:1px solid rgba(245,245,233,0.35);
+      border-radius:50%;
+      text-decoration:none;
+      font-size:1.1rem;
+      line-height:1;
+      cursor:pointer;
+      transition:background .2s, color .2s, transform .2s;
+      z-index:4;
+    }
+    .download-btn:hover{
+      background:var(--accent);
+      color:#111;
+      transform:scale(1.08);
+    }
 
     .download-note{
       width:100%;
@@ -423,14 +448,14 @@
       <p class="intro-title">Galería privada</p>
       <div class="intro-header">
         <div class="avatar-circle">
-          <img id="avatarPreview" src="../img/thumb/Javier_1.jpg" alt="Vista previa de Javier Amezcua">
+          <img id="avatarPreview" src="../img/Javier_1-EditarAzul.jpg" alt="Vista previa de Javier Amezcua">
         </div>
         <div>
           <h1 class="intro-name">Javier Amezcua</h1>
           <p class="intro-text">
-            Gracias por confiar en ANTE para tu sesión. Aquí puedes previsualizar las
-            fotografías finales de tu sesión. Las imágenes mostradas son una vista previa
-            con marca de agua; la entrega definitiva se realiza por separado.
+            Tus fotos están listas. Gracias por confiar en ANTE para tu sesión.
+            Da click en cualquiera para verla en grande, o en el ícono de descarga
+            para guardarla en alta resolución.
           </p>
         </div>
       </div>
@@ -439,9 +464,8 @@
     <section class="gallery" id="gallery"></section>
 
     <p class="download-note">
-      Estas imágenes son una previsualización con marca de agua. La entrega final
-      en alta resolución se realiza por separado. Esta galería se borrará 30 días
-      después del envío del correo electrónico con el acceso.
+      Tus fotos están listas en alta resolución. Gracias por confiar en ANTE.
+      Esta galería estará disponible durante 30 días desde el envío del correo de acceso.
     </p>
 
   </main>
@@ -450,7 +474,6 @@
     <span class="close">&times;</span>
     <div class="lightbox-frame">
       <img id="lightbox-img" src="" alt="Fotografía ampliada de Javier Amezcua">
-      <span class="watermark">A&nbsp;N&nbsp;T&nbsp;E</span>
     </div>
   </div>
 
@@ -474,28 +497,21 @@
       });
     }
 
-    // Imágenes específicas de la sesión de Javier Amezcua (solo thumbnails)
+    // Imágenes finales de la sesión de Javier Amezcua (alta resolución desde public/img)
     const images = [
-      {src: "../img/thumb/Javier_1.jpg",  alt: "Retrato profesional de Javier Amezcua – foto 1 de la sesión",  name: "Javier_1.jpg"},
-      {src: "../img/thumb/Javier_2.jpg",  alt: "Retrato profesional de Javier Amezcua – foto 2 de la sesión",  name: "Javier_2.jpg"},
-      {src: "../img/thumb/Javier_3.jpg",  alt: "Retrato profesional de Javier Amezcua – foto 3 de la sesión",  name: "Javier_3.jpg"},
-      {src: "../img/thumb/Javier_4.jpg",  alt: "Retrato profesional de Javier Amezcua – foto 4 de la sesión",  name: "Javier_4.jpg"},
-      {src: "../img/thumb/Javier_5.jpg",  alt: "Retrato profesional de Javier Amezcua – foto 5 de la sesión",  name: "Javier_5.jpg"},
-      {src: "../img/thumb/Javier_6.jpg",  alt: "Retrato profesional de Javier Amezcua – foto 6 de la sesión",  name: "Javier_6.jpg"},
-      {src: "../img/thumb/Javier_7.jpg",  alt: "Retrato profesional de Javier Amezcua – foto 7 de la sesión",  name: "Javier_7.jpg"},
-      {src: "../img/thumb/Javier_8.jpg",  alt: "Retrato profesional de Javier Amezcua – foto 8 de la sesión",  name: "Javier_8.jpg"},
-      {src: "../img/thumb/Javier_9.jpg",  alt: "Retrato profesional de Javier Amezcua – foto 9 de la sesión",  name: "Javier_9.jpg"},
-      {src: "../img/thumb/Javier_10.jpg", alt: "Retrato profesional de Javier Amezcua – foto 10 de la sesión", name: "Javier_10.jpg"},
-      {src: "../img/thumb/Javier_11.jpg", alt: "Retrato profesional de Javier Amezcua – foto 11 de la sesión", name: "Javier_11.jpg"},
-      {src: "../img/thumb/Javier_12.jpg", alt: "Retrato profesional de Javier Amezcua – foto 12 de la sesión", name: "Javier_12.jpg"},
-      {src: "../img/thumb/Javier_13.jpg", alt: "Retrato profesional de Javier Amezcua – foto 13 de la sesión", name: "Javier_13.jpg"},
-      {src: "../img/thumb/Javier_14.jpg", alt: "Retrato profesional de Javier Amezcua – foto 14 de la sesión", name: "Javier_14.jpg"},
-      {src: "../img/thumb/Javier_15.jpg", alt: "Retrato profesional de Javier Amezcua – foto 15 de la sesión", name: "Javier_15.jpg"},
-      {src: "../img/thumb/Javier_16.jpg", alt: "Retrato profesional de Javier Amezcua – foto 16 de la sesión", name: "Javier_16.jpg"},
-      {src: "../img/thumb/Javier_17.jpg", alt: "Retrato profesional de Javier Amezcua – foto 17 de la sesión", name: "Javier_17.jpg"},
-      {src: "../img/thumb/Javier_18.jpg", alt: "Retrato profesional de Javier Amezcua – foto 18 de la sesión", name: "Javier_18.jpg"},
-      {src: "../img/thumb/Javier_19.jpg", alt: "Retrato profesional de Javier Amezcua – foto 19 de la sesión", name: "Javier_19.jpg"},
-      {src: "../img/thumb/Javier_20.jpg", alt: "Retrato profesional de Javier Amezcua – foto 20 de la sesión", name: "Javier_20.jpg"}
+      {src: "../img/Javier_1.jpg",             alt: "Retrato profesional de Javier Amezcua – foto 1",                 name: "Javier_1.jpg"},
+      {src: "../img/Javier_1-EditarAzul.jpg",  alt: "Retrato profesional de Javier Amezcua – foto 1 (edición azul)",  name: "Javier_1-EditarAzul.jpg"},
+      {src: "../img/Javier_6.jpg",             alt: "Retrato profesional de Javier Amezcua – foto 6",                 name: "Javier_6.jpg"},
+      {src: "../img/Javier_6-EditarAzul.jpg",  alt: "Retrato profesional de Javier Amezcua – foto 6 (edición azul)",  name: "Javier_6-EditarAzul.jpg"},
+      {src: "../img/Javier_8.jpg",             alt: "Retrato profesional de Javier Amezcua – foto 8",                 name: "Javier_8.jpg"},
+      {src: "../img/Javier_8-EditarAzul.jpg",  alt: "Retrato profesional de Javier Amezcua – foto 8 (edición azul)",  name: "Javier_8-EditarAzul.jpg"},
+      {src: "../img/Javier_11.jpg",            alt: "Retrato profesional de Javier Amezcua – foto 11",                name: "Javier_11.jpg"},
+      {src: "../img/Javier_13.jpg",            alt: "Retrato profesional de Javier Amezcua – foto 13",                name: "Javier_13.jpg"},
+      {src: "../img/Javier_13-EditarAzul.jpg", alt: "Retrato profesional de Javier Amezcua – foto 13 (edición azul)", name: "Javier_13-EditarAzul.jpg"},
+      {src: "../img/Javier_15.jpg",            alt: "Retrato profesional de Javier Amezcua – foto 15",                name: "Javier_15.jpg"},
+      {src: "../img/Javier_15-EditarAzul.jpg", alt: "Retrato profesional de Javier Amezcua – foto 15 (edición azul)", name: "Javier_15-EditarAzul.jpg"},
+      {src: "../img/Javier_17.jpg",            alt: "Retrato profesional de Javier Amezcua – foto 17",                name: "Javier_17.jpg"},
+      {src: "../img/Javier_17-EditarAzul.jpg", alt: "Retrato profesional de Javier Amezcua – foto 17 (edición azul)", name: "Javier_17-EditarAzul.jpg"}
     ];
 
     const gallery = document.getElementById('gallery');
@@ -518,19 +534,19 @@
       el.draggable = false;
       el.addEventListener('contextmenu', e => e.preventDefault());
 
-      const wm = document.createElement('span');
-      wm.className = 'watermark';
-      wm.innerHTML = 'A&nbsp;N&nbsp;T&nbsp;E';
+      const dl = document.createElement('a');
+      dl.className = 'download-btn';
+      dl.href = img.src;
+      dl.download = img.name;
+      dl.setAttribute('aria-label', 'Descargar ' + img.name);
+      dl.title = 'Descargar';
+      dl.textContent = '↓';
+      dl.addEventListener('click', e => e.stopPropagation());
 
       frame.appendChild(el);
-      frame.appendChild(wm);
-
-      const caption = document.createElement('figcaption');
-      caption.className = 'filename';
-      caption.textContent = img.name;
+      frame.appendChild(dl);
 
       item.appendChild(frame);
-      item.appendChild(caption);
       gallery.appendChild(item);
 
       el.addEventListener('click', () => {
