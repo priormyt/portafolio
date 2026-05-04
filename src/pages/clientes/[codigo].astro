@@ -9,7 +9,23 @@ const codigoNormalizado = (codigo ?? '').toUpperCase();
 
 const runtimeEnv = (Astro.locals as any)?.runtime?.env;
 const env = readEnv(runtimeEnv);
-const data = codigoNormalizado ? await getSesionByCodigo(env, codigoNormalizado) : null;
+
+let data: Awaited<ReturnType<typeof getSesionByCodigo>> = null;
+let errorDetalle: string | null = null;
+
+try {
+  data = codigoNormalizado ? await getSesionByCodigo(env, codigoNormalizado) : null;
+} catch (err) {
+  errorDetalle = err instanceof Error ? `${err.name}: ${err.message}` : String(err);
+  console.error('[/clientes/[codigo]]', errorDetalle);
+}
+
+if (errorDetalle) {
+  return new Response(`Error cargando sesión: ${errorDetalle}`, {
+    status: 500,
+    headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+  });
+}
 
 if (!data) {
   return Astro.redirect('/clientes?err=no-encontrado', 302);
