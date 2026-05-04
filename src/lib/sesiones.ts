@@ -10,21 +10,28 @@ export type Env = {
 };
 
 /**
- * Lee env vars priorizando el runtime (Cloudflare Workers) y cayendo a build-time.
- * El runtime se obtiene de Astro.locals.runtime.env o context.locals.runtime.env.
+ * Lee env vars del runtime de Cloudflare Workers (Astro 6 API).
+ * Cae a import.meta.env en dev local. Llamar dentro de handlers, no en módulo top-level.
  */
-export function readEnv(runtimeEnv?: Env): Env {
+export async function readEnv(): Promise<Env> {
+  let runtimeEnv: Env = {};
+  try {
+    const mod = await import('cloudflare:workers');
+    runtimeEnv = (mod as any).env ?? {};
+  } catch {
+    // Fuera de Cloudflare runtime (dev local con node) — usa import.meta.env
+  }
   return {
     PUBLIC_SUPABASE_URL:
-      runtimeEnv?.PUBLIC_SUPABASE_URL ?? import.meta.env.PUBLIC_SUPABASE_URL,
+      runtimeEnv.PUBLIC_SUPABASE_URL ?? import.meta.env.PUBLIC_SUPABASE_URL,
     PUBLIC_SUPABASE_ANON_KEY:
-      runtimeEnv?.PUBLIC_SUPABASE_ANON_KEY ?? import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
+      runtimeEnv.PUBLIC_SUPABASE_ANON_KEY ?? import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
     SUPABASE_SERVICE_ROLE_KEY:
-      runtimeEnv?.SUPABASE_SERVICE_ROLE_KEY ?? import.meta.env.SUPABASE_SERVICE_ROLE_KEY,
+      runtimeEnv.SUPABASE_SERVICE_ROLE_KEY ?? import.meta.env.SUPABASE_SERVICE_ROLE_KEY,
     R2_PUBLIC_URL:
-      runtimeEnv?.R2_PUBLIC_URL ?? import.meta.env.R2_PUBLIC_URL,
+      runtimeEnv.R2_PUBLIC_URL ?? import.meta.env.R2_PUBLIC_URL,
     PUBLIC_R2_PUBLIC_URL:
-      runtimeEnv?.PUBLIC_R2_PUBLIC_URL ?? import.meta.env.PUBLIC_R2_PUBLIC_URL,
+      runtimeEnv.PUBLIC_R2_PUBLIC_URL ?? import.meta.env.PUBLIC_R2_PUBLIC_URL,
   };
 }
 

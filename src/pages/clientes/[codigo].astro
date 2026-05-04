@@ -7,8 +7,7 @@ import { getSesionByCodigo, fotoUrl, readEnv } from '../../lib/sesiones';
 const { codigo } = Astro.params;
 const codigoNormalizado = (codigo ?? '').toUpperCase();
 
-const runtimeEnv = (Astro.locals as any)?.runtime?.env;
-const env = readEnv(runtimeEnv);
+const env = await readEnv();
 
 let data: Awaited<ReturnType<typeof getSesionByCodigo>> = null;
 let errorDetalle: string | null = null;
