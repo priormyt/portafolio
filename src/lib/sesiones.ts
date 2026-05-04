@@ -7,6 +7,12 @@ export type Env = {
   SUPABASE_SERVICE_ROLE_KEY?: string;
   R2_PUBLIC_URL?: string;
   PUBLIC_R2_PUBLIC_URL?: string;
+  R2_ACCOUNT_ID?: string;
+  R2_ACCESS_KEY_ID?: string;
+  R2_SECRET_ACCESS_KEY?: string;
+  R2_BUCKET_NAME?: string;
+  ADMIN_PASSWORD?: string;
+  ADMIN_SESSION_SECRET?: string;
 };
 
 /**
@@ -21,17 +27,20 @@ export async function readEnv(): Promise<Env> {
   } catch {
     // Fuera de Cloudflare runtime (dev local con node) — usa import.meta.env
   }
+  const pick = (k: keyof Env) =>
+    (runtimeEnv as any)[k] ?? (import.meta.env as any)[k];
   return {
-    PUBLIC_SUPABASE_URL:
-      runtimeEnv.PUBLIC_SUPABASE_URL ?? import.meta.env.PUBLIC_SUPABASE_URL,
-    PUBLIC_SUPABASE_ANON_KEY:
-      runtimeEnv.PUBLIC_SUPABASE_ANON_KEY ?? import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
-    SUPABASE_SERVICE_ROLE_KEY:
-      runtimeEnv.SUPABASE_SERVICE_ROLE_KEY ?? import.meta.env.SUPABASE_SERVICE_ROLE_KEY,
-    R2_PUBLIC_URL:
-      runtimeEnv.R2_PUBLIC_URL ?? import.meta.env.R2_PUBLIC_URL,
-    PUBLIC_R2_PUBLIC_URL:
-      runtimeEnv.PUBLIC_R2_PUBLIC_URL ?? import.meta.env.PUBLIC_R2_PUBLIC_URL,
+    PUBLIC_SUPABASE_URL: pick('PUBLIC_SUPABASE_URL'),
+    PUBLIC_SUPABASE_ANON_KEY: pick('PUBLIC_SUPABASE_ANON_KEY'),
+    SUPABASE_SERVICE_ROLE_KEY: pick('SUPABASE_SERVICE_ROLE_KEY'),
+    R2_PUBLIC_URL: pick('R2_PUBLIC_URL'),
+    PUBLIC_R2_PUBLIC_URL: pick('PUBLIC_R2_PUBLIC_URL'),
+    R2_ACCOUNT_ID: pick('R2_ACCOUNT_ID'),
+    R2_ACCESS_KEY_ID: pick('R2_ACCESS_KEY_ID'),
+    R2_SECRET_ACCESS_KEY: pick('R2_SECRET_ACCESS_KEY'),
+    R2_BUCKET_NAME: pick('R2_BUCKET_NAME'),
+    ADMIN_PASSWORD: pick('ADMIN_PASSWORD'),
+    ADMIN_SESSION_SECRET: pick('ADMIN_SESSION_SECRET'),
   };
 }
 

@@ -10,9 +10,6 @@ const auth = await requireAdmin(env, Astro.request);
 if (auth.ok) {
   return Astro.redirect('/admin', 302);
 }
-
-const url = new URL(Astro.request.url);
-const error = url.searchParams.get('error');
 ---
 <Layout title="Admin · ANTE" noindex={true}>
   <main class="admin-login">
@@ -20,40 +17,19 @@ const error = url.searchParams.get('error');
       <p class="admin-eyebrow">Acceso administrador</p>
       <h1 class="admin-title">ANTE Admin</h1>
 
-      <form id="emailForm" class="admin-form">
-        <label for="adminEmail">Correo</label>
+      <form id="loginForm" class="admin-form">
+        <label for="adminPassword">Contraseña</label>
         <input
-          id="adminEmail"
-          name="email"
-          type="email"
+          id="adminPassword"
+          name="password"
+          type="password"
           required
-          autocomplete="email"
-          placeholder="priormyt99@gmail.com"
-          value="priormyt99@gmail.com"
-        />
-        <button type="submit">Enviar código de acceso</button>
-      </form>
-
-      <form id="codeForm" class="admin-form" style="display:none">
-        <p class="admin-info">Te enviamos un código de 6 dígitos a <strong id="emailLabel"></strong>.</p>
-        <label for="adminCode">Código</label>
-        <input
-          id="adminCode"
-          name="code"
-          type="text"
-          required
-          autocomplete="one-time-code"
-          inputmode="numeric"
-          maxlength="6"
-          pattern="[0-9]{6}"
-          placeholder="000000"
+          autocomplete="current-password"
+          autofocus
         />
         <button type="submit">Entrar</button>
-        <button type="button" id="backBtn" class="link-btn">Cambiar correo</button>
+        <p id="formError" class="admin-error" aria-live="polite"></p>
       </form>
-
-      {error && <p class="admin-error">{error}</p>}
-      <p id="formError" class="admin-error" aria-live="polite"></p>
     </section>
   </main>
 
@@ -98,7 +74,7 @@ const error = url.searchParams.get('error');
       outline: none;
     }
     .admin-form input:focus { border-color: rgba(245,242,237,0.5); }
-    .admin-form button[type="submit"] {
+    .admin-form button {
       margin-top: 1.5rem;
       width: 100%;
       padding: 0.9rem 1rem;
@@ -111,113 +87,44 @@ const error = url.searchParams.get('error');
       text-transform: uppercase;
       cursor: none;
     }
-    .admin-form button[type="submit"]:hover { background: var(--accent); }
-    .admin-form button[type="submit"]:disabled { opacity: 0.5; pointer-events: none; }
-    .admin-form .link-btn {
-      margin-top: 1rem;
-      background: transparent;
-      border: none;
-      color: var(--ash);
-      font-family: var(--f-mono);
-      font-size: var(--fs-micro);
-      letter-spacing: var(--ls-label);
-      text-transform: uppercase;
-      cursor: none;
-      padding: 0.5rem;
-    }
-    .admin-form .link-btn:hover { color: var(--paper); }
-    .admin-info { font-family: var(--f-sans); color: var(--mist); margin-bottom: 1.5rem; line-height: 1.6; font-size: var(--fs-body); }
-    .admin-info strong { color: var(--paper); }
+    .admin-form button:hover { background: var(--accent); }
+    .admin-form button:disabled { opacity: 0.5; pointer-events: none; }
     .admin-error { color: #e07070; font-family: var(--f-mono); font-size: var(--fs-micro); margin-top: 1rem; min-height: 1.2em; }
   </style>
 
   <script>
-    const emailForm = document.getElementById('emailForm') as HTMLFormElement;
-    const codeForm = document.getElementById('codeForm') as HTMLFormElement;
-    const emailLabel = document.getElementById('emailLabel')!;
+    const form = document.getElementById('loginForm') as HTMLFormElement;
     const errorEl = document.getElementById('formError')!;
-    const backBtn = document.getElementById('backBtn')!;
 
-    function showError(msg: string) { errorEl.textContent = msg; }
-    function clearError() { errorEl.textContent = ''; }
-
-    let currentEmail = '';
-
-    emailForm.addEventListener('submit', async (e) => {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      clearError();
-      const fd = new FormData(emailForm);
-      const email = String(fd.get('email') ?? '').trim().toLowerCase();
-      if (!email) return;
+      errorEl.textContent = '';
+      const fd = new FormData(form);
+      const password = String(fd.get('password') ?? '');
+      if (!password) return;
 
-      const btn = emailForm.querySelector('button[type="submit"]') as HTMLButtonElement;
+      const btn = form.querySelector('button') as HTMLButtonElement;
       btn.disabled = true;
-      btn.textContent = 'Enviando...';
+      btn.textContent = 'Verificando...';
 
       try {
         const res = await fetch('/admin/api/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email }),
+          body: JSON.stringify({ password }),
         });
-        const j = await res.json().catch(() => ({}));
-        if (!res.ok) {
-          showError(j.error ?? 'No se pudo enviar el código');
-          btn.disabled = false;
-          btn.textContent = 'Enviar código de acceso';
-          return;
-        }
-        currentEmail = email;
-        emailLabel.textContent = email;
-        emailForm.style.display = 'none';
-        codeForm.style.display = '';
-        (document.getElementById('adminCode') as HTMLInputElement).focus();
-      } catch (err) {
-        showError(String(err));
-        btn.disabled = false;
-        btn.textContent = 'Enviar código de acceso';
-      }
-    });
-
-    codeForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      clearError();
-      const fd = new FormData(codeForm);
-      const code = String(fd.get('code') ?? '').trim();
-      if (!code) return;
-
-      const btn = codeForm.querySelector('button[type="submit"]') as HTMLButtonElement;
-      btn.disabled = true;
-      btn.textContent = 'Verificando...';
-
-      try {
-        const res = await fetch('/admin/api/verify', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: currentEmail, code }),
-        });
-        const j = await res.json().catch(() => ({}));
-        if (!res.ok) {
-          showError(j.error ?? 'Código incorrecto');
+        if (res.ok) {
+          window.location.href = '/admin';
+        } else {
+          errorEl.textContent = 'Contraseña incorrecta';
           btn.disabled = false;
           btn.textContent = 'Entrar';
-          return;
         }
-        window.location.href = '/admin';
       } catch (err) {
-        showError(String(err));
+        errorEl.textContent = String(err);
         btn.disabled = false;
         btn.textContent = 'Entrar';
       }
-    });
-
-    backBtn.addEventListener('click', () => {
-      codeForm.style.display = 'none';
-      emailForm.style.display = '';
-      const btn = emailForm.querySelector('button[type="submit"]') as HTMLButtonElement;
-      btn.disabled = false;
-      btn.textContent = 'Enviar código de acceso';
-      clearError();
     });
   </script>
 </Layout>
