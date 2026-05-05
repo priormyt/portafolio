@@ -4,6 +4,7 @@ export const prerender = false;
 import Layout from '../../../layouts/Layout.astro';
 import { getSesionByCodigo, fotoUrl, readEnv } from '../../../lib/sesiones';
 import { requireAdmin } from '../../../lib/admin-auth';
+import '../../../styles/admin.css';
 
 const env = await readEnv();
 const auth = await requireAdmin(env, Astro.request);
@@ -27,9 +28,10 @@ const estadoLabel: Record<string, string> = {
 ---
 <Layout title={`${sesion.codigo} · Admin · ANTE`} noindex={true}>
   <main class="admin-main">
+    <a href="/admin" class="back-link">← Clientes</a>
     <header class="admin-header">
       <div>
-        <p class="admin-eyebrow"><a href="/admin" class="back-link">← Clientes</a></p>
+        <p class="admin-eyebrow">Cliente</p>
         <h1 class="admin-h1">{sesion.nombre_cliente}</h1>
         <p class="admin-sub">
           Código <span class="mono">{sesion.codigo}</span>
@@ -38,6 +40,9 @@ const estadoLabel: Record<string, string> = {
       </div>
       <div class="admin-actions">
         <span class={`badge badge-${sesion.estado}`}>{estadoLabel[sesion.estado]}</span>
+        <a href={`/clientes/${sesion.codigo}`} target="_blank" rel="noopener" class="btn-link">
+          Ver como cliente ↗
+        </a>
       </div>
     </header>
 
@@ -127,131 +132,7 @@ const estadoLabel: Record<string, string> = {
       )}
     </section>
 
-    <p class="admin-footer-link">
-      <a href={`/clientes/${sesion.codigo}`} target="_blank" class="link">Ver galería como cliente →</a>
-    </p>
   </main>
-
-  <style is:global>
-    .admin-sub {
-      font-family: var(--f-mono);
-      font-size: var(--fs-label);
-      letter-spacing: var(--ls-label);
-      color: var(--ash);
-      text-transform: uppercase;
-      margin-top: 0.4rem;
-    }
-    .admin-sub .mono { color: var(--paper); }
-
-    .admin-block {
-      margin-top: 3rem;
-      padding-top: 2.5rem;
-      border-top: 0.5px solid rgba(245,242,237,0.1);
-    }
-    .admin-h2 {
-      font-family: var(--f-serif);
-      font-size: 1.3rem;
-      font-weight: 300;
-      margin-bottom: 1rem;
-    }
-
-    .estado-controls {
-      display: flex;
-      gap: 1rem;
-      align-items: center;
-      flex-wrap: wrap;
-      margin-bottom: 0.6rem;
-    }
-    #estadoSelect {
-      padding: 0.7rem 1rem;
-      background: transparent;
-      border: 0.5px solid rgba(245,242,237,0.2);
-      color: var(--paper);
-      font-family: var(--f-mono);
-      font-size: var(--fs-label);
-      letter-spacing: var(--ls-label);
-      text-transform: uppercase;
-    }
-    #estadoSelect option { background: var(--ink); }
-
-    .thumb-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 1rem;
-      margin-top: 1rem;
-    }
-    .thumb {
-      position: relative;
-      background: var(--char);
-    }
-    .thumb img {
-      width: 100%;
-      aspect-ratio: 3/4;
-      object-fit: cover;
-      display: block;
-    }
-    .thumb.selected { outline: 2px solid var(--accent); outline-offset: 3px; }
-    .thumb-mark {
-      position: absolute;
-      top: 0.5rem;
-      right: 0.5rem;
-      background: var(--paper);
-      color: var(--ink);
-      padding: 0.25rem 0.6rem;
-      font-family: var(--f-mono);
-      font-size: var(--fs-micro);
-      letter-spacing: var(--ls-label);
-    }
-    .thumb figcaption {
-      padding: 0.4rem 0.6rem;
-      font-family: var(--f-mono);
-      font-size: var(--fs-micro);
-      color: var(--ash);
-      letter-spacing: 0.05em;
-      word-break: break-all;
-    }
-
-    .empty-block {
-      padding: 1.5rem;
-      font-family: var(--f-mono);
-      font-size: var(--fs-micro);
-      letter-spacing: var(--ls-label);
-      color: var(--ash);
-      text-transform: uppercase;
-      border: 0.5px dashed rgba(245,242,237,0.15);
-      text-align: center;
-    }
-
-    .selection-list { list-style: none; padding: 0; display: grid; gap: 0.4rem; }
-    .selection-list li {
-      padding: 0.5rem 0.8rem;
-      border: 0.5px solid rgba(245,242,237,0.1);
-      font-family: var(--f-mono);
-      font-size: var(--fs-micro);
-      color: var(--mist);
-      display: flex;
-      gap: 1rem;
-    }
-    .selection-list .nota {
-      color: var(--accent);
-      font-style: italic;
-    }
-    .extras-info {
-      margin-top: 1rem;
-      padding: 0.8rem 1rem;
-      background: rgba(224,158,111,0.08);
-      border: 0.5px solid rgba(224,158,111,0.3);
-      font-family: var(--f-mono);
-      font-size: var(--fs-label);
-      letter-spacing: var(--ls-label);
-      color: var(--paper);
-      text-transform: uppercase;
-    }
-    .admin-footer-link {
-      margin-top: 4rem;
-      text-align: center;
-    }
-  </style>
 
   <script src="/js/image-processor.js" is:inline></script>
   <script define:vars={{ codigo: sesion.codigo }}>

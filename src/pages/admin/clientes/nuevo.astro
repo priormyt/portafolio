@@ -6,6 +6,7 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from '../../../lib/database.types';
 import { readEnv } from '../../../lib/sesiones';
 import { requireAdmin } from '../../../lib/admin-auth';
+import '../../../styles/admin.css';
 
 const env = await readEnv();
 const auth = await requireAdmin(env, Astro.request);
@@ -25,10 +26,11 @@ const { data: paquetes } = await sb
 ---
 <Layout title="Nuevo cliente · Admin · ANTE" noindex={true}>
   <main class="admin-main">
+    <a href="/admin" class="back-link">← Clientes</a>
     <header class="admin-header">
       <div>
-        <p class="admin-eyebrow"><a href="/admin" class="back-link">← Clientes</a></p>
-        <h1 class="admin-h1">Nuevo cliente</h1>
+        <p class="admin-eyebrow">Nuevo</p>
+        <h1 class="admin-h1">Crear cliente</h1>
       </div>
     </header>
 
@@ -82,101 +84,6 @@ const { data: paquetes } = await sb
       </div>
     </form>
   </main>
-
-  <style is:global>
-    .back-link { color: var(--accent); text-decoration: none; }
-    .back-link:hover { color: var(--paper); }
-
-    .admin-form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.8rem 2rem;
-      max-width: 900px;
-    }
-    .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
-    .form-group-full { grid-column: 1 / -1; }
-
-    .form-group label {
-      font-family: var(--f-mono);
-      font-size: var(--fs-micro);
-      letter-spacing: var(--ls-label);
-      color: var(--ash);
-      text-transform: uppercase;
-    }
-    .form-group input, .form-group select {
-      padding: 0.85rem 1rem;
-      background: transparent;
-      border: 0.5px solid rgba(245,242,237,0.2);
-      color: var(--paper);
-      font-family: var(--f-mono);
-      font-size: var(--fs-label);
-      outline: none;
-    }
-    .form-group input:focus, .form-group select:focus { border-color: rgba(245,242,237,0.5); }
-    .form-group select option { background: var(--ink); color: var(--paper); }
-    .form-hint { font-family: var(--f-mono); font-size: var(--fs-micro); color: var(--ash); letter-spacing: 0.05em; margin-top: 0.2rem; }
-
-    .dropzone {
-      border: 1px dashed rgba(245,242,237,0.25);
-      padding: 3rem 2rem;
-      text-align: center;
-      cursor: none;
-      transition: border-color 0.25s, background 0.25s;
-    }
-    .dropzone:hover, .dropzone.drag-over {
-      border-color: var(--accent);
-      background: rgba(245,242,237,0.02);
-    }
-    .dropzone-text {
-      font-family: var(--f-sans);
-      font-size: var(--fs-body);
-      color: var(--paper);
-      margin-bottom: 0.5rem;
-    }
-    .dropzone-sub {
-      font-family: var(--f-mono);
-      font-size: var(--fs-micro);
-      letter-spacing: var(--ls-label);
-      color: var(--ash);
-    }
-
-    .file-list { list-style: none; padding: 0; margin-top: 1rem; display: grid; gap: 0.4rem; }
-    .file-list li {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0.5rem 0.8rem;
-      border: 0.5px solid rgba(245,242,237,0.1);
-      font-family: var(--f-mono);
-      font-size: var(--fs-micro);
-      color: var(--mist);
-    }
-    .file-list .file-status {
-      color: var(--ash);
-      letter-spacing: var(--ls-label);
-      text-transform: uppercase;
-    }
-    .file-list .file-status.ok { color: #a4c486; }
-    .file-list .file-status.error { color: #e07070; }
-
-    .btn-full { width: 100%; padding: 1.1rem; }
-    .btn-primary:disabled { opacity: 0.5; pointer-events: none; }
-    .form-msg {
-      margin-top: 1rem;
-      font-family: var(--f-mono);
-      font-size: var(--fs-micro);
-      letter-spacing: var(--ls-label);
-      color: var(--ash);
-      text-transform: uppercase;
-      min-height: 1.2em;
-    }
-    .form-msg.error { color: #e07070; }
-    .form-msg.ok { color: #a4c486; }
-
-    @media (max-width: 768px) {
-      .admin-form-grid { grid-template-columns: 1fr; }
-    }
-  </style>
 
   <script src="/js/image-processor.js" is:inline></script>
   <script>

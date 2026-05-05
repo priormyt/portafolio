@@ -6,6 +6,7 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from '../../lib/database.types';
 import { readEnv } from '../../lib/sesiones';
 import { requireAdmin } from '../../lib/admin-auth';
+import '../../styles/admin.css';
 
 const env = await readEnv();
 const auth = await requireAdmin(env, Astro.request);
@@ -71,137 +72,6 @@ const estadoLabel: Record<string, string> = {
     </table>
 
   </main>
-
-  <style is:global>
-    .admin-main {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 8rem 2rem 4rem;
-    }
-    .admin-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      margin-bottom: 3rem;
-      gap: 2rem;
-      flex-wrap: wrap;
-    }
-    .admin-eyebrow {
-      font-family: var(--f-mono);
-      font-size: var(--fs-label);
-      letter-spacing: var(--ls-wide);
-      color: var(--accent);
-      text-transform: uppercase;
-      margin-bottom: 0.5rem;
-    }
-    .admin-h1 {
-      font-family: var(--f-serif);
-      font-size: 2.2rem;
-      font-weight: 300;
-      letter-spacing: 0.02em;
-    }
-    .admin-actions { display: flex; gap: 1rem; }
-    .btn-primary {
-      padding: 0.7rem 1.4rem;
-      background: var(--paper);
-      color: var(--ink);
-      border: none;
-      font-family: var(--f-mono);
-      font-size: var(--fs-label);
-      letter-spacing: var(--ls-wide);
-      text-transform: uppercase;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      cursor: none;
-    }
-    .btn-primary:hover { background: var(--accent); }
-    .btn-ghost {
-      padding: 0.7rem 1.4rem;
-      background: transparent;
-      color: var(--paper);
-      border: 0.5px solid rgba(245,242,237,0.3);
-      font-family: var(--f-mono);
-      font-size: var(--fs-label);
-      letter-spacing: var(--ls-wide);
-      text-transform: uppercase;
-      cursor: none;
-    }
-    .btn-ghost:hover { border-color: var(--paper); background: rgba(245,242,237,0.05); }
-
-    .clientes-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-family: var(--f-sans);
-    }
-    .clientes-table th {
-      text-align: left;
-      padding: 0.9rem 1rem;
-      border-bottom: 0.5px solid rgba(245,242,237,0.15);
-      font-family: var(--f-mono);
-      font-size: var(--fs-micro);
-      letter-spacing: var(--ls-label);
-      text-transform: uppercase;
-      color: var(--ash);
-      font-weight: 400;
-    }
-    .clientes-table td {
-      padding: 1rem;
-      border-bottom: 0.5px solid rgba(245,242,237,0.08);
-      font-size: var(--fs-body);
-      color: var(--paper);
-    }
-    .clientes-table tr:hover td { background: rgba(245,242,237,0.03); }
-    .clientes-table .mono { font-family: var(--f-mono); font-size: var(--fs-label); }
-    .clientes-table .dim { color: var(--ash); }
-    .clientes-table .empty {
-      text-align: center;
-      color: var(--ash);
-      padding: 3rem;
-      font-family: var(--f-mono);
-      font-size: var(--fs-label);
-      letter-spacing: var(--ls-label);
-    }
-    .clientes-table .link {
-      color: var(--paper);
-      text-decoration: none;
-      font-family: var(--f-mono);
-      font-size: var(--fs-label);
-      letter-spacing: var(--ls-label);
-      text-transform: uppercase;
-    }
-    .clientes-table .link:hover { color: var(--accent); }
-
-    .badge {
-      display: inline-block;
-      padding: 0.3rem 0.7rem;
-      font-family: var(--f-mono);
-      font-size: var(--fs-micro);
-      letter-spacing: var(--ls-label);
-      text-transform: uppercase;
-      border: 0.5px solid;
-    }
-    .badge-seleccion       { color: #d4c486; border-color: rgba(212,196,134,0.4); }
-    .badge-pago_pendiente  { color: #e09e6f; border-color: rgba(224,158,111,0.4); }
-    .badge-editando        { color: #88b3c4; border-color: rgba(136,179,196,0.4); }
-    .badge-entregada       { color: #a4c486; border-color: rgba(164,196,134,0.4); }
-
-    .admin-footer {
-      margin-top: 4rem;
-      font-family: var(--f-mono);
-      font-size: var(--fs-micro);
-      letter-spacing: var(--ls-label);
-      color: var(--ash);
-      text-transform: uppercase;
-    }
-    .admin-footer strong { color: var(--paper); }
-
-    @media (max-width: 768px) {
-      .admin-main { padding: 6.5rem 1.2rem 3rem; }
-      .clientes-table { font-size: var(--fs-label); }
-      .clientes-table th, .clientes-table td { padding: 0.7rem 0.6rem; }
-    }
-  </style>
 
   <script>
     document.getElementById('logoutBtn')?.addEventListener('click', async () => {
