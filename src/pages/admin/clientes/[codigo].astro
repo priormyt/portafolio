@@ -4,11 +4,14 @@ export const prerender = false;
 import Layout from '../../../layouts/Layout.astro';
 import { getSesionByCodigo, fotoUrl, readEnv } from '../../../lib/sesiones';
 import { requireAdmin } from '../../../lib/admin-auth';
+import { runDueArchives, diasParaArchivar } from '../../../lib/archivado';
 import '../../../styles/admin.css';
 
 const env = await readEnv();
 const auth = await requireAdmin(env, Astro.request);
 if (!auth.ok) return Astro.redirect('/admin/login', 302);
+
+await runDueArchives(env);
 
 const { codigo } = Astro.params;
 const codigoNorm = (codigo ?? '').toUpperCase();
@@ -18,12 +21,15 @@ if (!data) return Astro.redirect('/admin?err=no-encontrado', 302);
 const { sesion, paquete, fotosFinales, fotosPreview, selecciones } = data;
 const seleccionadas = new Set(selecciones.map((s) => s.foto_id));
 const limite = sesion.limite_fotos ?? paquete?.fotos_incluidas ?? 0;
+const diasRestantes = sesion.estado === 'entregada' ? diasParaArchivar(sesion.fecha_entrega) : null;
 
 const estadoLabel: Record<string, string> = {
+  lead: 'Lead',
   seleccion: 'Seleccionando',
   pago_pendiente: 'Pago pendiente',
   editando: 'Editando',
   entregada: 'Entregada',
+  archivada: 'Archivada',
 };
 ---
 <Layout title={`${sesion.codigo} · Admin · ANTE`} noindex={true}>
@@ -60,6 +66,20 @@ const estadoLabel: Record<string, string> = {
       <p class="form-hint">
         Recuerda: la página del cliente cambia según este estado. Pasa a "Editando" cuando recibas el pago de extras (si los hay), y a "Entregada" cuando subas las fotos finales.
       </p>
+
+      {sesion.estado === 'entregada' && diasRestantes !== null && (
+        <div class="archive-warn">
+          {diasRestantes > 0
+            ? <p>Las fotos se archivarán automáticamente en <strong>{diasRestantes} día{diasRestantes !== 1 ? 's' : ''}</strong> (30 días desde la entrega). Después se borran de R2 y solo queda la info histórica.</p>
+            : <p>Esta sesión cumplió ya 30 días desde la entrega. Se archivará en el próximo refresh, o puedes archivarla manualmente abajo.</p>}
+          <button id="btnArchivar" type="button" class="btn-ghost btn-danger">Archivar y borrar fotos ahora</button>
+        </div>
+      )}
+      {sesion.estado === 'archivada' && (
+        <p class="archive-info">
+          Esta sesión está <strong>archivada</strong>. Las fotos se borraron el {sesion.fecha_archivado ? new Date(sesion.fecha_archivado).toLocaleDateString('es-MX') : '—'}. Solo queda el histórico.
+        </p>
+      )}
     </section>
 
     <section class="admin-block">
@@ -136,6 +156,35 @@ const estadoLabel: Record<string, string> = {
 
   <script src="/js/image-processor.js" is:inline></script>
   <script define:vars={{ codigo: sesion.codigo }}>
+    // Archivar manual
+    const btnArchivar = document.getElementById('btnArchivar');
+    if (btnArchivar) {
+      btnArchivar.addEventListener('click', async () => {
+        if (!confirm('¿Archivar esta sesión? Se borrarán todas las fotos (preview y finales) de R2. Esta acción no se puede deshacer. La info del cliente y la selección histórica se conservan.')) return;
+        btnArchivar.disabled = true;
+        btnArchivar.textContent = 'Archivando...';
+        try {
+          const res = await fetch('/admin/api/archivar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ codigo }),
+          });
+          const j = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            alert(j.error || 'Error archivando');
+            btnArchivar.disabled = false;
+            btnArchivar.textContent = 'Archivar y borrar fotos ahora';
+            return;
+          }
+          window.location.reload();
+        } catch (e) {
+          alert(String(e));
+          btnArchivar.disabled = false;
+          btnArchivar.textContent = 'Archivar y borrar fotos ahora';
+        }
+      });
+    }
+
     // Cambiar estado
     const estadoSelect = document.getElementById('estadoSelect');
     const btnCambiar = document.getElementById('btnCambiarEstado');

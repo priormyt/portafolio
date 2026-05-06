@@ -12,36 +12,32 @@ export const POST: APIRoute = async ({ request }) => {
   const auth = await requireAdmin(env, request);
   if (!auth.ok) return json({ error: 'no autorizado' }, 401);
 
-  let body: {
-    codigo?: string;
-    nombre_cliente?: string;
-    email_cliente?: string;
-    paquete_id?: string;
-    limite_fotos?: number;
-    fecha_sesion?: string;
-  };
+  let body: { sesionId?: string; codigo?: string; paquete_id?: string; fecha_sesion?: string };
   try {
     body = await request.json();
   } catch {
     return json({ error: 'invalid json' }, 400);
   }
 
+  const sesionId = (body.sesionId ?? '').trim();
   const codigo = (body.codigo ?? '').trim().toUpperCase();
-  const nombre = (body.nombre_cliente ?? '').trim();
-  if (!codigo || !nombre) return json({ error: 'codigo y nombre son requeridos' }, 400);
-  if (!/^[A-Z0-9]+$/.test(codigo)) return json({ error: 'el código solo puede tener A-Z y 0-9' }, 400);
+  if (!sesionId || !codigo) return json({ error: 'sesionId y codigo son requeridos' }, 400);
+  if (!/^[A-Z0-9]+$/.test(codigo)) return json({ error: 'codigo solo A-Z y 0-9' }, 400);
 
   const sb = createClient<Database>(env.PUBLIC_SUPABASE_URL!, env.SUPABASE_SERVICE_ROLE_KEY!, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
-  // Verificar que no exista
-  const { data: existing } = await sb.from('sesiones').select('id').eq('codigo', codigo).maybeSingle();
+  const { data: existing } = await sb
+    .from('sesiones')
+    .select('id')
+    .eq('codigo', codigo)
+    .maybeSingle();
   if (existing) return json({ error: `Ya existe un cliente con código ${codigo}` }, 409);
 
-  // Resolver paquete (necesario para limite_fotos default)
-  let limite = body.limite_fotos ?? null;
-  if (body.paquete_id && limite == null) {
+  // Resolver paquete y limite
+  let limite: number | null = null;
+  if (body.paquete_id) {
     const { data: pq } = await sb
       .from('paquetes')
       .select('fotos_incluidas')
@@ -50,25 +46,24 @@ export const POST: APIRoute = async ({ request }) => {
     if (pq) limite = pq.fotos_incluidas;
   }
 
-  const { data: sesion, error } = await sb
+  const update: any = {
+    codigo,
+    estado: 'seleccion',
+  };
+  if (body.paquete_id) update.paquete_id = body.paquete_id;
+  if (limite != null) update.limite_fotos = limite;
+  if (body.fecha_sesion) update.fecha_sesion = body.fecha_sesion;
+
+  const { error } = await sb
     .from('sesiones')
-    .insert({
-      codigo,
-      nombre_cliente: nombre,
-      email_cliente: body.email_cliente?.trim() || null,
-      paquete_id: body.paquete_id || null,
-      limite_fotos: limite,
-      fecha_sesion: body.fecha_sesion || null,
-      estado: 'seleccion',
-    })
-    .select()
-    .single();
+    .update(update)
+    .eq('id', sesionId)
+    .eq('estado', 'lead');
+  if (error) return json({ error: error.message }, 500);
 
-  if (error || !sesion) return json({ error: error?.message ?? 'error creando sesión' }, 500);
+  syncSesionToNotionBackground(env, sesionId);
 
-  syncSesionToNotionBackground(env, sesion.id);
-
-  return json({ ok: true, sesion });
+  return json({ ok: true, codigo });
 };
 
 function json(payload: unknown, status = 200): Response {

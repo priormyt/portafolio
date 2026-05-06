@@ -1,5 +1,12 @@
-export type SesionEstado = 'seleccion' | 'pago_pendiente' | 'editando' | 'entregada';
+export type SesionEstado =
+  | 'lead'
+  | 'seleccion'
+  | 'pago_pendiente'
+  | 'editando'
+  | 'entregada'
+  | 'archivada';
 export type FotoTipo = 'preview' | 'final';
+export type SesionOrigen = 'instagram' | 'referido' | 'web' | 'google' | 'tiktok' | 'otro';
 
 export interface Paquete {
   id: string;
@@ -15,9 +22,15 @@ export interface Paquete {
 
 export interface Sesion {
   id: string;
-  codigo: string;
+  codigo: string | null;
   nombre_cliente: string;
   email_cliente: string | null;
+  telefono: string | null;
+  handle_ig: string | null;
+  ubicacion: string | null;
+  fecha_preferida: string | null;
+  es_estudiante: boolean;
+  origen: SesionOrigen | null;
   paquete_id: string | null;
   limite_fotos: number | null;
   precio_extra: number;
@@ -28,7 +41,11 @@ export interface Sesion {
   monto_extras: number | null;
   payment_id: string | null;
   fecha_entrega: string | null;
+  fecha_archivado: string | null;
   notas_admin: string | null;
+  notas_sesion: string | null;
+  notas_tecnicas: string | null;
+  notion_page_id: string | null;
   created_at: string;
   updated_at: string;
 }

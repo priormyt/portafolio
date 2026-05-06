@@ -13,6 +13,10 @@ export type Env = {
   R2_BUCKET_NAME?: string;
   ADMIN_PASSWORD?: string;
   ADMIN_SESSION_SECRET?: string;
+  NOTION_TOKEN?: string;
+  NOTION_DATABASE_ID?: string;
+  NOTION_WEBHOOK_TOKEN?: string;
+  PUBLIC_SITE_URL?: string;
 };
 
 /**
@@ -41,6 +45,10 @@ export async function readEnv(): Promise<Env> {
     R2_BUCKET_NAME: pick('R2_BUCKET_NAME'),
     ADMIN_PASSWORD: pick('ADMIN_PASSWORD'),
     ADMIN_SESSION_SECRET: pick('ADMIN_SESSION_SECRET'),
+    NOTION_TOKEN: pick('NOTION_TOKEN'),
+    NOTION_DATABASE_ID: pick('NOTION_DATABASE_ID'),
+    NOTION_WEBHOOK_TOKEN: pick('NOTION_WEBHOOK_TOKEN'),
+    PUBLIC_SITE_URL: pick('PUBLIC_SITE_URL'),
   };
 }
 

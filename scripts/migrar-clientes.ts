@@ -86,6 +86,25 @@ const clientes: ClienteSeed[] = [
     nombre: 'Valeria',
     fotos: ['img/Valeria1.jpg'],
   },
+  {
+    codigo: 'JAVIERAMEZCUA2026',
+    nombre: 'Javier Amezcua',
+    fotos: [
+      'img/Javier_1.jpg',
+      'img/Javier_1-EditarAzul.jpg',
+      'img/Javier_6.jpg',
+      'img/Javier_6-EditarAzul.jpg',
+      'img/Javier_8.jpg',
+      'img/Javier_8-EditarAzul.jpg',
+      'img/Javier_11.jpg',
+      'img/Javier_13.jpg',
+      'img/Javier_13-EditarAzul.jpg',
+      'img/Javier_15.jpg',
+      'img/Javier_15-EditarAzul.jpg',
+      'img/Javier_17.jpg',
+      'img/Javier_17-EditarAzul.jpg',
+    ],
+  },
 ];
 
 // ─── Main ──────────────────────────────────────────────────────

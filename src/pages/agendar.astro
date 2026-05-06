@@ -1,0 +1,307 @@
+---
+export const prerender = false;
+
+import Layout from '../layouts/Layout.astro';
+import { createClient } from '@supabase/supabase-js';
+import type { Database } from '../lib/database.types';
+import { readEnv } from '../lib/sesiones';
+
+const env = await readEnv();
+const sb =
+  env.PUBLIC_SUPABASE_URL && env.SUPABASE_SERVICE_ROLE_KEY
+    ? createClient<Database>(env.PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
+        auth: { persistSession: false, autoRefreshToken: false },
+      })
+    : null;
+
+const { data: paquetes } = sb
+  ? await sb
+      .from('paquetes')
+      .select('id, nombre, fotos_incluidas, duracion_min, looks, precio_base')
+      .eq('activo', true)
+      .order('orden')
+  : { data: [] as any[] };
+---
+<Layout
+  title="Agendar sesión | ANTE Estudio de Fotografía"
+  description="Agenda tu sesión de fotografía profesional en ANTE Estudio. Llena el formulario y te contactamos en menos de 24 horas para confirmar fecha y detalles."
+>
+  <section class="agendar-hero" aria-label="Agendar sesión con ANTE">
+    <p class="agendar-eyebrow">Agendar</p>
+    <h1 class="agendar-title">Cuéntanos<br>de tu sesión</h1>
+    <p class="agendar-sub">
+      Llena el formulario y te contactamos en menos de 24 horas para confirmar fecha, paquete y detalles.
+    </p>
+  </section>
+
+  <section class="agendar-form-wrap">
+    <form id="leadForm" class="agendar-form">
+      <div class="agendar-grid">
+        <div class="form-row">
+          <label for="nombre">Nombre completo *</label>
+          <input id="nombre" name="nombre" type="text" required />
+        </div>
+
+        <div class="form-row">
+          <label for="email">Correo *</label>
+          <input id="email" name="email" type="email" required />
+        </div>
+
+        <div class="form-row">
+          <label for="telefono">Teléfono / WhatsApp</label>
+          <input id="telefono" name="telefono" type="tel" inputmode="tel" placeholder="+52 ..." />
+        </div>
+
+        <div class="form-row">
+          <label for="handle_ig">Instagram (handle)</label>
+          <input id="handle_ig" name="handle_ig" type="text" placeholder="@tuusuario" />
+        </div>
+
+        <div class="form-row">
+          <label for="ubicacion">Ciudad / ubicación</label>
+          <input id="ubicacion" name="ubicacion" type="text" placeholder="CDMX, GDL..." />
+        </div>
+
+        <div class="form-row">
+          <label for="fecha_preferida">Fecha preferida</label>
+          <input id="fecha_preferida" name="fecha_preferida" type="date" />
+        </div>
+
+        <div class="form-row">
+          <label for="paquete">Paquete que te interesa</label>
+          <select id="paquete" name="paquete_id">
+            <option value="">— No estoy seguro —</option>
+            {paquetes?.map((p) => (
+              <option value={p.id}>
+                {p.nombre} · {p.fotos_incluidas} fotos · {p.duracion_min} min
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div class="form-row">
+          <label for="origen">¿Cómo nos conociste?</label>
+          <select id="origen" name="origen">
+            <option value="">— Selecciona —</option>
+            <option value="instagram">Instagram</option>
+            <option value="referido">Referido</option>
+            <option value="web">Web / Google</option>
+            <option value="google">Búsqueda Google</option>
+            <option value="tiktok">TikTok</option>
+            <option value="otro">Otro</option>
+          </select>
+        </div>
+
+        <div class="form-row form-row-full">
+          <label class="checkbox-row">
+            <input id="es_estudiante" name="es_estudiante" type="checkbox" />
+            <span>Soy estudiante (aplico a tarifa preferencial con credencial)</span>
+          </label>
+        </div>
+
+        <div class="form-row form-row-full">
+          <label for="notas">¿Algo más que debamos saber?</label>
+          <textarea id="notas" name="notas" rows="4" placeholder="Tipo de sesión, look, referencias visuales, ocasión..."></textarea>
+        </div>
+      </div>
+
+      <button type="submit" class="agendar-submit">Enviar solicitud</button>
+      <p id="formMsg" class="agendar-msg" aria-live="polite"></p>
+    </form>
+  </section>
+
+  <style is:global>
+    .agendar-hero {
+      padding: 12rem 4rem 4rem;
+      border-bottom: 0.5px solid rgba(245,242,237,0.1);
+    }
+    .agendar-eyebrow {
+      font-family: var(--f-mono);
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-wide);
+      color: var(--accent);
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .agendar-eyebrow::before {
+      content: '';
+      display: block;
+      width: 24px; height: 0.5px;
+      background: var(--accent);
+    }
+    .agendar-title {
+      font-family: var(--f-serif);
+      font-size: clamp(3rem, 7vw, 5.5rem);
+      font-weight: 700;
+      line-height: 1.0;
+      letter-spacing: -0.01em;
+      margin-bottom: 1.5rem;
+    }
+    .agendar-sub {
+      font-size: var(--fs-body);
+      font-weight: 300;
+      color: var(--mist);
+      line-height: 1.85;
+      max-width: 480px;
+    }
+
+    .agendar-form-wrap {
+      padding: 5rem 4rem 6rem;
+    }
+    .agendar-form {
+      max-width: 880px;
+      margin: 0 auto;
+    }
+    .agendar-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem 2.4rem;
+    }
+    .form-row { display: flex; flex-direction: column; gap: 0.6rem; }
+    .form-row-full { grid-column: 1 / -1; }
+
+    .agendar-form label {
+      font-family: var(--f-mono);
+      font-size: var(--fs-micro);
+      letter-spacing: var(--ls-label);
+      color: var(--ash);
+      text-transform: uppercase;
+    }
+    .agendar-form input[type="text"],
+    .agendar-form input[type="email"],
+    .agendar-form input[type="tel"],
+    .agendar-form input[type="date"],
+    .agendar-form select,
+    .agendar-form textarea {
+      width: 100%;
+      padding: 0.95rem 1rem;
+      background: transparent;
+      border: 0.5px solid rgba(245,242,237,0.2);
+      color: var(--paper);
+      font-family: var(--f-mono);
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-label);
+      outline: none;
+      transition: border-color 0.25s;
+      resize: vertical;
+    }
+    .agendar-form input:focus,
+    .agendar-form select:focus,
+    .agendar-form textarea:focus {
+      border-color: rgba(245,242,237,0.5);
+    }
+    .agendar-form select option {
+      background: var(--ink);
+      color: var(--paper);
+    }
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      cursor: none;
+    }
+    .checkbox-row input[type="checkbox"] {
+      width: auto;
+      margin: 0;
+      accent-color: var(--paper);
+    }
+    .checkbox-row span {
+      font-family: var(--f-mono);
+      font-size: var(--fs-micro);
+      letter-spacing: var(--ls-label);
+      color: var(--mist);
+      text-transform: none;
+    }
+
+    .agendar-submit {
+      margin-top: 2.5rem;
+      padding: 1.1rem 1.5rem;
+      background: var(--paper);
+      color: var(--ink);
+      border: none;
+      font-family: var(--f-mono);
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-wide);
+      text-transform: uppercase;
+      cursor: none;
+      transition: background 0.25s;
+    }
+    .agendar-submit:hover { background: var(--accent); }
+    .agendar-submit:disabled { opacity: 0.5; pointer-events: none; }
+
+    .agendar-msg {
+      margin-top: 1.2rem;
+      font-family: var(--f-mono);
+      font-size: var(--fs-micro);
+      letter-spacing: var(--ls-label);
+      color: var(--ash);
+      text-transform: uppercase;
+      min-height: 1.2em;
+    }
+    .agendar-msg.error { color: #e07070; }
+    .agendar-msg.ok    { color: #a4c486; }
+
+    @media (max-width: 768px) {
+      .agendar-hero { padding: 9rem 1.5rem 3rem; }
+      .agendar-form-wrap { padding: 3rem 1.5rem 4rem; }
+      .agendar-grid { grid-template-columns: 1fr; gap: 1.6rem; }
+    }
+  </style>
+
+  <script>
+    const form = document.getElementById('leadForm') as HTMLFormElement;
+    const msg = document.getElementById('formMsg') as HTMLParagraphElement;
+    const submit = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      msg.textContent = '';
+      msg.className = 'agendar-msg';
+
+      const fd = new FormData(form);
+      const payload = {
+        nombre: String(fd.get('nombre') ?? ''),
+        email: String(fd.get('email') ?? ''),
+        telefono: String(fd.get('telefono') ?? ''),
+        handle_ig: String(fd.get('handle_ig') ?? ''),
+        ubicacion: String(fd.get('ubicacion') ?? ''),
+        fecha_preferida: String(fd.get('fecha_preferida') ?? ''),
+        paquete_id: String(fd.get('paquete_id') ?? ''),
+        origen: String(fd.get('origen') ?? ''),
+        es_estudiante: fd.get('es_estudiante') === 'on',
+        notas: String(fd.get('notas') ?? ''),
+      };
+
+      submit.disabled = true;
+      submit.textContent = 'Enviando...';
+
+      try {
+        const res = await fetch('/api/lead', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const j = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          msg.textContent = j.error ?? 'No se pudo enviar';
+          msg.className = 'agendar-msg error';
+          submit.disabled = false;
+          submit.textContent = 'Enviar solicitud';
+          return;
+        }
+        msg.textContent = 'Listo. Te contactamos pronto.';
+        msg.className = 'agendar-msg ok';
+        form.reset();
+        submit.textContent = 'Enviado';
+      } catch (err) {
+        msg.textContent = String(err);
+        msg.className = 'agendar-msg error';
+        submit.disabled = false;
+        submit.textContent = 'Enviar solicitud';
+      }
+    });
+  </script>
+</Layout>

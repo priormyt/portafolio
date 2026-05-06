@@ -3,15 +3,13 @@ export const prerender = false;
 import type { APIRoute } from 'astro';
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '../../lib/database.types';
+import { readEnv } from '../../lib/sesiones';
+import { syncSesionToNotionBackground } from '../../lib/notion';
 
 export const POST: APIRoute = async ({ request }) => {
-  let runtimeEnv: any = {};
-  try {
-    const mod = await import('cloudflare:workers');
-    runtimeEnv = (mod as any).env ?? {};
-  } catch {}
-  const url = runtimeEnv.PUBLIC_SUPABASE_URL ?? import.meta.env.PUBLIC_SUPABASE_URL;
-  const key = runtimeEnv.SUPABASE_SERVICE_ROLE_KEY ?? import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
+  const env = await readEnv();
+  const url = env.PUBLIC_SUPABASE_URL;
+  const key = env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) return json({ error: 'misconfigured' }, 500);
 
   let body: { sesionId?: string };
@@ -62,6 +60,7 @@ export const POST: APIRoute = async ({ request }) => {
       })
       .eq('id', sesionId);
 
+    syncSesionToNotionBackground(env, sesionId);
     // TODO Fase 6: enviar correo a contacto@ante.photo con resumen
     return json({ ok: true, redirect: `/clientes/${sesion.codigo}` });
   }
@@ -75,6 +74,8 @@ export const POST: APIRoute = async ({ request }) => {
       monto_extras: monto,
     })
     .eq('id', sesionId);
+
+  syncSesionToNotionBackground(env, sesionId);
 
   // TODO Fase 5: redirigir a checkout de PayPal con order de $monto
   // Por ahora redirige a la página, que mostrará "esperando pago"

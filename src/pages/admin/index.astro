@@ -6,11 +6,14 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from '../../lib/database.types';
 import { readEnv } from '../../lib/sesiones';
 import { requireAdmin } from '../../lib/admin-auth';
+import { runDueArchives, diasParaArchivar } from '../../lib/archivado';
 import '../../styles/admin.css';
 
 const env = await readEnv();
 const auth = await requireAdmin(env, Astro.request);
 if (!auth.ok) return Astro.redirect('/admin/login', 302);
+
+await runDueArchives(env);
 
 const sb = createClient<Database>(
   env.PUBLIC_SUPABASE_URL!,
@@ -18,16 +21,31 @@ const sb = createClient<Database>(
   { auth: { persistSession: false, autoRefreshToken: false } },
 );
 
-const { data: sesiones } = await sb
+const { data: leads } = await sb
   .from('sesiones')
-  .select('codigo, nombre_cliente, estado, fecha_sesion, fecha_entrega, created_at, paquete:paquetes(nombre, fotos_incluidas)')
+  .select('id, nombre_cliente, email_cliente, telefono, handle_ig, fecha_preferida, origen, paquete:paquetes(nombre, fotos_incluidas), created_at')
+  .eq('estado', 'lead')
   .order('created_at', { ascending: false });
 
+const { data: sesiones } = await sb
+  .from('sesiones')
+  .select('codigo, nombre_cliente, email_cliente, estado, fecha_sesion, fecha_entrega, fecha_archivado, created_at, paquete:paquetes(nombre, fotos_incluidas)')
+  .neq('estado', 'lead')
+  .order('created_at', { ascending: false });
+
+const { data: paquetes } = await sb
+  .from('paquetes')
+  .select('id, nombre, fotos_incluidas')
+  .eq('activo', true)
+  .order('orden');
+
 const estadoLabel: Record<string, string> = {
+  lead: 'Lead',
   seleccion: 'Seleccionando',
   pago_pendiente: 'Pago pendiente',
   editando: 'Editando',
   entregada: 'Entregada',
+  archivada: 'Archivada',
 };
 ---
 <Layout title="Admin · ANTE" noindex={true}>
@@ -43,40 +61,243 @@ const estadoLabel: Record<string, string> = {
       </div>
     </header>
 
-    <table class="clientes-table">
-      <thead>
-        <tr>
-          <th>Código</th>
-          <th>Cliente</th>
-          <th>Paquete</th>
-          <th>Estado</th>
-          <th>Creada</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        {sesiones?.map((s) => (
-          <tr>
-            <td class="mono">{s.codigo}</td>
-            <td>{s.nombre_cliente}</td>
-            <td>{s.paquete ? `${s.paquete.nombre} · ${s.paquete.fotos_incluidas}` : '—'}</td>
-            <td><span class={`badge badge-${s.estado}`}>{estadoLabel[s.estado] ?? s.estado}</span></td>
-            <td class="mono dim">{s.created_at ? new Date(s.created_at).toLocaleDateString('es-MX') : ''}</td>
-            <td><a href={`/admin/clientes/${s.codigo}`} class="link">Gestionar →</a></td>
-          </tr>
-        ))}
-        {(!sesiones || sesiones.length === 0) && (
-          <tr><td colspan="6" class="empty">Sin clientes todavía. Click "+ Nuevo cliente" para crear uno.</td></tr>
-        )}
-      </tbody>
-    </table>
+    <div class="spotlight-wrap">
+      <input
+        id="spotlight"
+        type="text"
+        class="spotlight-input"
+        placeholder="Buscar por código, nombre o email..."
+        autocomplete="off"
+      />
+      <span class="spotlight-hint">⌘K</span>
+    </div>
 
+    {leads && leads.length > 0 && (
+      <section>
+        <div class="section-header">
+          <h2>Leads</h2>
+          <span class="count">{leads.length} pendiente{leads.length !== 1 ? 's' : ''} · del form público</span>
+        </div>
+        <table class="clientes-table" id="leadsTable">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Contacto</th>
+              <th>IG</th>
+              <th>Paquete interés</th>
+              <th>Origen</th>
+              <th>Fecha pref.</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {leads.map((l) => (
+              <tr data-search={`${l.nombre_cliente} ${l.email_cliente ?? ''} ${l.telefono ?? ''} ${l.handle_ig ?? ''}`.toLowerCase()}>
+                <td>{l.nombre_cliente}</td>
+                <td class="mono dim">{l.email_cliente}{l.telefono && <span> · {l.telefono}</span>}</td>
+                <td class="mono dim">{l.handle_ig ?? '—'}</td>
+                <td>{l.paquete ? l.paquete.nombre : <span class="dim">—</span>}</td>
+                <td class="mono dim">{l.origen ?? '—'}</td>
+                <td class="mono dim">{l.fecha_preferida ? new Date(l.fecha_preferida).toLocaleDateString('es-MX') : '—'}</td>
+                <td>
+                  <button
+                    type="button"
+                    class="link convertir-btn"
+                    data-id={l.id}
+                    data-nombre={l.nombre_cliente}
+                    data-paquete={l.paquete ? (l as any).paquete_id ?? '' : ''}
+                  >Convertir →</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+    )}
+
+    <section>
+      <div class="section-header">
+        <h2>Sesiones</h2>
+        <span class="count" id="sesionesCount">{sesiones?.length ?? 0} · activas y archivadas</span>
+      </div>
+      <table class="clientes-table" id="sesionesTable">
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Cliente</th>
+            <th>Paquete</th>
+            <th>Estado</th>
+            <th>Fecha</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {sesiones?.map((s) => {
+            const dias = s.estado === 'entregada' ? diasParaArchivar(s.fecha_entrega) : null;
+            return (
+              <tr data-search={`${s.codigo ?? ''} ${s.nombre_cliente} ${s.email_cliente ?? ''}`.toLowerCase()}>
+                <td class="mono">{s.codigo}</td>
+                <td>{s.nombre_cliente}</td>
+                <td>{s.paquete ? `${s.paquete.nombre} · ${s.paquete.fotos_incluidas}` : '—'}</td>
+                <td>
+                  <span class={`badge badge-${s.estado}`}>{estadoLabel[s.estado] ?? s.estado}</span>
+                  {dias !== null && dias > 0 && <span class="dim mono" style="margin-left:.5rem;font-size:var(--fs-micro)">archiva en {dias}d</span>}
+                </td>
+                <td class="mono dim">{s.fecha_sesion ? new Date(s.fecha_sesion).toLocaleDateString('es-MX') : (s.created_at ? new Date(s.created_at).toLocaleDateString('es-MX') : '')}</td>
+                <td><a href={`/admin/clientes/${s.codigo}`} class="link">Gestionar →</a></td>
+              </tr>
+            );
+          })}
+          {(!sesiones || sesiones.length === 0) && (
+            <tr><td colspan="6" class="empty">Sin sesiones todavía. Click "+ Nuevo cliente" o convierte un lead.</td></tr>
+          )}
+        </tbody>
+      </table>
+    </section>
   </main>
+
+  <div id="convertModal" class="modal-backdrop" hidden>
+    <div class="modal-card">
+      <h2 id="convertTitle">Convertir lead</h2>
+      <p class="modal-sub">Asigna código y confirma datos para crear la sesión activa</p>
+      <form id="convertForm">
+        <input type="hidden" id="convertSesionId" />
+        <div class="form-group">
+          <label for="convertCodigo">Código de acceso</label>
+          <input id="convertCodigo" type="text" required placeholder="MOOT, JUAN2026..." pattern="[A-Z0-9]+" />
+          <p class="form-hint">Solo mayúsculas y números. El cliente lo usará para entrar a su galería.</p>
+        </div>
+        <div class="form-group">
+          <label for="convertPaquete">Paquete</label>
+          <select id="convertPaquete">
+            <option value="">— Selecciona —</option>
+            {paquetes?.map((p) => (
+              <option value={p.id}>{p.nombre} · {p.fotos_incluidas} fotos</option>
+            ))}
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="convertFecha">Fecha de la sesión</label>
+          <input id="convertFecha" type="date" />
+        </div>
+        <p id="convertMsg" class="form-msg" aria-live="polite"></p>
+        <div class="modal-actions">
+          <button type="submit" class="btn-primary">Convertir y crear sesión</button>
+          <button type="button" id="convertCancel" class="btn-ghost">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <script>
     document.getElementById('logoutBtn')?.addEventListener('click', async () => {
       await fetch('/admin/api/logout', { method: 'POST' });
       window.location.href = '/admin/login';
+    });
+
+    // Spotlight search: filtra ambas tablas en vivo
+    const spotlight = document.getElementById('spotlight') as HTMLInputElement;
+    const tables = ['leadsTable', 'sesionesTable']
+      .map((id) => document.getElementById(id))
+      .filter((t): t is HTMLTableElement => !!t);
+
+    function applyFilter() {
+      const q = spotlight.value.trim().toLowerCase();
+      for (const table of tables) {
+        const rows = table.querySelectorAll<HTMLTableRowElement>('tbody tr[data-search]');
+        rows.forEach((row) => {
+          const hay = row.dataset.search ?? '';
+          row.style.display = !q || hay.includes(q) ? '' : 'none';
+        });
+      }
+    }
+
+    spotlight.addEventListener('input', applyFilter);
+
+    document.addEventListener('keydown', (e) => {
+      const isMac = navigator.platform.toLowerCase().includes('mac');
+      const cmdOrCtrl = isMac ? e.metaKey : e.ctrlKey;
+      if (cmdOrCtrl && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        spotlight.focus();
+        spotlight.select();
+      }
+      if (e.key === 'Escape' && document.activeElement === spotlight) {
+        spotlight.value = '';
+        applyFilter();
+        spotlight.blur();
+      }
+    });
+
+    // Convertir lead modal
+    const modal = document.getElementById('convertModal') as HTMLDivElement;
+    const sesionIdInput = document.getElementById('convertSesionId') as HTMLInputElement;
+    const codigoInput = document.getElementById('convertCodigo') as HTMLInputElement;
+    const paqueteSelect = document.getElementById('convertPaquete') as HTMLSelectElement;
+    const fechaInput = document.getElementById('convertFecha') as HTMLInputElement;
+    const convertForm = document.getElementById('convertForm') as HTMLFormElement;
+    const convertMsg = document.getElementById('convertMsg') as HTMLParagraphElement;
+    const convertTitle = document.getElementById('convertTitle') as HTMLHeadingElement;
+
+    codigoInput.addEventListener('input', () => {
+      codigoInput.value = codigoInput.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    });
+
+    document.querySelectorAll<HTMLButtonElement>('.convertir-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        sesionIdInput.value = btn.dataset.id ?? '';
+        codigoInput.value = '';
+        paqueteSelect.value = btn.dataset.paquete ?? '';
+        fechaInput.value = '';
+        convertMsg.textContent = '';
+        convertMsg.className = 'form-msg';
+        convertTitle.textContent = `Convertir lead · ${btn.dataset.nombre ?? ''}`;
+        modal.hidden = false;
+        setTimeout(() => codigoInput.focus(), 50);
+      });
+    });
+
+    document.getElementById('convertCancel')?.addEventListener('click', () => {
+      modal.hidden = true;
+    });
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.hidden = true;
+    });
+
+    convertForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const sesionId = sesionIdInput.value;
+      const codigo = codigoInput.value.trim().toUpperCase();
+      if (!sesionId || !codigo) { convertMsg.textContent = 'Código requerido'; convertMsg.className = 'form-msg error'; return; }
+      const submit = convertForm.querySelector('button[type="submit"]') as HTMLButtonElement;
+      submit.disabled = true;
+      submit.textContent = 'Convirtiendo...';
+      try {
+        const res = await fetch('/admin/api/convertir-lead', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sesionId,
+            codigo,
+            paquete_id: paqueteSelect.value || undefined,
+            fecha_sesion: fechaInput.value || undefined,
+          }),
+        });
+        const j = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          convertMsg.textContent = j.error ?? 'Error convirtiendo';
+          convertMsg.className = 'form-msg error';
+          submit.disabled = false;
+          submit.textContent = 'Convertir y crear sesión';
+          return;
+        }
+        window.location.href = `/admin/clientes/${j.codigo}`;
+      } catch (err) {
+        convertMsg.textContent = String(err);
+        convertMsg.className = 'form-msg error';
+        submit.disabled = false;
+        submit.textContent = 'Convertir y crear sesión';
+      }
     });
   </script>
 </Layout>

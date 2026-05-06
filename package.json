@@ -10,7 +10,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "migrate:clientes": "tsx --env-file=.env.local scripts/migrar-clientes.ts"
+    "migrate:clientes": "tsx --env-file=.env.local scripts/migrar-clientes.ts",
+    "sync:notion": "tsx --env-file=.env.local scripts/sync-notion.ts"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^13.2.2",
