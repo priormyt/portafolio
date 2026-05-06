@@ -1,0 +1,54 @@
+---
+// Esta página la sirve GitHub Pages cuando la ruta no existe estáticamente.
+// Para rutas dinámicas (las que vive el Worker), redirigimos al Worker.
+// Astro la prerendera a /dist/client/404.html.
+---
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Cargando · ANTE</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <style>
+    body {
+      background: #0d0d0b;
+      color: #f5f2ed;
+      font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem;
+    }
+    .wrap { max-width: 480px; }
+    h1 { font-family: Georgia, serif; font-weight: 300; font-size: 1.6rem; margin: 0 0 1rem; }
+    p { color: #9a9690; line-height: 1.7; font-size: 0.95rem; }
+    a { color: #f5f5e9; }
+    .small { font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase; margin-top: 2rem; }
+  </style>
+  <script>
+    (function () {
+      var WORKER = 'https://portafolio.priormyt99.workers.dev';
+      var p = window.location.pathname;
+      var s = window.location.search;
+      // Rutas dinámicas que viven en el Worker
+      var dyn = /^\/(clientes\/|admin(\/|$)|agendar(\/|$)|api\/)/;
+      if (dyn.test(p)) {
+        window.location.replace(WORKER + p + s);
+      }
+    })();
+  </script>
+</head>
+<body>
+  <div class="wrap">
+    <h1>No encontramos esta página</h1>
+    <p>La dirección que ingresaste no existe o el enlace caducó.</p>
+    <p><a href="/">Volver al inicio</a> · <a href="/clientes">Acceso clientes</a></p>
+    <p class="small">ANTE Estudio</p>
+  </div>
+</body>
+</html>
