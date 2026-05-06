@@ -6,14 +6,14 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from '../../lib/database.types';
 import { readEnv } from '../../lib/sesiones';
 import { requireAdmin } from '../../lib/admin-auth';
-import { runDueArchives, diasParaArchivar } from '../../lib/archivado';
+import { runDueArchives, runDuePreArchiveNotices, diasParaArchivar } from '../../lib/archivado';
 import '../../styles/admin.css';
 
 const env = await readEnv();
 const auth = await requireAdmin(env, Astro.request);
 if (!auth.ok) return Astro.redirect('/admin/login', 302);
 
-await runDueArchives(env);
+await Promise.all([runDueArchives(env), runDuePreArchiveNotices(env)]);
 
 const sb = createClient<Database>(
   env.PUBLIC_SUPABASE_URL!,

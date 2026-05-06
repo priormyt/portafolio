@@ -5,6 +5,7 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from '../../lib/database.types';
 import { readEnv } from '../../lib/sesiones';
 import { syncSesionToNotionBackground } from '../../lib/notion';
+import { notifyAdminConfirmacion } from '../../lib/mail';
 
 export const POST: APIRoute = async ({ request }) => {
   const env = await readEnv();
@@ -61,7 +62,13 @@ export const POST: APIRoute = async ({ request }) => {
       .eq('id', sesionId);
 
     syncSesionToNotionBackground(env, sesionId);
-    // TODO Fase 6: enviar correo a contacto@ante.photo con resumen
+    notifyAdminConfirmacion(env, {
+      codigo: sesion.codigo ?? sesionId,
+      nombre: sesion.nombre_cliente,
+      seleccionadas: numSelecciones,
+      extras: 0,
+      monto: 0,
+    });
     return json({ ok: true, redirect: `/clientes/${sesion.codigo}` });
   }
 
@@ -76,9 +83,14 @@ export const POST: APIRoute = async ({ request }) => {
     .eq('id', sesionId);
 
   syncSesionToNotionBackground(env, sesionId);
+  notifyAdminConfirmacion(env, {
+    codigo: sesion.codigo ?? sesionId,
+    nombre: sesion.nombre_cliente,
+    seleccionadas: numSelecciones,
+    extras,
+    monto,
+  });
 
-  // TODO Fase 5: redirigir a checkout de PayPal con order de $monto
-  // Por ahora redirige a la página, que mostrará "esperando pago"
   return json({
     ok: true,
     extras,

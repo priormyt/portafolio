@@ -3,8 +3,10 @@ import type { Database } from './database.types';
 import type { Env } from './sesiones';
 import { r2Delete } from './r2';
 import { upsertSesionToNotion } from './notion';
+import { notifyClienteArchivoProximo } from './mail';
 
 const DIAS_RETENCION = 30;
+const DIAS_AVISO_PREVIO = 7; // aviso al cliente 7 días antes del archivado
 
 function admin(env: Env) {
   return createClient<Database>(env.PUBLIC_SUPABASE_URL!, env.SUPABASE_SERVICE_ROLE_KEY!, {
@@ -88,4 +90,47 @@ export function diasParaArchivar(fechaEntrega: string | null): number | null {
   const entrega = new Date(fechaEntrega).getTime();
   const transcurridos = Math.floor((Date.now() - entrega) / (1000 * 60 * 60 * 24));
   return DIAS_RETENCION - transcurridos;
+}
+
+/**
+ * Manda email al cliente 7 días antes de que se archive su sesión.
+ * Idempotente: usa el flag `email_archivo_aviso_enviado` para no duplicar.
+ * Se llama lazy desde /admin junto con runDueArchives.
+ */
+export async function runDuePreArchiveNotices(env: Env): Promise<{ avisadas: number }> {
+  if (!env.PUBLIC_SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) return { avisadas: 0 };
+
+  const sb = admin(env);
+  const ahora = Date.now();
+  const dia = 24 * 60 * 60 * 1000;
+
+  // Sesiones entregadas que entran en la ventana de aviso (último día antes de los 7 restantes)
+  // y todavía no han sido avisadas.
+  const inicioVentana = new Date(ahora - (DIAS_RETENCION - DIAS_AVISO_PREVIO) * dia).toISOString();
+  const finVentana = new Date(ahora - (DIAS_RETENCION - DIAS_AVISO_PREVIO - 1) * dia).toISOString();
+
+  const { data: candidatas } = await sb
+    .from('sesiones')
+    .select('id, codigo, nombre_cliente, email_cliente, fecha_entrega')
+    .eq('estado', 'entregada')
+    .eq('email_archivo_aviso_enviado', false)
+    .not('fecha_entrega', 'is', null)
+    .lt('fecha_entrega', finVentana)
+    .gte('fecha_entrega', inicioVentana);
+
+  if (!candidatas || candidatas.length === 0) return { avisadas: 0 };
+
+  let count = 0;
+  for (const s of candidatas) {
+    if (!s.email_cliente) continue;
+    notifyClienteArchivoProximo(env, {
+      email: s.email_cliente,
+      nombre: s.nombre_cliente,
+      codigo: s.codigo ?? '',
+      diasRestantes: DIAS_AVISO_PREVIO,
+    });
+    await sb.from('sesiones').update({ email_archivo_aviso_enviado: true }).eq('id', s.id);
+    count++;
+  }
+  return { avisadas: count };
 }

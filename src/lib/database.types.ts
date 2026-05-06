@@ -46,6 +46,9 @@ export interface Sesion {
   notas_sesion: string | null;
   notas_tecnicas: string | null;
   notion_page_id: string | null;
+  precio_final: number | null;
+  comprobante_50_url: string | null;
+  email_archivo_aviso_enviado: boolean;
   created_at: string;
   updated_at: string;
 }

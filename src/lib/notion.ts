@@ -70,9 +70,12 @@ function buildProperties(args: {
 }): Record<string, any> {
   const { sesion, paquete, fotosFinales, selecciones, siteUrl } = args;
 
-  const precioFinal =
+  // precio_final manual gana sobre el cálculo. Si no hay override, sumamos paquete + extras.
+  const precioCalculado =
     (paquete?.precio_base ? Number(paquete.precio_base) : 0) +
     (sesion.monto_extras ? Number(sesion.monto_extras) : 0);
+  const precioFinal =
+    sesion.precio_final != null ? Number(sesion.precio_final) : precioCalculado;
 
   const fechaLimite = sesion.fecha_entrega
     ? new Date(new Date(sesion.fecha_entrega).getTime() + 30 * 24 * 60 * 60 * 1000)
@@ -105,6 +108,11 @@ function buildProperties(args: {
     'Notas Sesión':        { rich_text: rt(sesion.notas_sesion) },
     'Notas Técnicas':      { rich_text: rt(sesion.notas_tecnicas) },
     'Link de Entrega':     { url: linkEntrega },
+    'Comprobante 50%':     {
+      files: sesion.comprobante_50_url
+        ? [{ name: 'comprobante.jpg', type: 'external', external: { url: sesion.comprobante_50_url } }]
+        : [],
+    },
   };
 
   if (sesion.origen) {

@@ -5,6 +5,7 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database, SesionOrigen } from '../../lib/database.types';
 import { readEnv } from '../../lib/sesiones';
 import { syncSesionToNotionBackground } from '../../lib/notion';
+import { notifyAdminLeadNuevo } from '../../lib/mail';
 
 const ORIGENES: SesionOrigen[] = ['instagram', 'referido', 'web', 'google', 'tiktok', 'otro'];
 
@@ -57,6 +58,24 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   syncSesionToNotionBackground(env, sesion.id);
+
+  // Resolver nombre del paquete para el correo (no bloqueante si falla)
+  let paqueteNombre: string | null = null;
+  if (body.paquete_id) {
+    const { data: pq } = await sb.from('paquetes').select('nombre').eq('id', body.paquete_id).maybeSingle();
+    paqueteNombre = pq?.nombre ?? null;
+  }
+
+  notifyAdminLeadNuevo(env, {
+    nombre,
+    email,
+    telefono: String(body.telefono ?? '').trim() || null,
+    handleIg: String(body.handle_ig ?? '').trim() || null,
+    paqueteNombre,
+    fechaPreferida: String(body.fecha_preferida ?? '') || null,
+    origen,
+    notas: String(body.notas ?? '').trim() || null,
+  });
 
   return json({ ok: true });
 };

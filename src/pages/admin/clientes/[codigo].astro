@@ -23,6 +23,10 @@ const seleccionadas = new Set(selecciones.map((s) => s.foto_id));
 const limite = sesion.limite_fotos ?? paquete?.fotos_incluidas ?? 0;
 const diasRestantes = sesion.estado === 'entregada' ? diasParaArchivar(sesion.fecha_entrega) : null;
 
+const precioCalculado =
+  (paquete?.precio_base ? Number(paquete.precio_base) : 0) +
+  (sesion.monto_extras ? Number(sesion.monto_extras) : 0);
+
 const estadoLabel: Record<string, string> = {
   lead: 'Lead',
   seleccion: 'Seleccionando',
@@ -80,6 +84,47 @@ const estadoLabel: Record<string, string> = {
           Esta sesión está <strong>archivada</strong>. Las fotos se borraron el {sesion.fecha_archivado ? new Date(sesion.fecha_archivado).toLocaleDateString('es-MX') : '—'}. Solo queda el histórico.
         </p>
       )}
+    </section>
+
+    <section class="admin-block">
+      <h2 class="admin-h2">Pago y precio</h2>
+      <div class="precio-row">
+        <div class="precio-info">
+          <p class="form-hint">
+            Calculado: paquete{paquete?.precio_base ? ` $${Number(paquete.precio_base)}` : ' (sin precio)'}{sesion.monto_extras ? ` + extras $${Number(sesion.monto_extras)}` : ''} = <strong>${precioCalculado} MXN</strong>
+          </p>
+        </div>
+        <div class="precio-controls">
+          <label for="precioFinalInput">Precio final manual (override)</label>
+          <input
+            id="precioFinalInput"
+            type="number"
+            step="0.01"
+            min="0"
+            value={sesion.precio_final ?? ''}
+            placeholder="vacío = usar calculado"
+          />
+          <button id="btnPrecioFinal" type="button" class="btn-ghost">Guardar</button>
+        </div>
+      </div>
+
+      <h3 class="admin-h3">Comprobante de anticipo (50%)</h3>
+      {sesion.comprobante_50_url ? (
+        <div class="comprobante-actual">
+          <a href={sesion.comprobante_50_url} target="_blank" rel="noopener" class="btn-link">
+            Ver comprobante actual ↗
+          </a>
+          <button id="btnQuitarComprobante" type="button" class="btn-link" style="color:#e07070">Quitar</button>
+        </div>
+      ) : (
+        <p class="form-hint">Aún sin comprobante. Sube la imagen/PDF que te mandó el cliente.</p>
+      )}
+      <div id="comprobanteDropzone" class="dropzone" style="margin-top:1rem">
+        <p class="dropzone-text">Arrastra el comprobante aquí o haz click</p>
+        <p class="dropzone-sub">JPG, PNG o PDF · se sube directo a R2 + Notion</p>
+        <input id="comprobanteInput" type="file" accept="image/jpeg,image/png,application/pdf" hidden />
+      </div>
+      <p id="comprobanteMsg" class="form-msg" aria-live="polite"></p>
     </section>
 
     <section class="admin-block">
@@ -156,6 +201,94 @@ const estadoLabel: Record<string, string> = {
 
   <script src="/js/image-processor.js" is:inline></script>
   <script define:vars={{ codigo: sesion.codigo }}>
+    // Precio final manual
+    const precioFinalInput = document.getElementById('precioFinalInput');
+    const btnPrecioFinal = document.getElementById('btnPrecioFinal');
+    btnPrecioFinal?.addEventListener('click', async () => {
+      const raw = precioFinalInput.value.trim();
+      btnPrecioFinal.disabled = true;
+      btnPrecioFinal.textContent = 'Guardando...';
+      try {
+        const res = await fetch('/admin/api/precio-final', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ codigo, precio_final: raw === '' ? null : Number(raw) }),
+        });
+        const j = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          alert(j.error || 'Error guardando precio');
+        } else {
+          btnPrecioFinal.textContent = 'Guardado ✓';
+          setTimeout(() => { btnPrecioFinal.textContent = 'Guardar'; }, 1500);
+        }
+      } catch (e) {
+        alert(String(e));
+      } finally {
+        btnPrecioFinal.disabled = false;
+      }
+    });
+
+    // Comprobante 50%
+    const compDz = document.getElementById('comprobanteDropzone');
+    const compInput = document.getElementById('comprobanteInput');
+    const compMsg = document.getElementById('comprobanteMsg');
+    const btnQuitarComp = document.getElementById('btnQuitarComprobante');
+
+    async function uploadComprobante(file) {
+      compMsg.textContent = `Subiendo ${file.name}...`;
+      compMsg.className = 'form-msg';
+      const fd = new FormData();
+      fd.set('codigo', codigo);
+      fd.set('file', file);
+      try {
+        const res = await fetch('/admin/api/upload-comprobante', { method: 'POST', body: fd });
+        const j = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          compMsg.textContent = j.error || 'Error subiendo';
+          compMsg.className = 'form-msg error';
+          return;
+        }
+        compMsg.textContent = 'Subido ✓';
+        compMsg.className = 'form-msg ok';
+        setTimeout(() => window.location.reload(), 800);
+      } catch (e) {
+        compMsg.textContent = String(e);
+        compMsg.className = 'form-msg error';
+      }
+    }
+
+    compDz?.addEventListener('click', () => compInput.click());
+    compDz?.addEventListener('dragover', (e) => { e.preventDefault(); compDz.classList.add('drag-over'); });
+    compDz?.addEventListener('dragleave', () => compDz.classList.remove('drag-over'));
+    compDz?.addEventListener('drop', (e) => {
+      e.preventDefault();
+      compDz.classList.remove('drag-over');
+      const f = e.dataTransfer?.files?.[0];
+      if (f) uploadComprobante(f);
+    });
+    compInput?.addEventListener('change', () => {
+      const f = compInput.files?.[0];
+      if (f) uploadComprobante(f);
+    });
+
+    btnQuitarComp?.addEventListener('click', async () => {
+      if (!confirm('¿Quitar el comprobante? El archivo queda en R2 pero deja de mostrarse en Notion y en este admin.')) return;
+      const fd = new FormData();
+      fd.set('codigo', codigo);
+      fd.set('remove', '1');
+      try {
+        const res = await fetch('/admin/api/upload-comprobante', { method: 'POST', body: fd });
+        if (!res.ok) {
+          const j = await res.json().catch(() => ({}));
+          alert(j.error || 'Error');
+          return;
+        }
+        window.location.reload();
+      } catch (e) {
+        alert(String(e));
+      }
+    });
+
     // Archivar manual
     const btnArchivar = document.getElementById('btnArchivar');
     if (btnArchivar) {

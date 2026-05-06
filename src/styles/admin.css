@@ -36,6 +36,14 @@
   font-weight: 300;
   margin-bottom: 1rem;
 }
+.admin-h3 {
+  font-family: var(--f-mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--ash);
+  margin: 2rem 0 0.8rem;
+}
 
 .admin-sub {
   font-family: var(--f-mono);
@@ -440,6 +448,54 @@
 .btn-danger:hover {
   border-color: #e07070;
   background: rgba(224, 112, 112, 0.08);
+}
+
+/* ─── Pago / Comprobante ────────────────────────────────────── */
+.precio-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1.5rem 2rem;
+  align-items: end;
+  margin-bottom: 1rem;
+}
+.precio-info { padding-top: 0.6rem; }
+.precio-info strong { color: var(--paper); font-family: var(--f-mono); }
+.precio-controls {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.6rem;
+  align-items: end;
+}
+.precio-controls label {
+  grid-column: 1 / -1;
+  font-family: var(--f-mono);
+  font-size: var(--fs-micro);
+  letter-spacing: var(--ls-label);
+  color: var(--ash);
+  text-transform: uppercase;
+}
+.precio-controls input {
+  padding: 0.85rem 1rem;
+  background: transparent;
+  border: 0.5px solid rgba(245, 242, 237, 0.2);
+  color: var(--paper);
+  font-family: var(--f-mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  outline: none;
+  min-width: 12rem;
+}
+.precio-controls input:focus { border-color: rgba(245, 242, 237, 0.5); }
+
+.comprobante-actual {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  padding: 0.8rem 0;
+}
+
+@media (max-width: 768px) {
+  .precio-row { grid-template-columns: 1fr; }
 }
 
 /* ─── Spotlight search ──────────────────────────────────────── */

@@ -161,6 +161,38 @@ const fotosParaSeleccion = fotosPreview.length > 0 ? fotosPreview : fotosFinales
       </section>
     )}
 
+    {sesion.estado === 'archivada' && (
+      <section class="estado-archivada">
+        <p class="estado-titulo">Esta sesión fue archivada</p>
+        <p class="estado-texto">
+          Tus fotos estuvieron disponibles 30 días después de la entrega
+          {sesion.fecha_archivado && ` y se archivaron el ${new Date(sesion.fecha_archivado).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' })}`}.
+          Los archivos ya no están en línea, pero tu información sigue guardada.
+        </p>
+        <p class="estado-texto" style="margin-top:1.5rem">
+          Si necesitas que reactivemos tu galería, escríbenos por WhatsApp o correo y lo arreglamos.
+        </p>
+        <div class="archivada-actions">
+          <a class="btn-archivada" href="https://wa.me/525951220554?text=Hola%2C%20mi%20galer%C3%ADa%20de%20ANTE%20fue%20archivada%20y%20me%20gustar%C3%ADa%20reactivarla.%20Mi%20c%C3%B3digo%20es%20{sesion.codigo}" target="_blank" rel="noopener">
+            Escribir por WhatsApp
+          </a>
+          <a class="btn-archivada btn-archivada-ghost" href="mailto:contacto@ante.photo?subject=Reactivar galería {sesion.codigo}">
+            Escribir por correo
+          </a>
+        </div>
+      </section>
+    )}
+
+    {sesion.estado === 'lead' && (
+      <section class="estado-pendiente">
+        <p class="estado-titulo">Estamos preparando tu sesión</p>
+        <p class="estado-texto">
+          Recibimos tu solicitud por el formulario y te vamos a contactar pronto para confirmar fecha y detalles.
+          Vuelve a esta página con el código que te enviemos por WhatsApp o correo.
+        </p>
+      </section>
+    )}
+
     {sesion.estado === 'editando' && (
       <section class="estado-editando">
         <p class="estado-titulo">Estamos editando tus fotos</p>
@@ -387,12 +419,42 @@ const fotosParaSeleccion = fotosPreview.length > 0 ? fotosPreview : fotosFinales
     .btn-confirmar:disabled { opacity: 0.4; pointer-events: none; }
 
     /* ESTADOS NO INTERACTIVOS */
-    .estado-pendiente, .estado-editando {
+    .estado-pendiente, .estado-editando, .estado-archivada {
       max-width: 600px;
       margin: 4rem auto;
       text-align: center;
       padding: 2.5rem;
       border: 0.5px solid rgba(245,242,237,0.12);
+    }
+    .archivada-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+    }
+    .btn-archivada {
+      padding: 0.85rem 1.6rem;
+      background: var(--paper);
+      color: var(--ink);
+      border: none;
+      font-family: var(--f-mono);
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-wide);
+      text-transform: uppercase;
+      text-decoration: none;
+      cursor: none;
+      transition: background 0.2s;
+    }
+    .btn-archivada:hover { background: var(--accent); }
+    .btn-archivada-ghost {
+      background: transparent;
+      color: var(--paper);
+      border: 0.5px solid rgba(245,242,237,0.3);
+    }
+    .btn-archivada-ghost:hover {
+      background: rgba(245,242,237,0.05);
+      border-color: var(--paper);
     }
     .estado-titulo {
       font-family: var(--f-serif);

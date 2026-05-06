@@ -17,6 +17,9 @@ export type Env = {
   NOTION_DATABASE_ID?: string;
   NOTION_WEBHOOK_TOKEN?: string;
   PUBLIC_SITE_URL?: string;
+  RESEND_API_KEY?: string;
+  MAIL_FROM?: string;
+  ADMIN_EMAIL?: string;
 };
 
 /**
@@ -49,6 +52,9 @@ export async function readEnv(): Promise<Env> {
     NOTION_DATABASE_ID: pick('NOTION_DATABASE_ID'),
     NOTION_WEBHOOK_TOKEN: pick('NOTION_WEBHOOK_TOKEN'),
     PUBLIC_SITE_URL: pick('PUBLIC_SITE_URL'),
+    RESEND_API_KEY: pick('RESEND_API_KEY'),
+    MAIL_FROM: pick('MAIL_FROM'),
+    ADMIN_EMAIL: pick('ADMIN_EMAIL'),
   };
 }
 
