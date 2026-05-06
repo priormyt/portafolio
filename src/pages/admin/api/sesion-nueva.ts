@@ -66,7 +66,7 @@ export const POST: APIRoute = async ({ request }) => {
 
   if (error || !sesion) return json({ error: error?.message ?? 'error creando sesión' }, 500);
 
-  syncSesionToNotionBackground(env, sesion.id);
+  await syncSesionToNotionBackground(env, sesion.id);
 
   return json({ ok: true, sesion });
 };

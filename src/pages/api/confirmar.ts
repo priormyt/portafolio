@@ -61,7 +61,7 @@ export const POST: APIRoute = async ({ request }) => {
       })
       .eq('id', sesionId);
 
-    syncSesionToNotionBackground(env, sesionId);
+    await syncSesionToNotionBackground(env, sesionId);
     notifyAdminConfirmacion(env, {
       codigo: sesion.codigo ?? sesionId,
       nombre: sesion.nombre_cliente,
@@ -82,7 +82,7 @@ export const POST: APIRoute = async ({ request }) => {
     })
     .eq('id', sesionId);
 
-  syncSesionToNotionBackground(env, sesionId);
+  await syncSesionToNotionBackground(env, sesionId);
   notifyAdminConfirmacion(env, {
     codigo: sesion.codigo ?? sesionId,
     nombre: sesion.nombre_cliente,

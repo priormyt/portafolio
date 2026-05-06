@@ -41,7 +41,7 @@ export const POST: APIRoute = async ({ request }) => {
   if (remove) {
     const { error } = await sb.from('sesiones').update({ comprobante_50_url: null }).eq('id', sesion.id);
     if (error) return json({ error: error.message }, 500);
-    syncSesionToNotionBackground(env, sesion.id);
+    await syncSesionToNotionBackground(env, sesion.id);
     return json({ ok: true, removed: true });
   }
 
@@ -60,7 +60,7 @@ export const POST: APIRoute = async ({ request }) => {
   const { error } = await sb.from('sesiones').update({ comprobante_50_url: url }).eq('id', sesion.id);
   if (error) return json({ error: error.message }, 500);
 
-  syncSesionToNotionBackground(env, sesion.id);
+  await syncSesionToNotionBackground(env, sesion.id);
 
   return json({ ok: true, url });
 };

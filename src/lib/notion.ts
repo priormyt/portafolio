@@ -191,11 +191,17 @@ export async function upsertSesionToNotion(env: Env, sesionId: string): Promise<
 }
 
 /**
- * Hace upsert en background sin bloquear y sin lanzar errores al caller.
- * Úsalo en endpoints después de cambios de estado/datos.
+ * Hace upsert a Notion y absorbe errores para no romper al caller.
+ *
+ * Importante: sí hace `await`. En Cloudflare Workers una promise sin await
+ * (fire-and-forget) puede ser cancelada cuando el handler retorna su Response,
+ * porque el isolate se cierra. Por eso awaiteamos aquí y el caller también
+ * debe await esta función para garantizar la sincronización antes de responder.
  */
-export function syncSesionToNotionBackground(env: Env, sesionId: string): void {
-  upsertSesionToNotion(env, sesionId).catch((err) =>
-    console.error('[notion sync] fallo no fatal:', err),
-  );
+export async function syncSesionToNotionBackground(env: Env, sesionId: string): Promise<void> {
+  try {
+    await upsertSesionToNotion(env, sesionId);
+  } catch (err) {
+    console.error('[notion sync] fallo no fatal:', err);
+  }
 }

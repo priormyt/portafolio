@@ -43,7 +43,7 @@ export const POST: APIRoute = async ({ request }) => {
   if (error) return json({ error: error.message }, 500);
   if (!updated) return json({ error: 'no encontrado' }, 404);
 
-  syncSesionToNotionBackground(env, updated.id);
+  await syncSesionToNotionBackground(env, updated.id);
 
   return json({ ok: true, precio_final: precioFinal });
 };

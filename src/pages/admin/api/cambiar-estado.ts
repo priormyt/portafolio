@@ -42,7 +42,7 @@ export const POST: APIRoute = async ({ request }) => {
   if (error) return json({ error: error.message }, 500);
 
   if (updated) {
-    syncSesionToNotionBackground(env, updated.id);
+    await syncSesionToNotionBackground(env, updated.id);
 
     if (estado === 'entregada' && updated.email_cliente) {
       notifyClienteEntregada(env, {

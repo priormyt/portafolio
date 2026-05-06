@@ -42,9 +42,13 @@ export async function archivarSesion(env: Env, sesionId: string): Promise<{ borr
     })
     .eq('id', sesionId);
 
-  upsertSesionToNotion(env, sesionId).catch((err) =>
-    console.error('[notion sync archivar] fallo no fatal:', err),
-  );
+  // await para garantizar que el sync se complete antes de retornar al caller.
+  // En Workers un fire-and-forget puede ser cancelado al cerrar el isolate.
+  try {
+    await upsertSesionToNotion(env, sesionId);
+  } catch (err) {
+    console.error('[notion sync archivar] fallo no fatal:', err);
+  }
 
   return { borradas };
 }

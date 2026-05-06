@@ -57,7 +57,7 @@ export const POST: APIRoute = async ({ request }) => {
     return json({ error: error?.message ?? 'error creando lead' }, 500);
   }
 
-  syncSesionToNotionBackground(env, sesion.id);
+  await syncSesionToNotionBackground(env, sesion.id);
 
   // Resolver nombre del paquete para el correo (no bloqueante si falla)
   let paqueteNombre: string | null = null;

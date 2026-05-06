@@ -167,9 +167,12 @@ export const POST: APIRoute = async ({ request }) => {
 
   // Push back para reflejar campos derivados (fecha_entrega → Fecha Límite, codigo → Link de Entrega).
   // El re-evento que esto genere se descarta por BOT_ID.
-  upsertSesionToNotion(env, sesion.id).catch((e) =>
-    console.error('[notion webhook] sync back falló:', e),
-  );
+  // await para garantizar la sincronización antes de cerrar el isolate.
+  try {
+    await upsertSesionToNotion(env, sesion.id);
+  } catch (e) {
+    console.error('[notion webhook] sync back falló:', e);
+  }
 
   return jsonRes({ ok: true, action: 'updated', fields: Object.keys(update).length });
 };

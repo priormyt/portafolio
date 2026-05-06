@@ -61,7 +61,7 @@ export const POST: APIRoute = async ({ request }) => {
     .eq('estado', 'lead');
   if (error) return json({ error: error.message }, 500);
 
-  syncSesionToNotionBackground(env, sesionId);
+  await syncSesionToNotionBackground(env, sesionId);
 
   return json({ ok: true, codigo });
 };
