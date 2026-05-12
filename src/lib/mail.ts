@@ -44,9 +44,14 @@ async function sendMail(env: Env, args: SendArgs): Promise<void> {
   }
 }
 
-/** Versión "fire and forget" — nunca lanza errores, los loguea. */
-export function sendMailBackground(env: Env, args: SendArgs): void {
-  sendMail(env, args).catch((err) => console.error('[mail] background fail:', err));
+/**
+ * Versión segura — nunca lanza errores (los loguea) y devuelve una promesa que
+ * los callers DEBEN awaitar. En Cloudflare Workers, una promesa pendiente al
+ * retornar el handler se cancela; por eso aquí no fire-and-forget. Si el caller
+ * no quiere bloquear, debe pasarlo a ctx.waitUntil() explícitamente.
+ */
+export function sendMailBackground(env: Env, args: SendArgs): Promise<void> {
+  return sendMail(env, args).catch((err) => console.error('[mail] background fail:', err));
 }
 
 // ─── Design tokens (mismos que el template hero existente) ──────
@@ -363,13 +368,13 @@ export function buildClienteCambioEstadoEmail(
   };
 }
 
-export function notifyClienteCambioEstado(
+export async function notifyClienteCambioEstado(
   env: Env,
   args: { email: string; nombre: string; codigo: string; estado: Etapa },
-): void {
+): Promise<void> {
   if (!args.email) return;
   const { subject, html } = buildClienteCambioEstadoEmail(env, args);
-  sendMailBackground(env, { to: args.email, subject, html, replyTo: env.ADMIN_EMAIL });
+  return sendMailBackground(env, { to: args.email, subject, html, replyTo: env.ADMIN_EMAIL });
 }
 
 export function buildClienteEntregadaEmail(
@@ -401,19 +406,19 @@ export function buildClienteEntregadaEmail(
   };
 }
 
-export function notifyClienteEntregada(
+export async function notifyClienteEntregada(
   env: Env,
   args: { email: string; nombre: string; codigo: string },
-): void {
+): Promise<void> {
   if (!args.email) return;
   const { subject, html } = buildClienteEntregadaEmail(env, args);
-  sendMailBackground(env, { to: args.email, subject, html, replyTo: env.ADMIN_EMAIL });
+  return sendMailBackground(env, { to: args.email, subject, html, replyTo: env.ADMIN_EMAIL });
 }
 
-export function notifyClienteArchivoProximo(
+export async function notifyClienteArchivoProximo(
   env: Env,
   args: { email: string; nombre: string; codigo: string; diasRestantes: number },
-): void {
+): Promise<void> {
   if (!args.email) return;
   const galeriaUrl = `${(env.PUBLIC_SITE_URL ?? '').replace(/\/$/, '')}/clientes/${args.codigo}`;
   const firstName = args.nombre.split(' ')[0] ?? args.nombre;
@@ -435,7 +440,7 @@ export function notifyClienteArchivoProximo(
     footerRow(),
   ].join('');
 
-  sendMailBackground(env, {
+  return sendMailBackground(env, {
     to: args.email,
     subject: `Tu galería se archiva en ${dias} · ${args.codigo}`,
     html: shell({ title: 'Aviso de archivado', rows }),
@@ -445,7 +450,7 @@ export function notifyClienteArchivoProximo(
 
 // ─── Templates: admin ───────────────────────────────────────────
 
-export function notifyAdminLeadNuevo(
+export async function notifyAdminLeadNuevo(
   env: Env,
   args: {
     nombre: string;
@@ -457,7 +462,7 @@ export function notifyAdminLeadNuevo(
     origen?: string | null;
     notas?: string | null;
   },
-): void {
+): Promise<void> {
   if (!env.ADMIN_EMAIL) return;
   const adminUrl = (env.PUBLIC_SITE_URL ?? '').replace(/\/$/, '') + '/admin';
 
@@ -486,7 +491,7 @@ export function notifyAdminLeadNuevo(
     footerRow(),
   ].join('');
 
-  sendMailBackground(env, {
+  return sendMailBackground(env, {
     to: env.ADMIN_EMAIL,
     subject: `Nuevo lead · ${args.nombre}`,
     html: shell({ title: 'Nuevo lead', rows }),
@@ -494,10 +499,10 @@ export function notifyAdminLeadNuevo(
   });
 }
 
-export function notifyAdminConfirmacion(
+export async function notifyAdminConfirmacion(
   env: Env,
   args: { codigo: string; nombre: string; seleccionadas: number; extras: number; monto: number },
-): void {
+): Promise<void> {
   if (!env.ADMIN_EMAIL) return;
   const conExtras = args.extras > 0;
   const subject = conExtras
@@ -530,17 +535,17 @@ export function notifyAdminConfirmacion(
     footerRow(),
   ].join('');
 
-  sendMailBackground(env, {
+  return sendMailBackground(env, {
     to: env.ADMIN_EMAIL,
     subject,
     html: shell({ title: 'Selección confirmada', rows }),
   });
 }
 
-export function notifyAdminComprobante(
+export async function notifyAdminComprobante(
   env: Env,
   args: { codigo: string; nombre: string; monto: number | null; comprobanteUrl: string | null },
-): void {
+): Promise<void> {
   if (!env.ADMIN_EMAIL) return;
   const adminUrl = (env.PUBLIC_SITE_URL ?? '').replace(/\/$/, '') + `/admin/clientes/${args.codigo}`;
   const items: Array<{ label: string; value: string }> = [
@@ -562,7 +567,7 @@ export function notifyAdminComprobante(
     footerRow(),
   ].join('');
 
-  sendMailBackground(env, {
+  return sendMailBackground(env, {
     to: env.ADMIN_EMAIL,
     subject: `${args.codigo} subió comprobante${args.monto != null ? ` · $${args.monto} MXN` : ''}`,
     html: shell({ title: 'Comprobante recibido', rows }),

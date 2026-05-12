@@ -54,13 +54,13 @@ export const POST: APIRoute = async ({ request }) => {
     const cambio = estadoAnterior !== estado;
     if (cambio && updated.email_cliente) {
       if (estado === 'entregada') {
-        notifyClienteEntregada(env, {
+        await notifyClienteEntregada(env, {
           email: updated.email_cliente,
           nombre: updated.nombre_cliente,
           codigo: updated.codigo ?? '',
         });
       } else if (estado === 'seleccion' || estado === 'pago_pendiente' || estado === 'editando') {
-        notifyClienteCambioEstado(env, {
+        await notifyClienteCambioEstado(env, {
           email: updated.email_cliente,
           nombre: updated.nombre_cliente,
           codigo: updated.codigo ?? '',

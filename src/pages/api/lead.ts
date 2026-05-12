@@ -68,7 +68,7 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   const telefono = String(body.telefono ?? '').trim() || null;
-  notifyAdminLeadNuevo(env, {
+  await notifyAdminLeadNuevo(env, {
     nombre,
     email,
     telefono,
@@ -78,7 +78,7 @@ export const POST: APIRoute = async ({ request }) => {
     origen,
     notas: String(body.notas ?? '').trim() || null,
   });
-  notifyAdminWALeadNuevo(env, { nombre, email, telefono });
+  await notifyAdminWALeadNuevo(env, { nombre, email, telefono });
 
   return json({ ok: true });
 };
