@@ -404,18 +404,19 @@ const fotosParaSeleccion = fotosPreview.length > 0 ? fotosPreview : fotosFinales
       height: auto;
       aspect-ratio: 3 / 4;
       object-fit: cover;
-      border: 2px solid var(--paper);
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
       cursor: zoom-in;
       transition: transform 0.3s ease, box-shadow 0.3s ease;
+      transform-origin: bottom left;
       z-index: 2;
     }
     .galeria-item:hover .galeria-frame img.galeria-alt {
       transform: none;
     }
     .galeria-frame img.galeria-alt:hover {
-      transform: scale(1.08);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
+      transform: scale(1.8);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+      z-index: 3;
     }
     .galeria-download-alt {
       top: auto !important;
