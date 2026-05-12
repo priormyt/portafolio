@@ -395,10 +395,11 @@ const fotosParaSeleccion = fotosPreview.length > 0 ? fotosPreview : fotosFinales
     .galeria-download:hover { background: var(--paper); color: var(--ink); }
 
     /* VERSIÓN ALTERNATIVA (subversión) */
-    .galeria-alt {
+    .galeria-frame img.galeria-alt {
       position: absolute;
       left: 0.7rem;
       bottom: 0.7rem;
+      top: auto;
       width: 32%;
       height: auto;
       aspect-ratio: 3 / 4;
@@ -409,7 +410,10 @@ const fotosParaSeleccion = fotosPreview.length > 0 ? fotosPreview : fotosFinales
       transition: transform 0.3s ease, box-shadow 0.3s ease;
       z-index: 2;
     }
-    .galeria-alt:hover {
+    .galeria-item:hover .galeria-frame img.galeria-alt {
+      transform: none;
+    }
+    .galeria-frame img.galeria-alt:hover {
       transform: scale(1.08);
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
     }
