@@ -6,6 +6,7 @@ import type { Database } from '../../../lib/database.types';
 import { readEnv } from '../../../lib/sesiones';
 import { requireAdmin } from '../../../lib/admin-auth';
 import { syncSesionToNotionBackground } from '../../../lib/notion';
+import { notifyClienteCambioEstado } from '../../../lib/mail';
 
 export const POST: APIRoute = async ({ request }) => {
   const env = await readEnv();
@@ -67,6 +68,18 @@ export const POST: APIRoute = async ({ request }) => {
   if (error || !sesion) return json({ error: error?.message ?? 'error creando sesión' }, 500);
 
   await syncSesionToNotionBackground(env, sesion.id);
+
+  // Notificar al cliente que su sesión está en etapa de selección. La sesión nace
+  // en estado 'seleccion', así que cambiar-estado.ts nunca dispara el correo —
+  // por eso lo mandamos aquí explícitamente.
+  if (sesion.email_cliente) {
+    notifyClienteCambioEstado(env, {
+      email: sesion.email_cliente,
+      nombre: sesion.nombre_cliente,
+      codigo: sesion.codigo ?? '',
+      estado: 'seleccion',
+    });
+  }
 
   return json({ ok: true, sesion });
 };
