@@ -85,19 +85,20 @@ export const POST: APIRoute = async ({ request }) => {
     await sb.from('fotos').delete().eq('parent_foto_id', parentId);
   }
 
+  // Solo incluimos parent_foto_id cuando hay alt — así uploads normales
+  // siguen funcionando aunque la migración 0004 aún no esté corrida en la BD.
+  const payload: Record<string, unknown> = {
+    sesion_id: sesion.id,
+    r2_key: r2Key,
+    tipo,
+    orden: isNaN(orden) ? 0 : orden,
+    original_filename: safeName,
+  };
+  if (parentId) payload.parent_foto_id = parentId;
+
   const { data: inserted, error: errFoto } = await sb
     .from('fotos')
-    .upsert(
-      {
-        sesion_id: sesion.id,
-        r2_key: r2Key,
-        tipo,
-        orden: isNaN(orden) ? 0 : orden,
-        original_filename: safeName,
-        parent_foto_id: parentId,
-      },
-      { onConflict: 'sesion_id,r2_key' },
-    )
+    .upsert(payload, { onConflict: 'sesion_id,r2_key' })
     .select('id')
     .maybeSingle();
 
