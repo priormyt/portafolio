@@ -37,7 +37,13 @@ const seleccionadasCount = selecciones.length;
 const extras = Math.max(0, seleccionadasCount - limite);
 const costoExtras = extras * Number(sesion.precio_extra ?? 0);
 
-const fotosParaSeleccion = fotosPreview.length > 0 ? fotosPreview : fotosFinales;
+const fotosFinalesPrincipales = fotosFinales.filter((f) => !f.parent_foto_id);
+const altByParent: Record<string, typeof fotosFinales[number]> = {};
+for (const f of fotosFinales) {
+  if (f.parent_foto_id) altByParent[f.parent_foto_id] = f;
+}
+
+const fotosParaSeleccion = fotosPreview.length > 0 ? fotosPreview : fotosFinalesPrincipales;
 ---
 <Layout
   title={`Galería · ${sesion.nombre_cliente} | ANTE`}
@@ -55,37 +61,63 @@ const fotosParaSeleccion = fotosPreview.length > 0 ? fotosPreview : fotosFinales
     </section>
 
     {sesion.estado === 'entregada' && (
-      <section class="estado-entregada" data-fotos-count={fotosFinales.length}>
+      <section class="estado-entregada" data-fotos-count={fotosFinalesPrincipales.length}>
         <p class="estado-texto">
           Tus fotos están listas. Da click en cualquiera para verla en grande, o en el ícono de descarga.
         </p>
 
         <div class="galeria-grid">
-          {fotosFinales.map((foto, i) => (
-            <figure class="galeria-item" data-index={i}>
-              <div class="galeria-frame">
-                <img
-                  src={fotoUrl(env, foto.r2_key)}
-                  alt={`${sesion.nombre_cliente} – foto ${i + 1}`}
-                  loading="lazy"
-                  draggable="false"
-                  data-full={fotoUrl(env, foto.r2_key)}
-                />
-                <a
-                  class="galeria-download"
-                  href={fotoUrl(env, foto.r2_key)}
-                  download={foto.original_filename ?? `${sesion.codigo}_${i + 1}.jpg`}
-                  aria-label="Descargar foto"
-                  onclick="event.stopPropagation()"
-                >
-                  ↓
-                </a>
-              </div>
-              <figcaption class="galeria-caption">
-                {String(i + 1).padStart(2, '0')} / {String(fotosFinales.length).padStart(2, '0')}
-              </figcaption>
-            </figure>
-          ))}
+          {fotosFinalesPrincipales.map((foto, i) => {
+            const alt = altByParent[foto.id];
+            return (
+              <figure class="galeria-item" data-index={i}>
+                <div class="galeria-frame">
+                  <img
+                    src={fotoUrl(env, foto.r2_key)}
+                    alt={`${sesion.nombre_cliente} – foto ${i + 1}`}
+                    loading="lazy"
+                    draggable="false"
+                    data-full={fotoUrl(env, foto.r2_key)}
+                  />
+                  {alt && (
+                    <img
+                      class="galeria-alt"
+                      src={fotoUrl(env, alt.r2_key)}
+                      alt={`${sesion.nombre_cliente} – foto ${i + 1} (versión alterna)`}
+                      loading="lazy"
+                      draggable="false"
+                      data-full={fotoUrl(env, alt.r2_key)}
+                      title="Versión alterna · click para verla en grande"
+                    />
+                  )}
+                  <a
+                    class="galeria-download"
+                    href={fotoUrl(env, foto.r2_key)}
+                    download={foto.original_filename ?? `${sesion.codigo}_${i + 1}.jpg`}
+                    aria-label="Descargar foto"
+                    onclick="event.stopPropagation()"
+                  >
+                    ↓
+                  </a>
+                  {alt && (
+                    <a
+                      class="galeria-download galeria-download-alt"
+                      href={fotoUrl(env, alt.r2_key)}
+                      download={alt.original_filename ?? `${sesion.codigo}_${i + 1}_alt.jpg`}
+                      aria-label="Descargar versión alterna"
+                      onclick="event.stopPropagation()"
+                    >
+                      ↓
+                    </a>
+                  )}
+                </div>
+                <figcaption class="galeria-caption">
+                  {String(i + 1).padStart(2, '0')} / {String(fotosFinalesPrincipales.length).padStart(2, '0')}
+                  {alt && <span class="galeria-caption-alt"> · alt incluida</span>}
+                </figcaption>
+              </figure>
+            );
+          })}
         </div>
       </section>
     )}
@@ -329,6 +361,33 @@ const fotosParaSeleccion = fotosPreview.length > 0 ? fotosPreview : fotosFinales
     .galeria-item:hover .galeria-download { opacity: 1; }
     .galeria-download:hover { background: var(--paper); color: var(--ink); }
 
+    /* VERSIÓN ALTERNATIVA (subversión) */
+    .galeria-alt {
+      position: absolute;
+      left: 0.7rem;
+      bottom: 0.7rem;
+      width: 32%;
+      height: auto;
+      aspect-ratio: 3 / 4;
+      object-fit: cover;
+      border: 2px solid var(--paper);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+      cursor: zoom-in;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      z-index: 2;
+    }
+    .galeria-alt:hover {
+      transform: scale(1.08);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
+    }
+    .galeria-download-alt {
+      top: auto !important;
+      bottom: 0.7rem;
+      left: calc(0.7rem + 32% - 2.3rem);
+      right: auto;
+    }
+    .galeria-caption-alt { color: var(--accent); }
+
     /* WATERMARK (selección) */
     .watermark-corner {
       position: absolute;
@@ -549,25 +608,57 @@ const fotosParaSeleccion = fotosPreview.length > 0 ? fotosPreview : fotosFinales
       const lightbox = document.getElementById('lightbox') as HTMLDivElement | null;
       const lbImg = document.getElementById('lightboxImg') as HTMLImageElement | null;
       const lbCounter = document.getElementById('lightboxCounter') as HTMLDivElement | null;
-      const items = Array.from(document.querySelectorAll<HTMLImageElement>('.galeria-frame img[data-full]'));
+      const lbPrev = document.querySelector<HTMLButtonElement>('.lightbox-prev');
+      const lbNext = document.querySelector<HTMLButtonElement>('.lightbox-next');
+      // Solo las imágenes "principales" se navegan con flechas/contador.
+      // Las alt (.galeria-alt) se abren en standalone (sin nav, contador especial).
+      const items = Array.from(
+        document.querySelectorAll<HTMLImageElement>('.galeria-frame img[data-full]:not(.galeria-alt)'),
+      );
+      const altItems = Array.from(
+        document.querySelectorAll<HTMLImageElement>('.galeria-frame img.galeria-alt[data-full]'),
+      );
       let currentIdx = 0;
+      let inAltMode = false;
+
+      const setNavVisible = (visible: boolean) => {
+        if (lbPrev) lbPrev.style.display = visible ? '' : 'none';
+        if (lbNext) lbNext.style.display = visible ? '' : 'none';
+      };
 
       const openLightbox = (i: number) => {
         if (!lightbox || !lbImg || !lbCounter) return;
+        inAltMode = false;
         currentIdx = i;
         lbImg.src = items[i].dataset.full ?? items[i].src;
         lbImg.alt = items[i].alt;
         lbCounter.textContent = `${String(i + 1).padStart(2, '0')} / ${String(items.length).padStart(2, '0')}`;
+        setNavVisible(items.length > 1);
+        lightbox.hidden = false;
+      };
+      const openAlt = (img: HTMLImageElement) => {
+        if (!lightbox || !lbImg || !lbCounter) return;
+        inAltMode = true;
+        lbImg.src = img.dataset.full ?? img.src;
+        lbImg.alt = img.alt;
+        lbCounter.textContent = 'Versión alterna';
+        setNavVisible(false);
         lightbox.hidden = false;
       };
       const closeLightbox = () => { if (lightbox) lightbox.hidden = true; };
       const nav = (delta: number) => {
-        if (items.length === 0) return;
+        if (inAltMode || items.length === 0) return;
         openLightbox((currentIdx + delta + items.length) % items.length);
       };
 
       items.forEach((img, i) => {
         img.addEventListener('click', () => openLightbox(i));
+      });
+      altItems.forEach((img) => {
+        img.addEventListener('click', (e) => {
+          e.stopPropagation();
+          openAlt(img);
+        });
       });
 
       document.querySelector('.lightbox-close')?.addEventListener('click', closeLightbox);

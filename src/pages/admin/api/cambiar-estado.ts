@@ -6,7 +6,7 @@ import type { Database, SesionEstado } from '../../../lib/database.types';
 import { readEnv } from '../../../lib/sesiones';
 import { requireAdmin } from '../../../lib/admin-auth';
 import { syncSesionToNotionBackground } from '../../../lib/notion';
-import { notifyClienteEntregada } from '../../../lib/mail';
+import { notifyClienteEntregada, notifyClienteCambioEstado } from '../../../lib/mail';
 
 const ESTADOS_VALIDOS: SesionEstado[] = ['seleccion', 'pago_pendiente', 'editando', 'entregada'];
 
@@ -33,6 +33,13 @@ export const POST: APIRoute = async ({ request }) => {
   const update: Partial<Database['public']['Tables']['sesiones']['Update']> = { estado };
   if (estado === 'entregada') update.fecha_entrega = new Date().toISOString();
 
+  const { data: prev } = await sb
+    .from('sesiones')
+    .select('estado')
+    .eq('codigo', codigo)
+    .maybeSingle();
+  const estadoAnterior = prev?.estado ?? null;
+
   const { data: updated, error } = await sb
     .from('sesiones')
     .update(update)
@@ -44,12 +51,22 @@ export const POST: APIRoute = async ({ request }) => {
   if (updated) {
     await syncSesionToNotionBackground(env, updated.id);
 
-    if (estado === 'entregada' && updated.email_cliente) {
-      notifyClienteEntregada(env, {
-        email: updated.email_cliente,
-        nombre: updated.nombre_cliente,
-        codigo: updated.codigo ?? '',
-      });
+    const cambio = estadoAnterior !== estado;
+    if (cambio && updated.email_cliente) {
+      if (estado === 'entregada') {
+        notifyClienteEntregada(env, {
+          email: updated.email_cliente,
+          nombre: updated.nombre_cliente,
+          codigo: updated.codigo ?? '',
+        });
+      } else if (estado === 'seleccion' || estado === 'pago_pendiente' || estado === 'editando') {
+        notifyClienteCambioEstado(env, {
+          email: updated.email_cliente,
+          nombre: updated.nombre_cliente,
+          codigo: updated.codigo ?? '',
+          estado,
+        });
+      }
     }
   }
 

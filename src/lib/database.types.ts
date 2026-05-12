@@ -62,6 +62,7 @@ export interface Foto {
   original_filename: string | null;
   width: number | null;
   height: number | null;
+  parent_foto_id: string | null;
   created_at: string;
 }
 
