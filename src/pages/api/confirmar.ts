@@ -5,7 +5,8 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from '../../lib/database.types';
 import { readEnv } from '../../lib/sesiones';
 import { syncSesionToNotionBackground } from '../../lib/notion';
-import { notifyAdminConfirmacion } from '../../lib/mail';
+import { notifyAdminConfirmacion, notifyClienteCambioEstado } from '../../lib/mail';
+import { notifyAdminWAConfirmacion } from '../../lib/whatsapp';
 
 export const POST: APIRoute = async ({ request }) => {
   const env = await readEnv();
@@ -62,13 +63,15 @@ export const POST: APIRoute = async ({ request }) => {
       .eq('id', sesionId);
 
     await syncSesionToNotionBackground(env, sesionId);
-    notifyAdminConfirmacion(env, {
+    const adminArgs = {
       codigo: sesion.codigo ?? sesionId,
       nombre: sesion.nombre_cliente,
       seleccionadas: numSelecciones,
       extras: 0,
       monto: 0,
-    });
+    };
+    notifyAdminConfirmacion(env, adminArgs);
+    notifyAdminWAConfirmacion(env, adminArgs);
     return json({ ok: true, redirect: `/clientes/${sesion.codigo}` });
   }
 
@@ -83,13 +86,26 @@ export const POST: APIRoute = async ({ request }) => {
     .eq('id', sesionId);
 
   await syncSesionToNotionBackground(env, sesionId);
-  notifyAdminConfirmacion(env, {
+  const adminArgs = {
     codigo: sesion.codigo ?? sesionId,
     nombre: sesion.nombre_cliente,
     seleccionadas: numSelecciones,
     extras,
     monto,
-  });
+  };
+  notifyAdminConfirmacion(env, adminArgs);
+  notifyAdminWAConfirmacion(env, adminArgs);
+
+  // Cliente entra a pago_pendiente: mandarle su correo con el CTA para subir
+  // el comprobante (no pasa por cambiar-estado.ts).
+  if (sesion.email_cliente) {
+    notifyClienteCambioEstado(env, {
+      email: sesion.email_cliente,
+      nombre: sesion.nombre_cliente,
+      codigo: sesion.codigo ?? '',
+      estado: 'pago_pendiente',
+    });
+  }
 
   return json({
     ok: true,

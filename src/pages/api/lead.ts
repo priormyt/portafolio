@@ -6,6 +6,7 @@ import type { Database, SesionOrigen } from '../../lib/database.types';
 import { readEnv } from '../../lib/sesiones';
 import { syncSesionToNotionBackground } from '../../lib/notion';
 import { notifyAdminLeadNuevo } from '../../lib/mail';
+import { notifyAdminWALeadNuevo } from '../../lib/whatsapp';
 
 const ORIGENES: SesionOrigen[] = ['instagram', 'referido', 'web', 'google', 'tiktok', 'otro'];
 
@@ -66,16 +67,18 @@ export const POST: APIRoute = async ({ request }) => {
     paqueteNombre = pq?.nombre ?? null;
   }
 
+  const telefono = String(body.telefono ?? '').trim() || null;
   notifyAdminLeadNuevo(env, {
     nombre,
     email,
-    telefono: String(body.telefono ?? '').trim() || null,
+    telefono,
     handleIg: String(body.handle_ig ?? '').trim() || null,
     paqueteNombre,
     fechaPreferida: String(body.fecha_preferida ?? '') || null,
     origen,
     notas: String(body.notas ?? '').trim() || null,
   });
+  notifyAdminWALeadNuevo(env, { nombre, email, telefono });
 
   return json({ ok: true });
 };
