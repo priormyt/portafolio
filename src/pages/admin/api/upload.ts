@@ -27,6 +27,8 @@ export const POST: APIRoute = async ({ request }) => {
   const codigo = String(form.get('codigo') ?? '').trim().toUpperCase();
   const tipo = String(form.get('tipo') ?? '').trim() as FotoTipo;
   const orden = parseInt(String(form.get('orden') ?? '0'), 10);
+  const parentIdRaw = String(form.get('parent_id') ?? '').trim();
+  const parentId = parentIdRaw || null;
   const file = form.get('file');
 
   if (!codigo || !tipo || !(file instanceof File)) {
@@ -34,6 +36,9 @@ export const POST: APIRoute = async ({ request }) => {
   }
   if (tipo !== 'preview' && tipo !== 'final') {
     return json({ error: 'tipo inválido' }, 400);
+  }
+  if (parentId && tipo !== 'final') {
+    return json({ error: 'parent_id solo aplica a fotos finales' }, 400);
   }
 
   const sb = createClient<Database>(env.PUBLIC_SUPABASE_URL!, env.SUPABASE_SERVICE_ROLE_KEY!, {
@@ -47,9 +52,23 @@ export const POST: APIRoute = async ({ request }) => {
     .maybeSingle();
   if (!sesion) return json({ error: 'sesion no existe' }, 404);
 
+  if (parentId) {
+    const { data: parent } = await sb
+      .from('fotos')
+      .select('id, sesion_id, parent_foto_id')
+      .eq('id', parentId)
+      .maybeSingle();
+    if (!parent || parent.sesion_id !== sesion.id) {
+      return json({ error: 'parent_id inválido' }, 400);
+    }
+    if (parent.parent_foto_id) {
+      return json({ error: 'no se permite alternativa de una alternativa' }, 400);
+    }
+  }
+
   // Sanitizar filename
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-  const folder = tipo === 'preview' ? 'previews' : 'finales';
+  const folder = tipo === 'preview' ? 'previews' : parentId ? 'finales/alt' : 'finales';
   const r2Key = `clientes/${codigo}/${folder}/${safeName}`;
   const ct = file.type || contentTypeFor(safeName);
 
@@ -60,20 +79,31 @@ export const POST: APIRoute = async ({ request }) => {
     return json({ error: `R2 upload failed: ${err instanceof Error ? err.message : err}` }, 500);
   }
 
-  const { error: errFoto } = await sb.from('fotos').upsert(
-    {
-      sesion_id: sesion.id,
-      r2_key: r2Key,
-      tipo,
-      orden: isNaN(orden) ? 0 : orden,
-      original_filename: safeName,
-    },
-    { onConflict: 'sesion_id,r2_key' },
-  );
+  // Si ya existía una alternativa previa para este padre, la reemplazamos
+  // (una sola subversión por foto principal).
+  if (parentId) {
+    await sb.from('fotos').delete().eq('parent_foto_id', parentId);
+  }
+
+  const { data: inserted, error: errFoto } = await sb
+    .from('fotos')
+    .upsert(
+      {
+        sesion_id: sesion.id,
+        r2_key: r2Key,
+        tipo,
+        orden: isNaN(orden) ? 0 : orden,
+        original_filename: safeName,
+        parent_foto_id: parentId,
+      },
+      { onConflict: 'sesion_id,r2_key' },
+    )
+    .select('id')
+    .maybeSingle();
 
   if (errFoto) return json({ error: errFoto.message }, 500);
 
-  return json({ ok: true, r2_key: r2Key });
+  return json({ ok: true, r2_key: r2Key, foto_id: inserted?.id ?? null });
 };
 
 function json(payload: unknown, status = 200): Response {

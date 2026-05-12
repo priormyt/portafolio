@@ -21,6 +21,12 @@ if (!data) return Astro.redirect('/admin?err=no-encontrado', 302);
 const { sesion, paquete, fotosFinales, fotosPreview, selecciones } = data;
 const seleccionadas = new Set(selecciones.map((s) => s.foto_id));
 const limite = sesion.limite_fotos ?? paquete?.fotos_incluidas ?? 0;
+
+const fotosFinalesPrincipales = fotosFinales.filter((f) => !f.parent_foto_id);
+const altByParent: Record<string, typeof fotosFinales[number]> = {};
+for (const f of fotosFinales) {
+  if (f.parent_foto_id) altByParent[f.parent_foto_id] = f;
+}
 const diasRestantes = sesion.estado === 'entregada' ? diasParaArchivar(sesion.fecha_entrega) : null;
 
 const precioCalculado =
@@ -147,7 +153,12 @@ const estadoLabel: Record<string, string> = {
     </section>
 
     <section class="admin-block">
-      <h2 class="admin-h2">Fotos finales ({fotosFinales.length})</h2>
+      <h2 class="admin-h2">
+        Fotos finales ({fotosFinalesPrincipales.length})
+        {Object.keys(altByParent).length > 0 && (
+          <span class="admin-h2-aux"> · {Object.keys(altByParent).length} con subversión</span>
+        )}
+      </h2>
       <p class="form-hint">JPG en alta calidad sin marca de agua. Visibles para el cliente solo cuando estado = "Entregada".</p>
 
       <div id="finalDropzone" class="dropzone">
@@ -159,16 +170,39 @@ const estadoLabel: Record<string, string> = {
       <button id="btnSubirFinales" type="button" class="btn-primary" style="margin-top:1rem;display:none">Subir fotos finales</button>
       <p id="finalMsg" class="form-msg" aria-live="polite"></p>
 
-      {fotosFinales.length > 0 && (
+      {fotosFinalesPrincipales.length > 0 && (
         <div class="thumb-grid" style="margin-top: 1.5rem">
-          {fotosFinales.map((foto) => (
-            <figure class="thumb">
-              <img src={fotoUrl(env, foto.r2_key)} alt={foto.original_filename ?? ''} loading="lazy" />
-              <figcaption>{foto.original_filename}</figcaption>
-            </figure>
-          ))}
+          {fotosFinalesPrincipales.map((foto) => {
+            const alt = altByParent[foto.id];
+            return (
+              <figure class="thumb thumb-final">
+                <div class="thumb-final-frame">
+                  <img src={fotoUrl(env, foto.r2_key)} alt={foto.original_filename ?? ''} loading="lazy" />
+                  {alt && (
+                    <img
+                      class="thumb-alt-overlay"
+                      src={fotoUrl(env, alt.r2_key)}
+                      alt={`Alt · ${alt.original_filename ?? ''}`}
+                      loading="lazy"
+                    />
+                  )}
+                </div>
+                <figcaption>{foto.original_filename}</figcaption>
+                <div class="alt-controls">
+                  <button type="button" class="btn-alt-upload" data-foto-id={foto.id}>
+                    {alt ? 'Reemplazar alternativa' : '+ Versión alternativa'}
+                  </button>
+                  {alt && (
+                    <span class="alt-meta">alt: {alt.original_filename}</span>
+                  )}
+                </div>
+              </figure>
+            );
+          })}
         </div>
       )}
+      <input id="altFileInput" type="file" accept="image/jpeg,image/png" hidden />
+      <p id="altMsg" class="form-msg" aria-live="polite"></p>
     </section>
 
     <section class="admin-block">
@@ -423,6 +457,49 @@ const estadoLabel: Record<string, string> = {
       btnSubir.disabled = false;
       btnSubir.textContent = 'Subir fotos finales';
       if (fail === 0) setTimeout(() => window.location.reload(), 1200);
+    });
+
+    // ─── Subir versión alternativa por foto final ─────────────
+    const altInput = document.getElementById('altFileInput');
+    const altMsg = document.getElementById('altMsg');
+    let altTargetFotoId = null;
+
+    document.querySelectorAll('.btn-alt-upload').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        altTargetFotoId = btn.dataset.fotoId;
+        altInput.value = '';
+        altInput.click();
+      });
+    });
+
+    altInput?.addEventListener('change', async () => {
+      const file = altInput.files?.[0];
+      if (!file || !altTargetFotoId) return;
+      altMsg.textContent = `Procesando ${file.name}...`;
+      altMsg.className = 'form-msg';
+      try {
+        const blob = await window.imageProcessor.generaFinal(file);
+        altMsg.textContent = `Subiendo alternativa...`;
+        const fd = new FormData();
+        fd.set('codigo', codigo);
+        fd.set('tipo', 'final');
+        fd.set('orden', '0');
+        fd.set('parent_id', altTargetFotoId);
+        fd.set('file', new File([blob], file.name.replace(/\.[^.]+$/, '') + '.jpg', { type: 'image/jpeg' }));
+        const res = await fetch('/admin/api/upload', { method: 'POST', body: fd });
+        const j = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          altMsg.textContent = j.error || 'Error subiendo alternativa';
+          altMsg.className = 'form-msg error';
+          return;
+        }
+        altMsg.textContent = 'Alternativa subida ✓';
+        altMsg.className = 'form-msg ok';
+        setTimeout(() => window.location.reload(), 800);
+      } catch (e) {
+        altMsg.textContent = String(e);
+        altMsg.className = 'form-msg error';
+      }
     });
   </script>
 </Layout>

@@ -1,0 +1,206 @@
+---
+export const prerender = false;
+
+import Layout from '../../layouts/Layout.astro';
+import { readEnv } from '../../lib/sesiones';
+import { requireAdmin } from '../../lib/admin-auth';
+import { buildClienteCambioEstadoEmail, buildClienteEntregadaEmail } from '../../lib/mail';
+import '../../styles/admin.css';
+
+const env = await readEnv();
+// En dev local (sin ADMIN_PASSWORD), saltamos auth. En prod build, auth real.
+const auth = import.meta.env.DEV ? { ok: true } : await requireAdmin(env, Astro.request);
+if (!auth.ok) return Astro.redirect('/admin/login', 302);
+
+const sample = { nombre: 'Javier Pérez', codigo: 'DEMO99' };
+
+const previews = [
+  {
+    estado: 'seleccion' as const,
+    label: 'Seleccionando',
+    email: buildClienteCambioEstadoEmail(env, { ...sample, estado: 'seleccion' }),
+  },
+  {
+    estado: 'pago_pendiente' as const,
+    label: 'Pago pendiente',
+    email: buildClienteCambioEstadoEmail(env, { ...sample, estado: 'pago_pendiente' }),
+  },
+  {
+    estado: 'editando' as const,
+    label: 'Editando',
+    email: buildClienteCambioEstadoEmail(env, { ...sample, estado: 'editando' }),
+  },
+  {
+    estado: 'entregada' as const,
+    label: 'Entregada',
+    email: buildClienteEntregadaEmail(env, sample),
+  },
+];
+
+const resendOk = Boolean(env.RESEND_API_KEY);
+const mailFromOk = Boolean(env.MAIL_FROM);
+---
+<Layout title="Preview correos · Admin · ANTE" noindex={true}>
+  <main class="admin-main">
+    <a href="/admin" class="back-link">← Clientes</a>
+    <header class="admin-header">
+      <div>
+        <p class="admin-eyebrow">Diagnóstico</p>
+        <h1 class="admin-h1">Preview de correos por etapa</h1>
+        <p class="admin-sub">
+          Renderiza los 4 templates de cliente con datos de muestra ({sample.nombre} · <span class="mono">{sample.codigo}</span>).
+        </p>
+      </div>
+    </header>
+
+    <section class="admin-block">
+      <h2 class="admin-h2">Estado de envío</h2>
+      <ul class="diag-list">
+        <li>
+          <strong>RESEND_API_KEY:</strong>{' '}
+          {resendOk ? <span class="ok">✓ configurada</span> : <span class="err">✗ vacía — los envíos serán no-op</span>}
+        </li>
+        <li>
+          <strong>MAIL_FROM:</strong>{' '}
+          {mailFromOk
+            ? <span class="ok">✓ {env.MAIL_FROM}</span>
+            : <span class="err">✗ sin configurar</span>}
+        </li>
+        <li>
+          <strong>Reply-To:</strong> {env.ADMIN_EMAIL ?? '—'}
+        </li>
+      </ul>
+
+      <div class="test-send-row">
+        <label for="testEmail">Enviar test a:</label>
+        <input id="testEmail" type="email" value="priormyt99@gmail.com" />
+        <button id="btnEnviar" type="button" class="btn-primary">Enviar los 4 correos</button>
+        <p id="testMsg" class="form-msg" aria-live="polite"></p>
+      </div>
+    </section>
+
+    {previews.map((p) => (
+      <section class="admin-block">
+        <h2 class="admin-h2">
+          {p.label}
+          <span class="admin-h2-aux">· estado <span class="mono">{p.estado}</span></span>
+        </h2>
+        <p class="form-hint">
+          <strong>Asunto:</strong> {p.email.subject}
+        </p>
+        <iframe
+          class="email-frame"
+          srcdoc={p.email.html}
+          title={`Preview ${p.label}`}
+        ></iframe>
+      </section>
+    ))}
+  </main>
+
+  <style>
+    .diag-list {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 1rem;
+      display: grid;
+      gap: 0.4rem;
+      font-family: var(--f-mono);
+      font-size: var(--fs-micro);
+      color: var(--mist);
+    }
+    .diag-list .ok { color: #6fcf97; }
+    .diag-list .err { color: #e07070; }
+    .test-send-row {
+      display: flex;
+      gap: 0.6rem;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+    .test-send-row label {
+      font-family: var(--f-mono);
+      font-size: var(--fs-micro);
+      letter-spacing: var(--ls-label);
+      text-transform: uppercase;
+      color: var(--ash);
+    }
+    .test-send-row input {
+      flex: 1;
+      min-width: 240px;
+      padding: 0.6rem 0.8rem;
+      background: transparent;
+      border: 0.5px solid rgba(245, 242, 237, 0.2);
+      color: var(--paper);
+      font-family: var(--f-mono);
+      font-size: var(--fs-body);
+    }
+    .test-send-row .form-msg {
+      flex: 1 0 100%;
+    }
+    .email-frame {
+      width: 100%;
+      max-width: 720px;
+      height: 1200px;
+      border: 0.5px solid rgba(245, 242, 237, 0.15);
+      background: #0b0b0b;
+      display: block;
+    }
+  </style>
+
+  <script>
+    // Autoajustar altura de cada iframe a su contenido
+    function fitFrame(f) {
+      try {
+        const doc = f.contentDocument;
+        if (!doc) return;
+        const h = Math.max(doc.documentElement.scrollHeight, doc.body.scrollHeight);
+        if (h > 100) f.style.height = (h + 20) + 'px';
+      } catch (e) { /* cross-origin */ }
+    }
+    document.querySelectorAll('iframe.email-frame').forEach((f) => {
+      f.addEventListener('load', () => fitFrame(f));
+      // Por si ya cargó antes del listener:
+      if (f.contentDocument?.readyState === 'complete') fitFrame(f);
+    });
+
+    const btn = document.getElementById('btnEnviar');
+    const input = document.getElementById('testEmail');
+    const msg = document.getElementById('testMsg');
+    btn?.addEventListener('click', async () => {
+      const email = input.value.trim();
+      if (!email) {
+        msg.textContent = 'Pon un correo';
+        msg.className = 'form-msg error';
+        return;
+      }
+      btn.disabled = true;
+      btn.textContent = 'Enviando...';
+      msg.textContent = '';
+      msg.className = 'form-msg';
+      try {
+        const res = await fetch('/admin/api/test-emails', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        });
+        const j = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          msg.textContent = j.error || `HTTP ${res.status}`;
+          msg.className = 'form-msg error';
+        } else if (j.skipped) {
+          msg.textContent = `RESEND_API_KEY vacía — no se envió nada. Pega la key en .env.local para enviar de verdad.`;
+          msg.className = 'form-msg error';
+        } else {
+          msg.textContent = `Enviados ${j.sent}/${j.total} correos a ${email}. Revisa tu bandeja.`;
+          msg.className = 'form-msg ok';
+        }
+      } catch (e) {
+        msg.textContent = String(e);
+        msg.className = 'form-msg error';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Enviar los 4 correos';
+      }
+    });
+  </script>
+</Layout>

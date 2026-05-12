@@ -141,11 +141,13 @@ export async function upsertSesionToNotion(env: Env, sesionId: string): Promise<
     sesion.paquete_id
       ? sb.from('paquetes').select('*').eq('id', sesion.paquete_id).maybeSingle()
       : Promise.resolve({ data: null as Paquete | null }),
-    sb.from('fotos').select('id, tipo').eq('sesion_id', sesion.id),
+    sb.from('fotos').select('id, tipo, parent_foto_id').eq('sesion_id', sesion.id),
     sb.from('selecciones').select('id').eq('sesion_id', sesion.id),
   ]);
 
-  const fotosFinales = (fotosRes.data ?? []).filter((f) => f.tipo === 'final').length;
+  // Para Notion contamos solo las fotos principales: las subversiones (parent_foto_id != null)
+  // son variantes de la misma entrega y no inflan el conteo.
+  const fotosFinales = (fotosRes.data ?? []).filter((f) => f.tipo === 'final' && !f.parent_foto_id).length;
   const selecciones = (seleccionesRes.data ?? []).length;
 
   const properties = buildProperties({
