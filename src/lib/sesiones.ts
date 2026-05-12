@@ -20,6 +20,10 @@ export type Env = {
   RESEND_API_KEY?: string;
   MAIL_FROM?: string;
   ADMIN_EMAIL?: string;
+  TWILIO_ACCOUNT_SID?: string;
+  TWILIO_AUTH_TOKEN?: string;
+  TWILIO_WHATSAPP_FROM?: string;
+  ADMIN_WHATSAPP_TO?: string;
 };
 
 /**
@@ -55,6 +59,10 @@ export async function readEnv(): Promise<Env> {
     RESEND_API_KEY: pick('RESEND_API_KEY'),
     MAIL_FROM: pick('MAIL_FROM'),
     ADMIN_EMAIL: pick('ADMIN_EMAIL'),
+    TWILIO_ACCOUNT_SID: pick('TWILIO_ACCOUNT_SID'),
+    TWILIO_AUTH_TOKEN: pick('TWILIO_AUTH_TOKEN'),
+    TWILIO_WHATSAPP_FROM: pick('TWILIO_WHATSAPP_FROM'),
+    ADMIN_WHATSAPP_TO: pick('ADMIN_WHATSAPP_TO'),
   };
 }
 

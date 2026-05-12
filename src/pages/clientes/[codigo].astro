@@ -184,13 +184,46 @@ const fotosParaSeleccion = fotosPreview.length > 0 ? fotosPreview : fotosFinales
     )}
 
     {sesion.estado === 'pago_pendiente' && (
-      <section class="estado-pendiente">
-        <p class="estado-titulo">Esperando confirmación de pago</p>
-        <p class="estado-texto">
-          Recibimos tu selección. Cuando se confirme el pago de las {extras} foto{extras !== 1 ? 's' : ''} extra,
-          comenzaremos a editar tus fotos. Te avisaremos por correo en cuanto estén listas.
-        </p>
-      </section>
+      sesion.comprobante_50_url ? (
+        <section class="estado-pendiente" data-codigo={sesion.codigo}>
+          <p class="estado-eyebrow">Pago en revisión</p>
+          <p class="estado-titulo">Recibimos tu comprobante</p>
+          <p class="estado-texto">
+            Lo estamos verificando. En cuanto confirmemos el pago, pasamos a edición y te avisamos por correo.
+          </p>
+          <p class="estado-meta">
+            <a href={sesion.comprobante_50_url} target="_blank" rel="noopener">Ver el comprobante que subiste ↗</a>
+          </p>
+          <button id="btnReemplazarComp" type="button" class="btn-ghost-cliente">Subir otro comprobante</button>
+          <p id="compMsg" class="form-msg" aria-live="polite"></p>
+          <input id="compFileInput" type="file" accept="image/jpeg,image/png,application/pdf" hidden />
+        </section>
+      ) : (
+        <section class="estado-pago" data-codigo={sesion.codigo}>
+          <p class="estado-eyebrow">Pago de extras</p>
+          <p class="estado-titulo">Sube tu comprobante de pago</p>
+          <p class="estado-texto">
+            Recibimos tu selección. Elegiste <strong>{extras} foto{extras !== 1 ? 's' : ''} extra</strong> ·
+            total a pagar <strong>${Number(sesion.monto_extras ?? costoExtras)} MXN</strong>.
+          </p>
+
+          <div class="pago-instrucciones">
+            <p class="pago-instrucciones-label">Cómo pagar</p>
+            <p>
+              Manda el monto por transferencia, depósito o Mercado Pago. Si no tienes los datos,
+              <a href="https://wa.me/525951220554?text=Hola%2C%20mi%20c%C3%B3digo%20es%20{sesion.codigo}%20y%20quiero%20los%20datos%20de%20pago." target="_blank" rel="noopener">pídenoslos por WhatsApp</a>.
+            </p>
+            <p>Cuando hagas la transferencia, sube aquí el comprobante (foto o PDF).</p>
+          </div>
+
+          <div id="compDropzone" class="cliente-dropzone">
+            <p class="dropzone-text">Arrastra tu comprobante o haz click</p>
+            <p class="dropzone-sub">JPG, PNG o PDF · máximo 8 MB</p>
+            <input id="compFileInput" type="file" accept="image/jpeg,image/png,application/pdf" hidden />
+          </div>
+          <p id="compMsg" class="form-msg" aria-live="polite"></p>
+        </section>
+      )
     )}
 
     {sesion.estado === 'archivada' && (
@@ -478,6 +511,126 @@ const fotosParaSeleccion = fotosPreview.length > 0 ? fotosPreview : fotosFinales
     .btn-confirmar:disabled { opacity: 0.4; pointer-events: none; }
 
     /* ESTADOS NO INTERACTIVOS */
+    /* ESTADO PAGO (cliente sube comprobante) */
+    .estado-pago {
+      max-width: 640px;
+      margin: 3rem auto;
+      padding: 2.5rem 2rem;
+      border: 0.5px solid rgba(245,242,237,0.12);
+      background: rgba(245,242,237,0.02);
+    }
+    .estado-eyebrow {
+      font-family: var(--f-mono);
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-wide);
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 0.8rem;
+    }
+    .estado-pago .estado-titulo {
+      font-family: var(--f-serif);
+      font-size: 1.6rem;
+      margin-bottom: 1rem;
+      color: var(--paper);
+    }
+    .estado-pago .estado-texto {
+      font-family: var(--f-sans);
+      color: var(--mist);
+      line-height: 1.7;
+      margin-bottom: 1.2rem;
+    }
+    .estado-pago .estado-texto strong { color: var(--paper); }
+    .pago-instrucciones {
+      margin: 1.5rem 0 1.8rem;
+      padding: 1.2rem 1.4rem;
+      background: rgba(13,13,11,0.6);
+      border-left: 2px solid var(--accent);
+    }
+    .pago-instrucciones-label {
+      font-family: var(--f-mono);
+      font-size: var(--fs-micro);
+      letter-spacing: var(--ls-label);
+      color: var(--ash);
+      text-transform: uppercase;
+      margin-bottom: 0.6rem;
+    }
+    .pago-instrucciones p {
+      font-family: var(--f-sans);
+      font-size: var(--fs-body);
+      color: var(--mist);
+      line-height: 1.6;
+      margin-bottom: 0.5rem;
+    }
+    .pago-instrucciones p:last-child { margin-bottom: 0; }
+    .pago-instrucciones a {
+      color: var(--paper);
+      text-decoration: underline;
+    }
+    .cliente-dropzone {
+      padding: 2.2rem 1.4rem;
+      border: 1px dashed rgba(245,242,237,0.25);
+      background: rgba(245,242,237,0.02);
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .cliente-dropzone:hover,
+    .cliente-dropzone.drag-over {
+      border-color: var(--paper);
+      background: rgba(245,242,237,0.05);
+    }
+    .cliente-dropzone .dropzone-text {
+      font-family: var(--f-mono);
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-label);
+      text-transform: uppercase;
+      color: var(--paper);
+      margin-bottom: 0.4rem;
+    }
+    .cliente-dropzone .dropzone-sub {
+      font-family: var(--f-mono);
+      font-size: var(--fs-micro);
+      color: var(--ash);
+    }
+    .form-msg {
+      margin-top: 1rem;
+      font-family: var(--f-mono);
+      font-size: var(--fs-micro);
+      letter-spacing: var(--ls-label);
+      text-transform: uppercase;
+      color: var(--ash);
+    }
+    .form-msg.ok { color: #9bc59b; }
+    .form-msg.error { color: #e07070; }
+    .btn-ghost-cliente {
+      margin-top: 1rem;
+      padding: 0.7rem 1.4rem;
+      background: transparent;
+      border: 0.5px solid rgba(245,242,237,0.3);
+      color: var(--paper);
+      font-family: var(--f-mono);
+      font-size: var(--fs-micro);
+      letter-spacing: var(--ls-label);
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .btn-ghost-cliente:hover {
+      background: rgba(245,242,237,0.06);
+      border-color: var(--paper);
+    }
+    .estado-meta {
+      font-family: var(--f-mono);
+      font-size: var(--fs-micro);
+      color: var(--ash);
+      letter-spacing: 0.04em;
+      margin-top: 1rem;
+    }
+    .estado-meta a {
+      color: var(--paper);
+      text-decoration: underline;
+    }
+
     .estado-pendiente, .estado-editando, .estado-archivada {
       max-width: 600px;
       margin: 4rem auto;
@@ -754,6 +907,63 @@ const fotosParaSeleccion = fotosPreview.length > 0 ? fotosPreview : fotosFinales
       });
 
       refresh();
+
+      // ─── Subir comprobante (cliente, pago_pendiente) ────
+      const compSection = document.querySelector<HTMLElement>('.estado-pago, .estado-pendiente[data-codigo]');
+      if (compSection) {
+        const codigo = compSection.dataset.codigo!;
+        const compInput = document.getElementById('compFileInput') as HTMLInputElement | null;
+        const compDropzone = document.getElementById('compDropzone');
+        const compMsg = document.getElementById('compMsg');
+        const btnReemplazar = document.getElementById('btnReemplazarComp');
+
+        const subirComprobante = async (file: File) => {
+          if (!compMsg) return;
+          if (file.size > 8 * 1024 * 1024) {
+            compMsg.textContent = 'El archivo excede 8 MB. Compáctalo y vuelve a intentar.';
+            compMsg.className = 'form-msg error';
+            return;
+          }
+          compMsg.textContent = `Subiendo ${file.name}...`;
+          compMsg.className = 'form-msg';
+          const fd = new FormData();
+          fd.set('codigo', codigo);
+          fd.set('file', file);
+          try {
+            const res = await fetch('/api/upload-comprobante', { method: 'POST', body: fd });
+            const j = await res.json().catch(() => ({}));
+            if (!res.ok) {
+              compMsg.textContent = j.error || `Error ${res.status}`;
+              compMsg.className = 'form-msg error';
+              return;
+            }
+            compMsg.textContent = 'Listo. Te avisamos cuando lo verifiquemos.';
+            compMsg.className = 'form-msg ok';
+            setTimeout(() => window.location.reload(), 900);
+          } catch (e) {
+            compMsg.textContent = String(e);
+            compMsg.className = 'form-msg error';
+          }
+        };
+
+        compDropzone?.addEventListener('click', () => compInput?.click());
+        compDropzone?.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          compDropzone.classList.add('drag-over');
+        });
+        compDropzone?.addEventListener('dragleave', () => compDropzone.classList.remove('drag-over'));
+        compDropzone?.addEventListener('drop', (e) => {
+          e.preventDefault();
+          compDropzone.classList.remove('drag-over');
+          const f = e.dataTransfer?.files?.[0];
+          if (f) subirComprobante(f);
+        });
+        btnReemplazar?.addEventListener('click', () => compInput?.click());
+        compInput?.addEventListener('change', () => {
+          const f = compInput.files?.[0];
+          if (f) subirComprobante(f);
+        });
+      }
     })();
   </script>
 </Layout>
