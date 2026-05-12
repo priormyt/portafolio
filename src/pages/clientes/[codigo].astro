@@ -361,7 +361,7 @@ const fotosParaSeleccion = fotosPreview.length > 0 ? fotosPreview : fotosFinales
       -webkit-user-drag: none;
       user-select: none;
     }
-    .galeria-item:hover .galeria-frame img { transform: scale(1.03); }
+    .galeria-item:hover .galeria-frame img:not(.galeria-alt) { transform: scale(1.03); }
 
     .galeria-caption {
       margin-top: 0.6rem;
@@ -409,9 +409,6 @@ const fotosParaSeleccion = fotosPreview.length > 0 ? fotosPreview : fotosFinales
       transition: transform 0.3s ease, box-shadow 0.3s ease;
       transform-origin: bottom left;
       z-index: 2;
-    }
-    .galeria-item:hover .galeria-frame img.galeria-alt {
-      transform: none;
     }
     .galeria-frame img.galeria-alt:hover {
       transform: scale(1.8);
