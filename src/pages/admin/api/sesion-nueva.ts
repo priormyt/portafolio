@@ -73,7 +73,7 @@ export const POST: APIRoute = async ({ request }) => {
   // en estado 'seleccion', así que cambiar-estado.ts nunca dispara el correo —
   // por eso lo mandamos aquí explícitamente.
   if (sesion.email_cliente) {
-    notifyClienteCambioEstado(env, {
+    await notifyClienteCambioEstado(env, {
       email: sesion.email_cliente,
       nombre: sesion.nombre_cliente,
       codigo: sesion.codigo ?? '',

@@ -73,8 +73,8 @@ export const POST: APIRoute = async ({ request }) => {
     nombre: sesion.nombre_cliente,
     monto: sesion.monto_extras != null ? Number(sesion.monto_extras) : null,
   };
-  notifyAdminComprobante(env, { ...adminArgs, comprobanteUrl: url });
-  notifyAdminWAComprobante(env, adminArgs);
+  await notifyAdminComprobante(env, { ...adminArgs, comprobanteUrl: url });
+  await notifyAdminWAComprobante(env, adminArgs);
 
   return json({ ok: true, url });
 };

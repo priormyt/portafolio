@@ -60,8 +60,8 @@ async function send(env: Env, args: SendArgs): Promise<void> {
   }
 }
 
-export function sendWhatsAppBackground(env: Env, args: SendArgs): void {
-  send(env, args).catch((err) => console.error('[whatsapp] background fail:', err));
+export function sendWhatsAppBackground(env: Env, args: SendArgs): Promise<void> {
+  return send(env, args).catch((err) => console.error('[whatsapp] background fail:', err));
 }
 
 // ─── Templates ──────────────────────────────────────────────────
@@ -70,10 +70,10 @@ function adminLink(env: Env, path: string): string {
   return `${(env.PUBLIC_SITE_URL ?? '').replace(/\/$/, '')}${path}`;
 }
 
-export function notifyAdminWALeadNuevo(
+export async function notifyAdminWALeadNuevo(
   env: Env,
   args: { nombre: string; email: string; telefono?: string | null },
-): void {
+): Promise<void> {
   const lines = [
     `🆕 Nuevo lead en ANTE`,
     ``,
@@ -83,13 +83,13 @@ export function notifyAdminWALeadNuevo(
     ``,
     `Convertir → ${adminLink(env, '/admin')}`,
   ].filter(Boolean).join('\n');
-  sendWhatsAppBackground(env, { body: lines });
+  return sendWhatsAppBackground(env, { body: lines });
 }
 
-export function notifyAdminWAConfirmacion(
+export async function notifyAdminWAConfirmacion(
   env: Env,
   args: { codigo: string; nombre: string; seleccionadas: number; extras: number; monto: number },
-): void {
+): Promise<void> {
   const conExtras = args.extras > 0;
   const lines = [
     `✅ ${args.nombre} (${args.codigo}) confirmó selección`,
@@ -100,13 +100,13 @@ export function notifyAdminWAConfirmacion(
     ``,
     `Admin → ${adminLink(env, `/admin/clientes/${args.codigo}`)}`,
   ].join('\n');
-  sendWhatsAppBackground(env, { body: lines });
+  return sendWhatsAppBackground(env, { body: lines });
 }
 
-export function notifyAdminWAComprobante(
+export async function notifyAdminWAComprobante(
   env: Env,
   args: { codigo: string; nombre: string; monto: number | null },
-): void {
+): Promise<void> {
   const lines = [
     `💸 ${args.nombre} (${args.codigo}) subió comprobante`,
     args.monto != null ? `Monto: $${args.monto} MXN` : null,
@@ -114,5 +114,5 @@ export function notifyAdminWAComprobante(
     ``,
     `Admin → ${adminLink(env, `/admin/clientes/${args.codigo}`)}`,
   ].filter(Boolean).join('\n');
-  sendWhatsAppBackground(env, { body: lines });
+  return sendWhatsAppBackground(env, { body: lines });
 }

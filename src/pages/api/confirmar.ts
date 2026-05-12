@@ -70,8 +70,8 @@ export const POST: APIRoute = async ({ request }) => {
       extras: 0,
       monto: 0,
     };
-    notifyAdminConfirmacion(env, adminArgs);
-    notifyAdminWAConfirmacion(env, adminArgs);
+    await notifyAdminConfirmacion(env, adminArgs);
+    await notifyAdminWAConfirmacion(env, adminArgs);
     return json({ ok: true, redirect: `/clientes/${sesion.codigo}` });
   }
 
@@ -93,13 +93,13 @@ export const POST: APIRoute = async ({ request }) => {
     extras,
     monto,
   };
-  notifyAdminConfirmacion(env, adminArgs);
-  notifyAdminWAConfirmacion(env, adminArgs);
+  await notifyAdminConfirmacion(env, adminArgs);
+  await notifyAdminWAConfirmacion(env, adminArgs);
 
   // Cliente entra a pago_pendiente: mandarle su correo con el CTA para subir
   // el comprobante (no pasa por cambiar-estado.ts).
   if (sesion.email_cliente) {
-    notifyClienteCambioEstado(env, {
+    await notifyClienteCambioEstado(env, {
       email: sesion.email_cliente,
       nombre: sesion.nombre_cliente,
       codigo: sesion.codigo ?? '',
