@@ -114,23 +114,50 @@ const estadoLabel: Record<string, string> = {
         </div>
       </div>
 
-      <h3 class="admin-h3">Comprobante de anticipo (50%)</h3>
+      <h3 class="admin-h3">Comprobante de pago</h3>
+      <p class="form-hint">
+        El cliente lo sube desde su galería cuando entra en estado <strong>Pago pendiente</strong>.
+        Tú solo verificas que el pago aparezca y pasas la sesión a <strong>Editando</strong>.
+      </p>
+
       {sesion.comprobante_50_url ? (
         <div class="comprobante-actual">
           <a href={sesion.comprobante_50_url} target="_blank" rel="noopener" class="btn-link">
-            Ver comprobante actual ↗
+            Ver comprobante del cliente ↗
           </a>
           <button id="btnQuitarComprobante" type="button" class="btn-link" style="color:#e07070">Quitar</button>
         </div>
       ) : (
-        <p class="form-hint">Aún sin comprobante. Sube la imagen/PDF que te mandó el cliente.</p>
+        <p class="form-hint" style="font-style:italic">
+          {sesion.estado === 'pago_pendiente'
+            ? 'Aún sin comprobante. Cuando el cliente lo suba, llega aquí y te avisamos por correo/WhatsApp.'
+            : 'El cliente todavía no llega a esta etapa.'}
+        </p>
       )}
-      <div id="comprobanteDropzone" class="dropzone" style="margin-top:1rem">
-        <p class="dropzone-text">Arrastra el comprobante aquí o haz click</p>
-        <p class="dropzone-sub">JPG, PNG o PDF · se sube directo a R2 + Notion</p>
-        <input id="comprobanteInput" type="file" accept="image/jpeg,image/png,application/pdf" hidden />
-      </div>
-      <p id="comprobanteMsg" class="form-msg" aria-live="polite"></p>
+
+      {sesion.estado === 'pago_pendiente' && sesion.comprobante_50_url && (
+        <div class="verificar-pago" style="margin-top:1.2rem">
+          <button id="btnVerificarPago" type="button" class="btn-primary">
+            ✓ Verificar pago y pasar a Editando
+          </button>
+          <p class="form-hint" style="margin-top:0.6rem">
+            Esto cambia el estado a <strong>Editando</strong>, dispara el correo al cliente y queda registrado en Notion.
+          </p>
+        </div>
+      )}
+
+      <details class="comprobante-manual" style="margin-top:1.6rem">
+        <summary>Subir comprobante manualmente (respaldo)</summary>
+        <p class="form-hint" style="margin-top:0.6rem">
+          Sólo si el cliente no puede subirlo por su lado y te lo manda por WhatsApp/correo.
+        </p>
+        <div id="comprobanteDropzone" class="dropzone" style="margin-top:0.8rem">
+          <p class="dropzone-text">Arrastra el comprobante aquí o haz click</p>
+          <p class="dropzone-sub">JPG, PNG o PDF · se sube directo a R2 + Notion</p>
+          <input id="comprobanteInput" type="file" accept="image/jpeg,image/png,application/pdf" hidden />
+        </div>
+        <p id="comprobanteMsg" class="form-msg" aria-live="polite"></p>
+      </details>
     </section>
 
     <section class="admin-block">
@@ -351,6 +378,33 @@ const estadoLabel: Record<string, string> = {
         }
       });
     }
+
+    // Verificar pago (atajo: cambia estado a 'editando')
+    const btnVerificarPago = document.getElementById('btnVerificarPago');
+    btnVerificarPago?.addEventListener('click', async () => {
+      if (!confirm('¿Verificar el pago y pasar a Editando? El cliente recibe el correo de que empezamos.')) return;
+      btnVerificarPago.disabled = true;
+      btnVerificarPago.textContent = 'Verificando...';
+      try {
+        const res = await fetch('/admin/api/cambiar-estado', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ codigo, estado: 'editando' }),
+        });
+        if (!res.ok) {
+          const j = await res.json().catch(() => ({}));
+          alert(j.error || 'Error verificando pago');
+          btnVerificarPago.disabled = false;
+          btnVerificarPago.textContent = '✓ Verificar pago y pasar a Editando';
+          return;
+        }
+        window.location.reload();
+      } catch (e) {
+        alert(String(e));
+        btnVerificarPago.disabled = false;
+        btnVerificarPago.textContent = '✓ Verificar pago y pasar a Editando';
+      }
+    });
 
     // Cambiar estado
     const estadoSelect = document.getElementById('estadoSelect');

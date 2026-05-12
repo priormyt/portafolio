@@ -300,11 +300,11 @@ const ETAPAS: Record<Etapa, {
     siguiente: 'Al confirmar, si elegiste fotos extra te enviamos el monto a pagar. Si no, pasamos directo a edición.',
   },
   pago_pendiente: {
-    titulo: 'Esperando tu pago de extras',
+    titulo: 'Falta tu comprobante de pago',
     eyebrow: 'Tu sesión privada · Pago de extras',
-    resumen: 'Recibimos tu selección. En cuanto confirmemos el pago de las fotos extra, comenzamos a editar tu entrega final.',
-    tiempo: 'Normalmente confirmamos el pago en menos de 24 horas hábiles.',
-    siguiente: 'Cuando se confirme, pasamos a edición (10 a 14 días hábiles).',
+    resumen: 'Recibimos tu selección. Entra a tu galería privada y sube ahí el comprobante de pago de tus fotos extra; en cuanto lo verifiquemos comenzamos la edición.',
+    tiempo: 'Verificamos el comprobante en menos de 24 horas hábiles.',
+    siguiente: 'Una vez verificado, pasamos a edición (10 a 14 días hábiles).',
   },
   editando: {
     titulo: 'Empezamos a editar tus fotos',
@@ -330,8 +330,11 @@ export function buildClienteCambioEstadoEmail(
   const galeriaUrl = `${(env.PUBLIC_SITE_URL ?? '').replace(/\/$/, '')}/clientes/${args.codigo}`;
   const firstName = args.nombre.split(' ')[0] ?? args.nombre;
 
-  const showCta = args.estado === 'seleccion' || args.estado === 'entregada';
-  const ctaLabel = args.estado === 'entregada' ? 'Ver mi galería' : 'Elegir mis fotos';
+  const showCta = args.estado !== 'editando';
+  const ctaLabel =
+    args.estado === 'entregada' ? 'Ver mi galería'
+    : args.estado === 'pago_pendiente' ? 'Subir mi comprobante'
+    : 'Elegir mis fotos';
 
   const rows = [
     header(),
@@ -531,5 +534,37 @@ export function notifyAdminConfirmacion(
     to: env.ADMIN_EMAIL,
     subject,
     html: shell({ title: 'Selección confirmada', rows }),
+  });
+}
+
+export function notifyAdminComprobante(
+  env: Env,
+  args: { codigo: string; nombre: string; monto: number | null; comprobanteUrl: string | null },
+): void {
+  if (!env.ADMIN_EMAIL) return;
+  const adminUrl = (env.PUBLIC_SITE_URL ?? '').replace(/\/$/, '') + `/admin/clientes/${args.codigo}`;
+  const items: Array<{ label: string; value: string }> = [
+    { label: 'Cliente', value: escapeHtml(args.nombre) },
+    { label: 'Código', value: `<span style="font-family:${FONT_MONO};letter-spacing:0.12em;">${escapeHtml(args.codigo)}</span>` },
+  ];
+  if (args.monto != null) items.push({ label: 'Monto', value: `<strong>$${args.monto} MXN</strong>` });
+  if (args.comprobanteUrl) items.push({ label: 'Comprobante', value: `<a href="${args.comprobanteUrl}" style="color:${C.text};text-decoration:underline;">Ver archivo →</a>` });
+
+  const rows = [
+    header(),
+    dividerRow(),
+    eyebrowRow('Comprobante recibido'),
+    h1Row(`${args.codigo} · ${args.nombre}`),
+    paragraphRow(`<strong>${escapeHtml(args.nombre)}</strong> subió el comprobante de pago de sus fotos extra. Verifícalo y pasa la sesión a <strong>Editando</strong>.`),
+    infoBlockRow(items),
+    buttonRow(adminUrl, 'Verificar en admin →'),
+    spacerRow(20),
+    footerRow(),
+  ].join('');
+
+  sendMailBackground(env, {
+    to: env.ADMIN_EMAIL,
+    subject: `${args.codigo} subió comprobante${args.monto != null ? ` · $${args.monto} MXN` : ''}`,
+    html: shell({ title: 'Comprobante recibido', rows }),
   });
 }
