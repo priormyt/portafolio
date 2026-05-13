@@ -53,18 +53,28 @@ const { data: paquetes } = sb
         </div>
 
         <div class="form-row">
-          <label for="handle_ig">Instagram (handle)</label>
-          <input id="handle_ig" name="handle_ig" type="text" placeholder="@tuusuario" />
-        </div>
-
-        <div class="form-row">
           <label for="ubicacion">Ciudad / ubicación</label>
           <input id="ubicacion" name="ubicacion" type="text" placeholder="CDMX, GDL..." />
         </div>
 
         <div class="form-row">
           <label for="fecha_preferida">Fecha preferida</label>
-          <input id="fecha_preferida" name="fecha_preferida" type="date" />
+          <div class="date-picker-field" data-date-picker>
+            <input
+              id="fecha_preferida"
+              name="fecha_preferida"
+              type="date"
+              inputmode="none"
+              autocomplete="off"
+              aria-describedby="fecha_preferida_note"
+            />
+            <button class="date-picker-button" type="button" aria-label="Abrir calendario" data-date-picker-button>
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M7 2v3M17 2v3M4 9h16M6 5h12a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z" />
+              </svg>
+            </button>
+          </div>
+          <p id="fecha_preferida_note" class="field-note">Mínimo 48 horas después de enviar este formulario.</p>
         </div>
 
         <div class="form-row">
@@ -162,6 +172,14 @@ const { data: paquetes } = sb
     }
     .form-row { display: flex; flex-direction: column; gap: 0.6rem; }
     .form-row-full { grid-column: 1 / -1; }
+    .field-note {
+      font-family: var(--f-mono);
+      font-size: var(--fs-micro);
+      letter-spacing: var(--ls-label);
+      color: var(--ash);
+      line-height: 1.6;
+      text-transform: uppercase;
+    }
 
     .agendar-form label {
       font-family: var(--f-mono);
@@ -192,6 +210,55 @@ const { data: paquetes } = sb
     .agendar-form select:focus,
     .agendar-form textarea:focus {
       border-color: rgba(245,242,237,0.5);
+    }
+    .date-picker-field {
+      position: relative;
+      display: flex;
+      align-items: center;
+      border: 0.5px solid rgba(245,242,237,0.2);
+      transition: border-color 0.25s;
+    }
+    .date-picker-field:focus-within {
+      border-color: rgba(245,242,237,0.5);
+    }
+    .agendar-form .date-picker-field input[type="date"] {
+      border: 0;
+      padding-right: 3.6rem;
+      cursor: pointer;
+    }
+    .agendar-form .date-picker-field input[type="date"]:focus {
+      border-color: transparent;
+    }
+    .agendar-form .date-picker-field input[type="date"]::-webkit-calendar-picker-indicator {
+      opacity: 0;
+      cursor: pointer;
+    }
+    .date-picker-button {
+      position: absolute;
+      right: 0.9rem;
+      width: 2.2rem;
+      height: 2.2rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 0.5px solid rgba(245,242,237,0.16);
+      background: transparent;
+      color: var(--ash);
+      cursor: pointer;
+      transition: color 0.25s, border-color 0.25s;
+    }
+    .date-picker-button:hover {
+      color: var(--paper);
+      border-color: rgba(245,242,237,0.4);
+    }
+    .date-picker-button svg {
+      width: 1rem;
+      height: 1rem;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.6;
+      stroke-linecap: round;
+      stroke-linejoin: round;
     }
     .agendar-form select option {
       background: var(--ink);
@@ -255,6 +322,34 @@ const { data: paquetes } = sb
     const form = document.getElementById('leadForm') as HTMLFormElement;
     const msg = document.getElementById('formMsg') as HTMLParagraphElement;
     const submit = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+    const fechaPreferida = document.getElementById('fecha_preferida') as HTMLInputElement | null;
+
+    if (fechaPreferida) {
+      const minDate = new Date();
+      minDate.setDate(minDate.getDate() + 2);
+      fechaPreferida.min = minDate.toISOString().slice(0, 10);
+
+      const openDatePicker = () => {
+        fechaPreferida.focus();
+        if (typeof fechaPreferida.showPicker === 'function') {
+          try {
+            fechaPreferida.showPicker();
+          } catch {
+            // Algunos navegadores sólo permiten abrirlo durante una interacción directa.
+          }
+        }
+      };
+
+      document.querySelectorAll('[data-date-picker], [data-date-picker-button]').forEach((el) => {
+        el.addEventListener('click', openDatePicker);
+      });
+
+      fechaPreferida.addEventListener('keydown', (event) => {
+        if (!['Tab', 'Shift', 'Escape'].includes(event.key)) event.preventDefault();
+      });
+      fechaPreferida.addEventListener('paste', (event) => event.preventDefault());
+      fechaPreferida.addEventListener('drop', (event) => event.preventDefault());
+    }
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();

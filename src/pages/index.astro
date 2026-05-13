@@ -14,14 +14,47 @@ import Layout from '../layouts/Layout.astro';
     <h1 class="hero-title">La imagen<br><em>honesta.</em></h1>
     <p class="hero-sub">Retratos que reflejan el carácter único de cada persona. Luz cuidada, dirección suave, resultado que perdura.</p>
     <div class="hero-cta">
-      <a href="https://wa.me/525951220554" class="btn-ghost" target="_blank" rel="noopener">
+      <button class="btn-ghost schedule-trigger" type="button" data-schedule-trigger aria-haspopup="dialog">
         Agendar sesión
         <span class="arrow">→</span>
-      </a>
+      </button>
     </div>
   </div>
   <div class="hero-scroll">Desplazar</div>
 </section>
+
+<div class="schedule-modal" data-schedule-modal aria-hidden="true">
+  <div class="schedule-backdrop" data-schedule-close></div>
+  <section
+    class="schedule-dialog"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="scheduleTitle"
+    aria-describedby="scheduleDescription"
+  >
+    <button class="schedule-close" type="button" data-schedule-close aria-label="Cerrar">×</button>
+    <p class="schedule-kicker">Agendar sesión</p>
+    <h2 id="scheduleTitle" class="schedule-title">¡Ya casi!</h2>
+    <p id="scheduleDescription" class="schedule-copy">
+      Escríbenos directo por WhatsApp o déjanos tus datos en el formulario.
+    </p>
+    <div class="schedule-actions">
+      <a
+        class="schedule-option schedule-option-primary"
+        href="https://wa.me/525951220554?text=Hola%20ANTE%2C%20me%20gustar%C3%ADa%20agendar%20una%20sesi%C3%B3n."
+        target="_blank"
+        rel="noopener"
+      >
+        WhatsApp
+        <span>Respuesta directa</span>
+      </a>
+      <a class="schedule-option" href="/agendar">
+        Formulario
+        <span>Déjanos tus datos</span>
+      </a>
+    </div>
+  </section>
+</div>
 
 <!-- PRICING STRIP -->
 <div class="pricing-strip">
@@ -379,6 +412,141 @@ import Layout from '../layouts/Layout.astro';
 </script>
 
 <style is:global>
+  .schedule-trigger {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+  }
+  .schedule-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 500;
+    display: grid;
+    place-items: center;
+    padding: 1.5rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+  .schedule-modal[data-open] {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .schedule-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(13,13,11,0.74);
+    backdrop-filter: blur(10px);
+  }
+  .schedule-dialog {
+    position: relative;
+    width: min(100%, 460px);
+    padding: 3rem;
+    border: 0.5px solid rgba(245,242,237,0.18);
+    background: rgba(28,27,24,0.94);
+    box-shadow: 0 24px 90px rgba(0,0,0,0.42);
+    transform: translateY(16px);
+    transition: transform 0.25s ease;
+  }
+  .schedule-modal[data-open] .schedule-dialog {
+    transform: translateY(0);
+  }
+  .schedule-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 2rem;
+    height: 2rem;
+    border: 0.5px solid rgba(245,242,237,0.16);
+    background: transparent;
+    color: var(--ash);
+    font-size: 1.4rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: color 0.25s ease, border-color 0.25s ease;
+  }
+  .schedule-close:hover {
+    color: var(--paper);
+    border-color: rgba(245,242,237,0.35);
+  }
+  .schedule-kicker {
+    font-family: var(--f-mono);
+    font-size: var(--fs-label);
+    letter-spacing: var(--ls-wide);
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 1.25rem;
+  }
+  .schedule-title {
+    font-family: var(--f-serif);
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+    color: var(--paper);
+    margin-bottom: 1.25rem;
+  }
+  .schedule-copy {
+    font-size: var(--fs-body);
+    font-weight: 300;
+    line-height: 1.85;
+    color: var(--mist);
+    margin-bottom: 2rem;
+  }
+  .schedule-actions {
+    display: grid;
+    gap: 0.9rem;
+  }
+  .schedule-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.25rem;
+    padding: 1rem 1.1rem;
+    border: 0.5px solid rgba(245,242,237,0.16);
+    color: var(--paper);
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    transition: background 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
+  }
+  .schedule-option span {
+    font-family: var(--f-mono);
+    font-size: var(--fs-micro);
+    font-weight: 300;
+    letter-spacing: var(--ls-label);
+    color: var(--ash);
+    text-transform: uppercase;
+    text-align: right;
+  }
+  .schedule-option:hover {
+    transform: translateY(-1px);
+    border-color: rgba(245,242,237,0.38);
+    background: rgba(245,242,237,0.035);
+  }
+  .schedule-option-primary {
+    color: var(--ink);
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .schedule-option-primary span {
+    color: rgba(13,13,11,0.64);
+  }
+  .schedule-option-primary:hover {
+    background: var(--paper);
+  }
+  @media (max-width: 540px) {
+    .schedule-dialog { padding: 2.4rem 1.4rem 1.4rem; }
+    .schedule-option {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .schedule-option span { text-align: left; }
+  }
+
   /* ── FAQ Accordion ── */
   .faq-acc-section {
     padding: 0 4rem 7rem;
@@ -489,6 +657,43 @@ import Layout from '../layouts/Layout.astro';
 
 <script is:inline>
 (function () {
+  var modal = document.querySelector('[data-schedule-modal]');
+  var triggers = document.querySelectorAll('[data-schedule-trigger]');
+  var closeButtons = document.querySelectorAll('[data-schedule-close]');
+  var lastFocus = null;
+
+  function openScheduleModal() {
+    if (!modal) return;
+    lastFocus = document.activeElement;
+    modal.setAttribute('data-open', '');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    var firstLink = modal.querySelector('.schedule-option');
+    if (firstLink) firstLink.focus();
+  }
+
+  function closeScheduleModal() {
+    if (!modal) return;
+    modal.removeAttribute('data-open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    if (lastFocus && typeof lastFocus.focus === 'function') lastFocus.focus();
+  }
+
+  triggers.forEach(function (trigger) {
+    trigger.addEventListener('click', openScheduleModal);
+  });
+
+  closeButtons.forEach(function (button) {
+    button.addEventListener('click', closeScheduleModal);
+  });
+
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape' && modal && modal.hasAttribute('data-open')) {
+      closeScheduleModal();
+    }
+  });
+
   var items = document.querySelectorAll('[data-faq]');
   items.forEach(function (item) {
     var trigger = item.querySelector('.faq-acc-trigger');
