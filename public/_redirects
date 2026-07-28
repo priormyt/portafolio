@@ -6,3 +6,7 @@
 /aviso-privacidad.html   /aviso-privacidad  301
 /clientes.html           /clientes          301
 /agendar.html            /agendar           301
+
+# El sitemap ahora lo genera @astrojs/sitemap como /sitemap-index.xml.
+# Google ya conoce la URL vieja, así que la mandamos a la nueva en vez de dar 404.
+/sitemap.xml             /sitemap-index.xml 301
