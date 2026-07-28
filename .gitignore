@@ -19,3 +19,7 @@ wrangler.toml.local
 
 # macOS
 .DS_Store
+
+# Claude Code (worktrees y estado local)
+.claude/
+**/.DS_Store
