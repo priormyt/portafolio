@@ -2,20 +2,27 @@
 import Layout from '../layouts/Layout.astro';
 ---
 <Layout
-  title="Galería de Retratos | ANTE Estudio de Fotografía CDMX"
-  description="Galería de retratos profesionales de ANTE Estudio de Fotografía en Ciudad de México. Corporativos, personales y editoriales. Fotografía minimalista y honesta."
+  title="Galería de Retratos y Books | ANTE Estudio Fotográfico CDMX"
+  description="Retratos profesionales hechos en nuestro estudio fotográfico en CDMX: corporativos, books personales y editoriales. Mira el trabajo y agenda desde $900 MXN."
 >
 <!-- PAGE HEADER -->
 <div class="page-header">
   <div>
     <p class="page-eyebrow">Trabajo reciente</p>
     <h1 class="page-title">Galería</h1>
+    <p class="page-sub">Retratos hechos en nuestro estudio en la Ciudad de México: corporativos para LinkedIn y perfiles profesionales, books personales y trabajo editorial. Todo con la misma luz cuidada y la misma dirección de pose.</p>
   </div>
 </div>
 
 <!-- GALLERY -->
 <section class="gallery-section" aria-label="Galería de retratos profesionales ANTE">
   <div class="gallery-grid" id="gallery"></div>
+</section>
+
+<!-- CTA -->
+<section class="gallery-cta">
+  <p>¿Quieres el tuyo? Sesiones desde $900 MXN, entrega en 3 a 5 días.</p>
+  <a href="/agendar" class="btn-ghost">Agendar sesión <span class="arrow">→</span></a>
 </section>
 
 <!-- LIGHTBOX -->
@@ -164,6 +171,27 @@ import Layout from '../layouts/Layout.astro';
       display: block;
       width: 24px; height: 0.5px;
       background: var(--accent);
+    }
+    .page-sub {
+      font-size: var(--fs-body);
+      font-weight: 300;
+      color: var(--mist);
+      line-height: 1.85;
+      max-width: 560px;
+      margin-top: 2rem;
+      opacity: 0;
+      animation: fadeup 1s 0.8s forwards;
+    }
+    .gallery-cta {
+      padding: 4rem;
+      border-top: 0.5px solid rgba(245,242,237,0.1);
+      text-align: center;
+    }
+    .gallery-cta p {
+      font-size: var(--fs-body);
+      font-weight: 300;
+      color: var(--mist);
+      margin-bottom: 2rem;
     }
     .page-title {
       font-family: var(--f-serif);

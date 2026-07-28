@@ -15,7 +15,7 @@ necesita saber para no arrancar desde cero en cada conversación vive aquí.
 | Dashboard | https://app.openseo.so/p/9bcc76c1-434b-459c-b8cb-5cb6dd786e9b |
 | Dominio | `ante.photo` |
 | Mercado | México (`locationCode` 2484), español (`es`) |
-| Search Console | **Sin conectar** → https://app.openseo.so/p/9bcc76c1-434b-459c-b8cb-5cb6dd786e9b/search-performance |
+| Search Console | **Conectado** (verificado 2026-07-27), propiedad `https://www.ante.photo/` |
 | Créditos | **0** al 2026-07-27 — las herramientas de research (keywords, SERP, backlinks, audit) no corren hasta recargar |
 
 Herramientas que **no** consumen créditos: `whoami`, `list_projects`, `get_search_console_performance`,
@@ -85,7 +85,7 @@ de compra en CDMX".
 - Servicios: retrato corporativo (LinkedIn, perfiles), retrato personal/editorial,
   fotografía para equipos y empresas.
 - Precio de entrada: paquetes desde $900 MXN. Edición incluida, entrega en 3–5 días.
-- Contacto: WhatsApp +52 595 122 0554, contacto@ante.photo. Respuesta < 24 h.
+- Contacto: WhatsApp +52 55 1238 8782, contacto@ante.photo. Respuesta < 24 h.
 - Zona: Ciudad de México.
 - Negocio adyacente: Foro Colibrí, renta de foro fotográfico en CDMX (`/mas`).
 
@@ -142,3 +142,42 @@ seo/
   - `width`/`height` en las 17 imágenes del home, contra CLS.
   - Pendiente medir: no hay baseline de Core Web Vitals previo. Verificar en PageSpeed
     después de desplegar.
+
+### Baseline de Search Console (25 abr – 25 jul 2026)
+
+**19 clics, ~5,200 impresiones.** Punto de partida real, para comparar más adelante.
+
+| Página | Impresiones | Clics | Posición |
+| --- | --- | --- | --- |
+| `/` | 4,223 | 14 | 6.9 |
+| `/contacto` | 567 | 0 | 7.0 |
+| `/nosotros` | 174 | 0 | 7.5 |
+| `/galeria` | 167 | 2 | 40.3 |
+| `/galeria.html` | 38 | 3 | 17.6 |
+| `/agendar`, `/mas` | 0 | 0 | — |
+
+Notas sobre estos datos:
+
+- Las URLs `.html` son residuo del índice viejo. **Cloudflare ya hace 301** de `/galeria.html`
+  a `/galeria` (verificado con curl), así que se consolidan solas. No hay nada que arreglar.
+- La mayoría de las impresiones del home vienen de consultas anonimizadas por GSC. Las visibles
+  son casi todas "estudio fotográfico cerca de mí" en posición 1–4 con **0 clics**: son
+  búsquedas donde el paquete de mapas se lleva el clic. **La palanca ahí es Google Business
+  Profile, no el sitio.**
+- **Coyoacán / Copilco aparecen repetidamente** ("estudio fotografico coyoacan" pos. 2.1,
+  "foto estudio coyoacan" 30 impresiones, "estudio fotografico copilco"). El sitio **nunca
+  menciona esas colonias** — solo dice CDMX. Sin confirmar dónde está el estudio, no se puede
+  escribir. **Pregunta abierta y prioritaria.**
+- "book de fotos", "book fotográfico", "book profesional": posiciones 2–5 con volumen mínimo.
+  Es el término mexicano y el sitio no lo usaba.
+- Corporativo (objetivo #2): "fotografía corporativa cdmx" pos. 38.5, "fotografía corporativa
+  méxico" pos. 47. Prácticamente no existe.
+
+- **2026-07-27** — Cambios para CTR y captación:
+  - Titles reescritos usando el lenguaje real de las consultas ("estudio fotográfico", no
+    "estudio de fotografía") y con precio en el del home.
+  - FAQ nueva sobre books de fotos, visible y en el `FAQPage` schema.
+  - `/galeria` tenía solo un `h1`: se agregó párrafo de intro y CTA a `/agendar`.
+  - Teléfono actualizado a **+52 55 1238 8782** en todo el sitio, plantillas de correo
+    y `.env.example`. **Pendiente:** cambiar `ADMIN_WHATSAPP_TO` en el entorno de Cloudflare
+    y el número en `legacy_html/` si esos archivos siguen sirviendo para algo.
