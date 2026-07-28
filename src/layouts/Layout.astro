@@ -148,7 +148,17 @@ const schemaGraph = {
   <header>
     <nav>
       <a href="/" class="nav-logo">Ante</a>
-      <ul class="nav-links">
+      <button
+        class="nav-toggle"
+        type="button"
+        id="navToggle"
+        aria-expanded="false"
+        aria-controls="navLinks"
+        aria-label="Abrir menú"
+      >
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links" id="navLinks">
         <li><a href="/galeria">Galería</a></li>
         <li><a href="/fotografia-corporativa">Corporativo</a></li>
         <li><a href="/nosotros">Nosotros</a></li>
@@ -176,6 +186,37 @@ const schemaGraph = {
   </footer>
 
   <script is:inline>
+  // Menú móvil colapsable
+  (function () {
+    const toggle = document.getElementById('navToggle');
+    const links = document.getElementById('navLinks');
+    if (!toggle || !links) return;
+
+    const setOpen = (open) => {
+      document.body.toggleAttribute('data-nav-open', open);
+      toggle.setAttribute('aria-expanded', String(open));
+      toggle.setAttribute('aria-label', open ? 'Cerrar menú' : 'Abrir menú');
+    };
+
+    toggle.addEventListener('click', () => {
+      setOpen(!document.body.hasAttribute('data-nav-open'));
+    });
+
+    // Los anclas dentro de la misma página no navegan, así que hay que cerrar a mano.
+    links.addEventListener('click', (e) => {
+      if (e.target.closest('a')) setOpen(false);
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') setOpen(false);
+    });
+
+    // Si se agranda la ventana con el menú abierto, el panel quedaría colgando.
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 768) setOpen(false);
+    });
+  })();
+
   const cursor = document.getElementById('cursor');
   const ring = document.getElementById('cursorRing');
   let mx = 0, my = 0, rx = 0, ry = 0;

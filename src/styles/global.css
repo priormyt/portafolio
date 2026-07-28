@@ -90,6 +90,30 @@
     }
     .nav-links a:hover { color: var(--paper); }
 
+    /* Botón hamburguesa: solo existe en móvil, ver el bloque responsive */
+    .nav-toggle {
+      display: none;
+      background: none;
+      border: 0;
+      padding: 0.4rem;
+      cursor: pointer;
+      flex-direction: column;
+      justify-content: center;
+      gap: 5px;
+      width: 32px;
+      height: 32px;
+    }
+    .nav-toggle span {
+      display: block;
+      width: 20px;
+      height: 1px;
+      background: var(--paper);
+      transition: transform 0.3s ease, opacity 0.2s ease;
+    }
+    body[data-nav-open] .nav-toggle span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+    body[data-nav-open] .nav-toggle span:nth-child(2) { opacity: 0; }
+    body[data-nav-open] .nav-toggle span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
     /* HERO */
     .hero {
       position: relative;
@@ -811,10 +835,34 @@
     /* RESPONSIVE */
     @media (max-width: 768px) {
       nav {
-        align-items: flex-start;
+        align-items: center;
         padding: 1.35rem 1.5rem;
       }
-      .nav-links { gap: 0.8rem 1.2rem; }
+      /* El menú se colapsa detrás del botón. Especificidad alta a propósito:
+         varias páginas redefinen .nav-links en su propio bloque de estilos. */
+      .nav-toggle { display: flex; }
+      header nav .nav-links {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        flex-direction: column;
+        gap: 0;
+        padding: 0 1.5rem 1rem;
+        background: rgba(13,13,11,0.97);
+        border-bottom: 0.5px solid rgba(245,242,237,0.1);
+      }
+      body[data-nav-open] header nav .nav-links { display: flex; }
+      header nav .nav-links li { width: 100%; }
+      header nav .nav-links a {
+        display: block;
+        padding: 1rem 0;
+        font-size: 0.6rem;
+        letter-spacing: 0.28em;
+        border-bottom: 0.5px solid rgba(245,242,237,0.07);
+      }
+      header nav .nav-links li:last-child a { border-bottom: 0; }
       section { padding: 6rem 1.5rem; }
       .hero-content { padding: 0 1.5rem 4rem; }
       .hero-scroll { right: 1.5rem; bottom: 2rem; }
@@ -839,20 +887,13 @@
       .footer-info { text-align: center; }
     }
     @media (max-width: 520px) {
+      /* Con el menú colapsado la barra se queda en una sola línea: logo y botón. */
       nav {
-        flex-direction: column;
-        align-items: flex-start;
+        flex-direction: row;
+        align-items: center;
         gap: 0.8rem;
         padding: 1.2rem 1.5rem;
         background: linear-gradient(to bottom, rgba(13,13,11,0.86), rgba(13,13,11,0.18), transparent);
       }
-      .nav-links {
-        width: 100%;
-        justify-content: flex-start;
-        gap: 0.55rem 0.95rem;
-      }
-      .nav-links a {
-        font-size: 0.48rem;
-        letter-spacing: 0.22em;
-      }
+      body[data-nav-open] nav { background: rgba(13,13,11,0.97); }
     }
