@@ -23,18 +23,41 @@ const { data: paquetes } = sb
   : { data: [] as any[] };
 ---
 <Layout
-  title="Agendar sesión | ANTE Estudio de Fotografía"
-  description="Agenda tu sesión de fotografía profesional en ANTE Estudio. Llena el formulario y te contactamos en menos de 24 horas para confirmar fecha y detalles."
+  title="Agendar Sesión | ANTE Estudio Fotográfico en Coyoacán"
+  description="Agenda tu sesión de retrato en ANTE. Escríbenos por WhatsApp al +52 55 1238 8782, llámanos o déjanos tus datos: te contactamos en menos de 24 horas."
 >
   <section class="agendar-hero" aria-label="Agendar sesión con ANTE">
     <p class="agendar-eyebrow">Agendar</p>
     <h1 class="agendar-title">Cuéntanos<br>de tu sesión</h1>
     <p class="agendar-sub">
-      Llena el formulario y te contactamos en menos de 24 horas para confirmar fecha, paquete y detalles.
+      Escríbenos o llámanos y lo resolvemos en el momento. Si prefieres, déjanos tus datos
+      en el formulario y te contactamos en menos de 24 horas.
     </p>
   </section>
 
+  <section class="agendar-directo" aria-label="Contacto directo">
+    <p class="directo-label">Lo más rápido</p>
+    <div class="directo-opciones">
+      <a
+        class="directo-card"
+        href="https://wa.me/525512388782?text=Hola%20ANTE%2C%20me%20gustar%C3%ADa%20agendar%20una%20sesi%C3%B3n."
+        target="_blank"
+        rel="noopener"
+      >
+        <span class="directo-tipo">WhatsApp</span>
+        <span class="directo-dato">+52 55 1238 8782</span>
+        <span class="directo-nota">Respuesta en menos de 24 horas</span>
+      </a>
+      <a class="directo-card" href="tel:+525512388782">
+        <span class="directo-tipo">Llamar</span>
+        <span class="directo-dato">+52 55 1238 8782</span>
+        <span class="directo-nota">Lunes a sábado, 9:00 a 18:00</span>
+      </a>
+    </div>
+  </section>
+
   <section class="agendar-form-wrap">
+    <p class="agendar-form-label">O déjanos tus datos</p>
     <form id="leadForm" class="agendar-form">
       <div class="agendar-grid">
         <div class="form-row">
@@ -158,8 +181,60 @@ const { data: paquetes } = sb
       max-width: 480px;
     }
 
+    /* CONTACTO DIRECTO */
+    .agendar-directo {
+      padding: 4rem 4rem 0;
+    }
+    .directo-label,
+    .agendar-form-label {
+      font-family: var(--f-mono);
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-label);
+      text-transform: uppercase;
+      color: var(--ash);
+      max-width: 880px;
+      margin: 0 auto 1.6rem;
+    }
+    .directo-opciones {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      max-width: 880px;
+      margin: 0 auto;
+    }
+    .directo-card {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      padding: 2rem;
+      border: 0.5px solid rgba(245,242,237,0.18);
+      text-decoration: none;
+      transition: border-color 0.3s, background 0.3s;
+    }
+    .directo-card:hover {
+      border-color: var(--accent);
+      background: rgba(245,242,237,0.03);
+    }
+    .directo-tipo {
+      font-family: var(--f-mono);
+      font-size: var(--fs-micro);
+      letter-spacing: var(--ls-label);
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .directo-dato {
+      font-size: 1.15rem;
+      font-weight: 300;
+      color: var(--paper);
+    }
+    .directo-nota {
+      font-size: var(--fs-micro);
+      color: var(--ash);
+      line-height: 1.6;
+    }
+
     .agendar-form-wrap {
-      padding: 5rem 4rem 6rem;
+      padding: 4rem 4rem 6rem;
     }
     .agendar-form {
       max-width: 880px;
@@ -313,6 +388,9 @@ const { data: paquetes } = sb
 
     @media (max-width: 768px) {
       .agendar-hero { padding: 9rem 1.5rem 3rem; }
+      .agendar-directo { padding: 3rem 1.5rem 0; }
+      .directo-opciones { grid-template-columns: 1fr; gap: 1rem; }
+      .directo-card { padding: 1.5rem; }
       .agendar-form-wrap { padding: 3rem 1.5rem 4rem; }
       .agendar-grid { grid-template-columns: 1fr; gap: 1.6rem; }
     }
