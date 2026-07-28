@@ -136,6 +136,21 @@ para un estudio de fotografía y `IMG_4821.jpg` no le dice nada.
 
 Si se renombra una imagen ya publicada, agregar su 301 en `public/_redirects`.
 
+**Formato:** las páginas sirven `.webp`. Los `.jpg` originales se conservan en el repo
+porque son el destino de los 301 y la fuente para regenerar. Dos excepciones que siguen
+en JPEG a propósito:
+
+- `estudio-fotografico-ante-coyoacan.jpg` es la `og:image` y la `image` del schema.
+  WhatsApp y varias redes no previsualizan WebP en los enlaces compartidos.
+- `lista-precios.jpg` la abre y comparte el usuario; JPEG es más universal.
+
+Para convertir imágenes nuevas, `sharp` ya viene con Astro:
+
+```js
+import sharp from 'sharp';
+await sharp('foto.jpg').webp({ quality: 82, effort: 6 }).toFile('foto.webp');
+```
+
 ---
 
 ## Preferencias de trabajo

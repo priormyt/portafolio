@@ -125,7 +125,7 @@
     .hero-bg {
       position: absolute;
       inset: 0;
-      background-image: url('/img/estudio-fotografico-ante-coyoacan.jpg');
+      background-image: url('/img/estudio-fotografico-ante-coyoacan.webp');
       background-size: cover;
       background-position: center 30%;
       filter: brightness(0.55) contrast(1.1);
