@@ -150,23 +150,7 @@ import Layout from '../layouts/Layout.astro';
 
 <style is:global>
 
-    :root {
-      --ink: #0d0d0b;
-      --paper: #f5f2ed;
-      --bone: #e8e3da;
-      --ash: #9a9690;
-      --char: #1c1b18;
-      --mist: #ccc8c0;
-      --accent: #f5f5e9;
-      --f-serif: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-      --f-sans: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-      --f-mono: 'DM Mono', 'Courier New', monospace;
-      --fs-label: 0.62rem;
-      --fs-body: 0.9rem;
-      --fs-micro: 0.58rem;
-      --ls-label: 0.3em;
-      --ls-wide: 0.4em;
-    }
+    /* Los tokens viven en src/styles/global.css. */
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
@@ -227,6 +211,7 @@ import Layout from '../layouts/Layout.astro';
     }
     .nav-links a {
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-label);
       letter-spacing: var(--ls-label);
       color: var(--ash);
@@ -237,11 +222,12 @@ import Layout from '../layouts/Layout.astro';
     .nav-links a:hover, .nav-links a.active { color: var(--paper); }
 
     /* SECTIONS */
-    section { padding: 9rem 4rem; }
+    section { padding: var(--pad-section) var(--pad-inline); }
 
     /* SECTION TAG */
     .section-tag {
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-label);
       letter-spacing: var(--ls-wide);
       color: var(--accent);
@@ -268,6 +254,7 @@ import Layout from '../layouts/Layout.astro';
     }
     .page-eyebrow {
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-label);
       letter-spacing: var(--ls-wide);
       color: var(--accent);
@@ -323,6 +310,7 @@ import Layout from '../layouts/Layout.astro';
       padding: 1.1rem 0;
       border-bottom: 0.5px solid rgba(245,242,237,0.08);
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-label);
       letter-spacing: var(--ls-label);
       color: var(--ash);
@@ -352,6 +340,7 @@ import Layout from '../layouts/Layout.astro';
       position: absolute;
       bottom: 1.5rem; right: 1.5rem;
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-micro);
       letter-spacing: var(--ls-label);
       color: var(--paper);
@@ -370,6 +359,7 @@ import Layout from '../layouts/Layout.astro';
     }
     .about-card-label {
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-label);
       letter-spacing: var(--ls-wide);
       color: var(--accent);
@@ -388,7 +378,7 @@ import Layout from '../layouts/Layout.astro';
 
     /* TESTIMONIOS — Infinite Marquee */
     .testimonios {
-      padding: 9rem 0;
+      padding: var(--pad-section) 0;
       overflow: hidden;
     }
     .test-header {
@@ -456,6 +446,7 @@ import Layout from '../layouts/Layout.astro';
     .marquee-quote::after  { content: '\201D'; color: var(--accent); margin-left: 0.05em; }
     .marquee-name {
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-micro);
       letter-spacing: var(--ls-label);
       color: var(--ash);
@@ -488,6 +479,7 @@ import Layout from '../layouts/Layout.astro';
     .cta-content { position: relative; z-index: 1; }
     .cta-tag {
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-label);
       letter-spacing: var(--ls-wide);
       color: var(--accent);
@@ -571,6 +563,7 @@ import Layout from '../layouts/Layout.astro';
     }
     .footer-logo {
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-label);
       letter-spacing: var(--ls-wide);
       color: var(--ash);
@@ -578,6 +571,7 @@ import Layout from '../layouts/Layout.astro';
     }
     .footer-info {
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-micro);
       letter-spacing: var(--ls-label);
       color: var(--ash);
@@ -607,7 +601,7 @@ import Layout from '../layouts/Layout.astro';
     @media (max-width: 768px) {
       nav { padding: 1.5rem 1.5rem; }
       .nav-links { gap: 1.5rem; }
-      section { padding: 6rem 1.5rem; }
+
       .page-hero { padding: 10rem 1.5rem 4rem; }
       .about { grid-template-columns: 1fr; gap: 4rem; }
       .about-cards { grid-template-columns: 1fr; gap: 4rem; }

@@ -1,9 +1,12 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { PRECIO_DESDE, formatMXN } from '../lib/precios';
+
+const desde = formatMXN(PRECIO_DESDE);
 ---
 <Layout
   title="Galería de Retratos y Books | ANTE Estudio Coyoacán CDMX"
-  description="Retratos profesionales hechos en nuestro estudio fotográfico en Coyoacán, CDMX: corporativos, books personales y editoriales. Mira el trabajo y agenda desde $900 MXN."
+  description={`Retratos profesionales hechos en nuestro estudio fotográfico en Coyoacán, CDMX: corporativos, books personales y editoriales. Mira el trabajo y agenda desde ${desde} MXN.`}
 >
 <!-- PAGE HEADER -->
 <div class="page-header">
@@ -21,7 +24,7 @@ import Layout from '../layouts/Layout.astro';
 
 <!-- CTA -->
 <section class="gallery-cta">
-  <p>¿Quieres el tuyo? Sesiones desde $900 MXN, entrega en 3 a 5 días.</p>
+  <p>¿Quieres el tuyo? Sesiones desde {desde} MXN, entrega en 3 a 5 días. <a href="/#precios">Ver paquetes</a>.</p>
   <a href="/agendar" class="btn-ghost">Agendar sesión <span class="arrow">→</span></a>
 </section>
 
@@ -61,23 +64,7 @@ import Layout from '../layouts/Layout.astro';
 
 <style is:global>
 
-    :root {
-      --ink: #0d0d0b;
-      --paper: #f5f2ed;
-      --bone: #e8e3da;
-      --ash: #9a9690;
-      --char: #1c1b18;
-      --mist: #ccc8c0;
-      --accent: #f5f5e9;
-      --f-serif: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-      --f-sans: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-      --f-mono: 'DM Mono', 'Courier New', monospace;
-      --fs-label: 0.62rem;
-      --fs-body: 0.9rem;
-      --fs-micro: 0.58rem;
-      --ls-label: 0.3em;
-      --ls-wide: 0.4em;
-    }
+    /* Los tokens viven en src/styles/global.css. */
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
@@ -136,6 +123,7 @@ import Layout from '../layouts/Layout.astro';
     }
     .nav-links a {
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-label);
       letter-spacing: var(--ls-label);
       color: var(--ash);
@@ -155,6 +143,7 @@ import Layout from '../layouts/Layout.astro';
     }
     .page-eyebrow {
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-label);
       letter-spacing: var(--ls-wide);
       color: var(--accent);
@@ -244,6 +233,7 @@ import Layout from '../layouts/Layout.astro';
     }
     .gallery-item-label {
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-micro);
       letter-spacing: var(--ls-label);
       color: var(--paper);
@@ -282,6 +272,7 @@ import Layout from '../layouts/Layout.astro';
       position: absolute;
       top: 2rem; right: 3rem;
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-label);
       letter-spacing: var(--ls-label);
       color: var(--ash);
@@ -318,6 +309,7 @@ import Layout from '../layouts/Layout.astro';
     }
     .footer-logo {
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-label);
       letter-spacing: var(--ls-wide);
       color: var(--ash);
@@ -325,6 +317,7 @@ import Layout from '../layouts/Layout.astro';
     }
     .footer-info {
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-micro);
       letter-spacing: var(--ls-label);
       color: var(--ash);

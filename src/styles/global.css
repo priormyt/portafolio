@@ -6,14 +6,33 @@
       --char: #1c1b18;
       --mist: #ccc8c0;
       --accent: #f5f5e9;
+      /* Ojo con el nombre: --f-serif no es una serif, es la de titulares. */
       --f-serif: 'Helvetica Neue', Helvetica, Arial, sans-serif;
       --f-sans: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      /* Marca. Marion viene con macOS, así que solo la ven los usuarios de Mac;
+         Gelasio se carga como respaldo por ser métricamente compatible con
+         Georgia, que es el fallback histórico. */
+      --f-marca: 'Marion', 'Gelasio', Georgia, serif;
       --f-mono: 'DM Mono', 'Courier New', monospace;
-      --fs-label: 0.62rem;
-      --fs-body: 0.9rem;
-      --fs-micro: 0.58rem;
+      --fs-label: 0.7rem;
+      --fs-body: 0.95rem;
+      --fs-micro: 0.66rem;
       --ls-label: 0.3em;
       --ls-wide: 0.4em;
+      /* Espaciado de sección. Dos secciones seguidas suman el doble, así que
+         este número se ve duplicado entre bloques: 7rem aquí son 14rem de aire
+         entre una sección y la siguiente. */
+      --pad-section: 7rem;
+      --pad-inline: 4rem;
+      --gap-header: 3.5rem;
+    }
+
+    @media (max-width: 768px) {
+      :root {
+        --pad-section: 4rem;
+        --pad-inline: 1.5rem;
+        --gap-header: 2rem;
+      }
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -26,29 +45,51 @@
       font-family: var(--f-sans);
       font-weight: 300;
       overflow-x: hidden;
-      cursor: none;
     }
 
-    /* Custom cursor */
-    .cursor {
-      position: fixed;
-      width: 8px; height: 8px;
-      background: var(--paper);
-      border-radius: 50%;
-      pointer-events: none;
-      z-index: 9999;
-      transform: translate(-50%, -50%);
-      transition: transform 0.1s ease, opacity 0.2s;
+    /* Anillo de foco: no había ninguno declarado y sobre este fondo los enlaces
+       no llevan subrayado, así que quien navega con teclado se quedaba sin
+       referencia visible. */
+    :focus-visible {
+      outline: 1px solid var(--accent);
+      outline-offset: 3px;
+      border-radius: 1px;
     }
-    .cursor-ring {
-      position: fixed;
-      width: 36px; height: 36px;
-      border: 0.5px solid var(--accent);
-      border-radius: 50%;
-      pointer-events: none;
-      z-index: 9998;
-      transform: translate(-50%, -50%);
-      transition: transform 0.25s ease, width 0.2s, height 0.2s, opacity 0.2s;
+
+    /* Cursor custom: solo con mouse real. En táctil dejaba un punto fantasma
+       flotando y `cursor: none` escondía el puntero de los híbridos. */
+    .cursor, .cursor-ring { display: none; }
+
+    @media (hover: hover) and (pointer: fine) {
+      body { cursor: none; }
+
+      .cursor {
+        display: block;
+        position: fixed;
+        width: 8px; height: 8px;
+        background: var(--paper);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 9999;
+        transform: translate(-50%, -50%);
+        transition: transform 0.1s ease, opacity 0.2s;
+      }
+      .cursor-ring {
+        display: block;
+        position: fixed;
+        width: 36px; height: 36px;
+        border: 0.5px solid var(--accent);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 9998;
+        transform: translate(-50%, -50%);
+        transition: transform 0.25s ease, width 0.2s, height 0.2s, opacity 0.2s;
+      }
+    }
+
+    /* Sin JS nadie agrega .visible y todo lo de abajo del hero queda invisible. */
+    @media (scripting: none) {
+      .reveal { opacity: 1 !important; transform: none !important; }
     }
 
     /* NAV */
@@ -63,7 +104,7 @@
       padding: 2rem 4rem;
     }
     .nav-logo {
-      font-family: 'Marion', Georgia, serif;
+      font-family: var(--f-marca);
       font-size: 1.1rem;
       font-weight: 400;
       letter-spacing: var(--ls-wide);
@@ -71,6 +112,9 @@
       text-decoration: none;
       text-transform: uppercase;
       flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
     }
     .nav-links {
       display: flex;
@@ -81,6 +125,7 @@
     }
     .nav-links a {
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-label);
       letter-spacing: var(--ls-label);
       color: var(--ash);
@@ -95,13 +140,17 @@
       display: none;
       background: none;
       border: 0;
-      padding: 0.4rem;
+      /* 44×44 es el mínimo táctil y en móvil este botón es la única navegación.
+         El ícono sigue midiendo 20px; lo que crece es el área. */
+      padding: 12px;
       cursor: pointer;
       flex-direction: column;
       justify-content: center;
+      align-items: center;
       gap: 5px;
-      width: 32px;
-      height: 32px;
+      width: 44px;
+      height: 44px;
+      margin-right: -12px;
     }
     .nav-toggle span {
       display: block;
@@ -154,6 +203,7 @@
     }
     .hero-eyebrow {
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-label);
       letter-spacing: var(--ls-wide);
       color: var(--accent);
@@ -204,11 +254,15 @@
       color: var(--accent);
       text-decoration: none;
       position: relative;
+      /* Es la acción principal del hero: necesita cuerpo de botón, no de
+         enlace de 20px de alto. */
+      min-height: 44px;
+      padding: 0.6rem 0;
     }
     .btn-ghost::after {
       content: '';
       position: absolute;
-      left: 0; bottom: -6px;
+      left: 0; bottom: 0.4rem;
       height: 2px; width: 100%;
       background: currentColor;
       transform: scaleX(0);
@@ -227,6 +281,7 @@
       z-index: 2;
       writing-mode: vertical-rl;
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-micro);
       letter-spacing: var(--ls-wide);
       color: var(--ash);
@@ -253,7 +308,7 @@
     }
 
     /* SECTIONS */
-    section { padding: 9rem 4rem; }
+    section { padding: var(--pad-section) var(--pad-inline); }
 
     /* PRICING STRIP */
     .pricing-strip {
@@ -270,6 +325,7 @@
       align-items: center;
       gap: 1.4rem;
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: 0.78rem;
       letter-spacing: var(--ls-label);
       color: var(--ash);
@@ -290,6 +346,7 @@
     }
     .pricing-strip-link {
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: 0.78rem;
       letter-spacing: var(--ls-label);
       color: var(--ash);
@@ -302,13 +359,215 @@
       white-space: nowrap;
       border: 0.5px solid rgba(245,242,237,0.15);
       padding: 0.65rem 1.2rem;
+      min-height: 44px;
+      justify-content: center;
     }
     .pricing-strip-link:hover {
       color: var(--paper);
       border-color: rgba(245,242,237,0.35);
     }
     @media (max-width: 768px) {
-      .pricing-strip { padding: 1.5rem 1.5rem; }
+      .pricing-strip {
+        padding: 1.5rem;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1.2rem;
+      }
+      .pricing-strip-left { justify-content: flex-start; }
+    }
+
+    /* PRECIOS */
+    .precios {
+      padding: var(--pad-section) var(--pad-inline);
+      border-top: 0.5px solid rgba(245,242,237,0.1);
+    }
+    .precios-header {
+      max-width: 46rem;
+      margin-bottom: var(--gap-header);
+    }
+    .precios-title {
+      font-family: var(--f-serif);
+      font-size: clamp(2.4rem, 5vw, 4rem);
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -0.01em;
+      margin-bottom: 2rem;
+    }
+    .precios-title em {
+      font-style: italic;
+      color: var(--ash);
+    }
+    .precios-sub {
+      font-size: var(--fs-body);
+      line-height: 1.8;
+      color: var(--ash);
+      max-width: 34rem;
+    }
+    .precios-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: rgba(245,242,237,0.1);
+      border: 0.5px solid rgba(245,242,237,0.1);
+    }
+    .precio-card {
+      background: var(--ink);
+      padding: 3rem 2.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.6rem;
+    }
+    .precio-card-head {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .precio-nombre {
+      font-family: var(--f-mono);
+      font-weight: 400;
+      font-size: var(--fs-label);
+      font-weight: 400;
+      letter-spacing: var(--ls-label);
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+    .precio-monto {
+      font-family: var(--f-serif);
+      font-size: clamp(2rem, 3.4vw, 2.8rem);
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: baseline;
+      gap: 0.6rem;
+    }
+    .precio-moneda {
+      font-family: var(--f-mono);
+      font-weight: 400;
+      font-size: var(--fs-micro);
+      font-weight: 400;
+      letter-spacing: var(--ls-label);
+      color: var(--ash);
+    }
+    .precio-para {
+      font-size: var(--fs-body);
+      line-height: 1.7;
+      color: var(--ash);
+      flex-grow: 1;
+    }
+    .precio-specs {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+      padding-top: 1.6rem;
+      border-top: 0.5px solid rgba(245,242,237,0.1);
+    }
+    .precio-specs li {
+      font-family: var(--f-mono);
+      font-weight: 400;
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      color: var(--ash);
+      text-transform: uppercase;
+    }
+    .precio-specs li span {
+      color: var(--paper);
+      margin-right: 0.5rem;
+    }
+    .precio-specs .spec-larga { font-style: normal; }
+    /* El 50% a estudiantes es un argumento de venta: estaba en el tipo más
+       chico de la tarjeta. */
+    .precio-estudiante {
+      font-family: var(--f-mono);
+      font-weight: 400;
+      font-size: var(--fs-label);
+      letter-spacing: 0.14em;
+      color: var(--ash);
+      text-transform: uppercase;
+    }
+    .precio-estudiante strong {
+      color: var(--paper);
+      font-weight: 400;
+    }
+    .precio-cta {
+      font-family: var(--f-mono);
+      font-weight: 400;
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-label);
+      color: var(--ash);
+      text-transform: uppercase;
+      text-decoration: none;
+      border: 0.5px solid rgba(245,242,237,0.15);
+      padding: 0.9rem 1.2rem;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      transition: color 0.3s, border-color 0.3s;
+    }
+    .precio-cta:hover {
+      color: var(--paper);
+      border-color: rgba(245,242,237,0.35);
+    }
+    .precios-notas {
+      list-style: none;
+      margin-top: 3rem;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.2rem 3rem;
+      max-width: 62rem;
+    }
+    .precios-notas li {
+      font-size: 0.82rem;
+      line-height: 1.7;
+      color: var(--ash);
+      padding-left: 1.4rem;
+      position: relative;
+    }
+    .precios-notas li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0.62em;
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+    .precios-notas strong { color: var(--paper); font-weight: 400; }
+    .precios-notas a { color: var(--paper); }
+    @media (max-width: 980px) {
+      .precios-grid { grid-template-columns: 1fr; }
+      .precios-notas { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 768px) {
+
+
+      /* A una tarjeta por pantalla, comparar paquetes exigía memoria. Se
+         compacta la tarjeta y la descripción se va: las specs y el precio son
+         lo que se compara. */
+      .precio-card {
+        padding: 1.6rem 1.5rem;
+        gap: 1rem;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: start;
+      }
+      .precio-card-head { grid-column: 1; gap: 0.5rem; }
+      .precio-para { display: none; }
+      .precio-specs {
+        grid-column: 2;
+        grid-row: 1;
+        border-top: 0;
+        padding-top: 0.2rem;
+        text-align: right;
+        gap: 0.4rem;
+      }
+      .precio-estudiante { grid-column: 1 / -1; }
+      .precio-cta { grid-column: 1 / -1; }
+      /* La columna de specs es angosta: "fotos editadas" se parte en dos. */
+      .precio-specs .spec-larga { display: none; }
     }
 
     /* FILOSOFIA */
@@ -321,11 +580,12 @@
     }
     .section-tag {
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-label);
       letter-spacing: var(--ls-wide);
       color: var(--accent);
       text-transform: uppercase;
-      margin-bottom: 2.5rem;
+      margin-bottom: 1.5rem;
       display: flex;
       align-items: center;
       gap: 1rem;
@@ -376,6 +636,7 @@
       padding: 1.1rem 0;
       border-bottom: 0.5px solid rgba(245,242,237,0.08);
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-label);
       letter-spacing: var(--ls-label);
       color: var(--ash);
@@ -431,6 +692,7 @@
       bottom: 1.5rem;
       right: 1.5rem;
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-micro);
       letter-spacing: var(--ls-label);
       color: var(--paper);
@@ -449,8 +711,8 @@
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
-      margin-bottom: 4rem;
-      padding: 0 4rem;
+      margin-bottom: var(--gap-header);
+      padding: 0 var(--pad-inline);
     }
     .galeria-title {
       font-family: var(--f-serif);
@@ -460,12 +722,17 @@
     }
     .galeria-link {
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-label);
       letter-spacing: var(--ls-label);
       color: var(--ash);
       text-decoration: none;
       text-transform: uppercase;
       transition: color 0.3s;
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+      white-space: nowrap;
     }
     .galeria-link:hover { color: var(--paper); }
 
@@ -474,7 +741,10 @@
       position: relative;
       height: 300vh;
     }
-    /* Sticky viewport — stays pinned while wrapper scrolls past */
+    /* Sticky viewport — stays pinned while wrapper scrolls past.
+       La altura tiene que quedarse en 100vh: el JS calcula el avance con
+       `wrapper.offsetHeight - window.innerHeight` (ver Layout.astro). Para
+       recuperar aire se ajusta el padding, que va por dentro del box. */
     .galeria-sticky {
       position: sticky;
       top: 0;
@@ -539,6 +809,7 @@
     .galeria-slide-num {
       display: block;
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-micro);
       letter-spacing: var(--ls-wide);
       color: var(--accent);
@@ -556,6 +827,7 @@
     .galeria-slide-desc {
       display: block;
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-label);
       letter-spacing: var(--ls-label);
       color: var(--ash);
@@ -568,6 +840,7 @@
       bottom: 2.5rem;
       left: 4rem;
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-micro);
       letter-spacing: var(--ls-wide);
       color: rgba(245,242,237,0.3);
@@ -598,6 +871,7 @@
     }
     .galeria-counter-num {
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-micro);
       letter-spacing: var(--ls-label);
       color: var(--ash);
@@ -721,6 +995,7 @@
     .marquee-quote::after  { content: '\201D'; color: var(--accent); margin-left: 0.05em; }
     .marquee-name {
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-micro);
       letter-spacing: var(--ls-label);
       color: var(--ash);
@@ -728,6 +1003,7 @@
     }
     .cta-tag {
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-label);
       letter-spacing: var(--ls-wide);
       color: var(--accent);
@@ -768,6 +1044,8 @@
       color: var(--accent);
       text-decoration: none;
       position: relative;
+      min-height: 44px;
+      padding: 0.6rem 0;
     }
     .btn-primary::after {
       content: '';
@@ -792,6 +1070,7 @@
     }
     .footer-logo {
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-label);
       letter-spacing: var(--ls-wide);
       color: var(--ash);
@@ -799,16 +1078,22 @@
     }
     .footer-info {
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-micro);
       letter-spacing: var(--ls-label);
       color: var(--ash);
       text-align: right;
       line-height: 1.9;
     }
+    /* Correo y teléfono del footer: son objetivos táctiles reales (llamar,
+       escribir), no enlaces dentro de una frase. */
     .footer-info a {
       color: var(--ash);
       text-decoration: none;
       transition: color 0.3s;
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
     }
     .footer-info a:hover { color: var(--paper); }
 
@@ -863,22 +1148,30 @@
         border-bottom: 0.5px solid rgba(245,242,237,0.07);
       }
       header nav .nav-links li:last-child a { border-bottom: 0; }
-      section { padding: 6rem 1.5rem; }
+      /* El padding responsivo vive en los tokens :root. */
       .hero-content { padding: 0 1.5rem 4rem; }
       .hero-scroll { right: 1.5rem; bottom: 2rem; }
       .filosofia {
         grid-template-columns: 1fr;
         gap: 4rem;
       }
-      .galeria-header { padding: 0 1.5rem; }
+
+      /* En móvil el círculo mide 88vw (~330px) dentro de un escenario de 100vh:
+         sobraban ~240px de negro arriba. Se sube recortando la caja del slide
+         —que es contra la que centra el `margin: auto`— sin tocar los 100vh del
+         sticky, que el JS necesita para calcular el avance. */
+      /* Se recorta la caja contra la que centra el `margin: auto` de la imagen,
+         no la del slide: así el círculo sube sin arrastrar la etiqueta, que
+         sigue anclada abajo y no se le monta encima. */
       .galeria-slide-image {
+        inset: 0 0 22vh 0;
         width: 88vw;
         aspect-ratio: 1;
         height: auto;
         margin: auto;
       }
       .galeria-slide-content {
-        right: 1.5rem; top: auto; bottom: 7rem; transform: none; width: 130px;
+        right: 1.5rem; top: auto; bottom: 5rem; transform: none; width: 130px;
       }
       .galeria-label { left: 1.5rem; }
       .galeria-counter { right: 1.5rem; }

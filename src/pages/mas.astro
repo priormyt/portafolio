@@ -24,23 +24,7 @@ import Layout from '../layouts/Layout.astro';
 
 <style is:global>
 
-    :root {
-      --ink: #0d0d0b;
-      --paper: #f5f2ed;
-      --bone: #e8e3da;
-      --ash: #9a9690;
-      --char: #1c1b18;
-      --mist: #ccc8c0;
-      --accent: #f5f5e9;
-      --f-serif: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-      --f-sans: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-      --f-mono: 'DM Mono', 'Courier New', monospace;
-      --fs-label: 0.62rem;
-      --fs-body: 0.9rem;
-      --fs-micro: 0.58rem;
-      --ls-label: 0.3em;
-      --ls-wide: 0.4em;
-    }
+    /* Los tokens viven en src/styles/global.css. */
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
@@ -122,6 +106,7 @@ import Layout from '../layouts/Layout.astro';
     }
     .nav-links a {
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-label);
       letter-spacing: var(--ls-label);
       color: var(--ash);
@@ -148,6 +133,7 @@ import Layout from '../layouts/Layout.astro';
     }
     .foro-eyebrow {
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-label);
       letter-spacing: var(--ls-wide);
       color: var(--accent);
@@ -190,6 +176,7 @@ import Layout from '../layouts/Layout.astro';
     }
     .foro-link-text {
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-label);
       letter-spacing: var(--ls-wide);
       color: var(--ash);

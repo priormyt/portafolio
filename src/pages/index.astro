@@ -1,9 +1,34 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import {
+  PAQUETES,
+  PRECIO_DESDE,
+  PRECIO_HASTA,
+  PRECIO_DESDE_ESTUDIANTE,
+  formatMXN,
+  precioEstudiante,
+} from '../lib/precios';
+
+const desde = formatMXN(PRECIO_DESDE);
+const hasta = formatMXN(PRECIO_HASTA);
+const desdeEstudiante = formatMXN(PRECIO_DESDE_ESTUDIANTE);
+
+// El acordeón de FAQ y el FAQPage de abajo tienen que decir lo mismo: la
+// escalera de precios se arma una sola vez y se usa en los dos.
+const escalera = PAQUETES.map(
+  (p) => `${p.nombre} (${formatMXN(p.precio)}, ${p.fotos} fotos, ${p.duracionMin} min)`,
+).join(', ');
+
+const respuestaPrecios =
+  `Los paquetes de sesión fotográfica en ANTE van de ${desde} a ${hasta} MXN: ${escalera}. ` +
+  `Todos incluyen dirección de pose, iluminación profesional y edición de las imágenes ` +
+  `seleccionadas. Estudiantes con credencial vigente tienen 50% de descuento en cualquier ` +
+  `paquete, desde ${desdeEstudiante} MXN. La entrega digital es en 3 a 5 días hábiles y se ` +
+  `requiere anticipo del 50% para reservar la fecha.`;
 ---
 <Layout
-  title="Estudio Fotográfico en Coyoacán CDMX · Desde $900 | ANTE"
-  description="Estudio fotográfico de retrato en Coyoacán, Ciudad de México: corporativo, personal y books profesionales. Desde $900 MXN, edición incluida y entrega en 3–5 días."
+  title={`Estudio Fotográfico en Coyoacán CDMX · Desde ${desde} | ANTE`}
+  description={`Estudio fotográfico de retrato en Coyoacán, Ciudad de México: corporativo, personal y books profesionales. Paquetes de ${desde} a ${formatMXN(PRECIO_HASTA)} MXN, edición incluida y entrega en 3–5 días.`}
 >
 <!-- HERO -->
 <section class="hero" aria-label="Presentación de ANTE Estudio de Fotografía">
@@ -58,9 +83,9 @@ import Layout from '../layouts/Layout.astro';
 
 <!-- PRICING STRIP -->
 <div class="pricing-strip">
-  <span class="pricing-strip-left">Paquetes desde&nbsp;<strong>$900 MXN</strong></span>
-  <a href="img/lista-precios.jpg" target="_blank" rel="noopener" class="pricing-strip-link">
-    Lista de precios&nbsp;→
+  <span class="pricing-strip-left">Paquetes desde&nbsp;<strong>{desde} MXN</strong></span>
+  <a href="#precios" class="pricing-strip-link">
+    Ver paquetes&nbsp;→
   </a>
 </div>
 
@@ -177,7 +202,50 @@ import Layout from '../layouts/Layout.astro';
       </div>
     </div>
   </div>
-  <div style="height:9rem"></div>
+  <div style="height:var(--pad-section)"></div>
+</section>
+
+<!-- PRECIOS -->
+<section class="precios" id="precios" aria-label="Paquetes y precios de ANTE Estudio">
+  <div class="precios-header reveal">
+    <div class="section-tag">Precios</div>
+    <h2 class="precios-title">Lo que cuesta,<br><em>sin preguntar.</em></h2>
+    <p class="precios-sub">
+      Todos los paquetes incluyen dirección de pose, iluminación de estudio y edición
+      profesional de las fotos seleccionadas. Entrega digital en 3 a 5 días hábiles.
+    </p>
+  </div>
+
+  <div class="precios-grid">
+    {PAQUETES.map((p, i) => (
+      <article class="precio-card reveal" style={`transition-delay:${0.05 * (i + 1)}s`}>
+        <header class="precio-card-head">
+          <h3 class="precio-nombre">{p.nombre}</h3>
+          <p class="precio-monto">{formatMXN(p.precio)}<span class="precio-moneda">MXN</span></p>
+        </header>
+        <p class="precio-para">{p.para}</p>
+        <ul class="precio-specs">
+          <li><span>{p.fotos}</span> fotos<i class="spec-larga"> editadas</i></li>
+          <li><span>{p.duracionMin}</span> min<i class="spec-larga"> de sesión</i></li>
+          <li><span>{p.looks}</span> {p.looks === 1 ? 'look' : 'looks'}</li>
+        </ul>
+        <p class="precio-estudiante">
+          Estudiantes <strong>{formatMXN(precioEstudiante(p.precio))}</strong>
+        </p>
+        <a
+          class="precio-cta"
+          href={`/agendar?paquete=${encodeURIComponent(p.nombre)}`}
+        >Agendar {p.nombre.toLowerCase()}&nbsp;→</a>
+      </article>
+    ))}
+  </div>
+
+  <ul class="precios-notas">
+    <li><strong>50% de descuento a estudiantes</strong> con credencial vigente, en cualquier paquete. Desde {desdeEstudiante} MXN.</li>
+    <li>Se aparta con <strong>50% de anticipo</strong>; el resto el día de la sesión.</li>
+    <li>Todas las fotos se entregan con edición profesional. No entregamos archivos RAW.</li>
+    <li>¿Equipo o empresa? El precio depende del número de personas: <a href="/fotografia-corporativa">te cotizamos</a>.</li>
+  </ul>
 </section>
 
 <!-- TESTIMONIOS + CTA -->
@@ -322,7 +390,7 @@ import Layout from '../layouts/Layout.astro';
       </button>
       <div class="faq-acc-body" aria-hidden="true">
         <div class="faq-acc-body-inner">
-          <p class="faq-acc-answer">ANTE Estudio de Fotografía se especializa en retrato profesional en Coyoacán, Ciudad de México: <a href="/fotografia-corporativa">fotografía corporativa</a> para LinkedIn y presentaciones, retrato personal editorial y fotografía para artistas y emprendedores. Cada sesión incluye dirección de pose, iluminación de estudio controlada y edición profesional. Paquetes desde $900 MXN.</p>
+          <p class="faq-acc-answer">ANTE Estudio de Fotografía se especializa en retrato profesional en Coyoacán, Ciudad de México: <a href="/fotografia-corporativa">fotografía corporativa</a> para LinkedIn y presentaciones, retrato personal editorial y fotografía para artistas y emprendedores. Cada sesión incluye dirección de pose, iluminación de estudio controlada y edición profesional. Paquetes desde {desde} MXN, <a href="#precios">lista completa aquí</a>.</p>
         </div>
       </div>
     </div>
@@ -335,7 +403,7 @@ import Layout from '../layouts/Layout.astro';
       </button>
       <div class="faq-acc-body" aria-hidden="true">
         <div class="faq-acc-body-inner">
-          <p class="faq-acc-answer">Los paquetes de sesión fotográfica en ANTE comienzan desde $900 MXN e incluyen dirección de pose, iluminación profesional y edición de las imágenes seleccionadas. La entrega digital es en 3 a 5 días hábiles. Se requiere anticipo del 50% para reservar la fecha.</p>
+          <p class="faq-acc-answer">{respuestaPrecios}</p>
         </div>
       </div>
     </div>
@@ -361,7 +429,7 @@ import Layout from '../layouts/Layout.astro';
       </button>
       <div class="faq-acc-body" aria-hidden="true">
         <div class="faq-acc-body-inner">
-          <p class="faq-acc-answer">Sí. Un book fotográfico en ANTE es una sesión de retrato en estudio de la que sale una selección de imágenes editadas, lista para portafolio, castings, redes o perfiles profesionales. Incluye dirección de pose e iluminación de estudio, igual que el resto de nuestras sesiones. Desde $900 MXN, con entrega digital en 3 a 5 días hábiles.</p>
+          <p class="faq-acc-answer">Sí. Un book fotográfico en ANTE es una sesión de retrato en estudio de la que sale una selección de imágenes editadas, lista para portafolio, castings, redes o perfiles profesionales. Incluye dirección de pose e iluminación de estudio, igual que el resto de nuestras sesiones. Desde {desde} MXN ({desdeEstudiante} para estudiantes), con entrega digital en 3 a 5 días hábiles.</p>
         </div>
       </div>
     </div>
@@ -371,66 +439,72 @@ import Layout from '../layouts/Layout.astro';
 
 <!-- FOOTER -->
 
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
+<script type="application/ld+json" set:html={JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
     {
-      "@type": "Question",
-      "name": "¿Qué tipo de fotografía hace ANTE?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "ANTE Estudio de Fotografía se especializa en retrato profesional en Coyoacán, Ciudad de México: corporativo para LinkedIn y presentaciones, retrato personal editorial y fotografía para artistas y emprendedores. Cada sesión incluye dirección de pose, iluminación de estudio controlada y edición profesional. Paquetes desde $900 MXN."
-      }
+      '@type': 'Question',
+      name: '¿Qué tipo de fotografía hace ANTE?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: `ANTE Estudio de Fotografía se especializa en retrato profesional en Coyoacán, Ciudad de México: corporativo para LinkedIn y presentaciones, retrato personal editorial y fotografía para artistas y emprendedores. Cada sesión incluye dirección de pose, iluminación de estudio controlada y edición profesional. Paquetes desde ${desde} MXN.`,
+      },
     },
     {
-      "@type": "Question",
-      "name": "¿Cuánto cuesta una sesión de fotos profesional en CDMX?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Los paquetes de sesión fotográfica en ANTE comienzan desde $900 MXN e incluyen dirección de pose, iluminación profesional y edición de las imágenes seleccionadas. La entrega digital es en 3 a 5 días hábiles. Se requiere anticipo del 50% para reservar la fecha."
-      }
+      '@type': 'Question',
+      name: '¿Cuánto cuesta una sesión de fotos profesional en CDMX?',
+      acceptedAnswer: { '@type': 'Answer', text: respuestaPrecios },
     },
     {
-      "@type": "Question",
-      "name": "¿Cómo agendar una sesión de fotografía profesional en Ciudad de México?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Para agendar con ANTE Estudio escribe por WhatsApp al +52 55 1238 8782 o envía un correo a contacto@ante.photo. Confirmamos disponibilidad y enviamos todos los detalles. Tiempo de respuesta menor a 24 horas."
-      }
+      '@type': 'Question',
+      name: '¿Cómo agendar una sesión de fotografía profesional en Ciudad de México?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Para agendar con ANTE Estudio escribe por WhatsApp al +52 55 1238 8782 o envía un correo a contacto@ante.photo. Confirmamos disponibilidad y enviamos todos los detalles. Tiempo de respuesta menor a 24 horas.',
+      },
     },
     {
-      "@type": "Question",
-      "name": "¿Hacen books de fotos profesionales?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Sí. Un book fotográfico en ANTE es una sesión de retrato en estudio de la que sale una selección de imágenes editadas, lista para portafolio, castings, redes o perfiles profesionales. Incluye dirección de pose e iluminación de estudio, igual que el resto de nuestras sesiones. Desde $900 MXN, con entrega digital en 3 a 5 días hábiles."
-      }
-    }
-  ]
-}
-</script>
+      '@type': 'Question',
+      name: '¿Hacen books de fotos profesionales?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: `Sí. Un book fotográfico en ANTE es una sesión de retrato en estudio de la que sale una selección de imágenes editadas, lista para portafolio, castings, redes o perfiles profesionales. Incluye dirección de pose e iluminación de estudio, igual que el resto de nuestras sesiones. Desde ${desde} MXN (${desdeEstudiante} para estudiantes), con entrega digital en 3 a 5 días hábiles.`,
+      },
+    },
+  ],
+})} />
 
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "Service",
-  "serviceType": "Fotografía profesional",
-  "provider": { "@type": "PhotographyBusiness", "name": "ANTE Estudio de Fotografía", "url": "https://www.ante.photo" },
-  "areaServed": { "@type": "City", "name": "Ciudad de México" },
-  "hasOfferCatalog": {
-    "@type": "OfferCatalog",
-    "name": "Servicios de fotografía ANTE",
-    "itemListElement": [
-      { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Retrato profesional corporativo", "description": "Retratos para LinkedIn, presentaciones y perfiles corporativos. Iluminación de estudio, dirección de pose y edición profesional incluida." } },
-      { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Retrato personal y editorial", "description": "Sesiones de retrato personal con estética limpia y minimalista. Para artistas, emprendedores y cualquier persona que quiera una imagen auténtica." } },
-      { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Fotografía para equipos y empresas", "description": "Sesiones grupales o individuales para equipos corporativos. Imagen consistente y profesional para toda la organización." } }
-    ]
+<script type="application/ld+json" set:html={JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  serviceType: 'Fotografía profesional',
+  provider: { '@type': 'PhotographyBusiness', name: 'ANTE Estudio de Fotografía', url: 'https://www.ante.photo' },
+  areaServed: { '@type': 'City', name: 'Ciudad de México' },
+  hasOfferCatalog: {
+    '@type': 'OfferCatalog',
+    name: 'Paquetes de sesión ANTE',
+    itemListElement: PAQUETES.map((p) => ({
+      '@type': 'Offer',
+      name: p.nombre,
+      price: String(p.precio),
+      priceCurrency: 'MXN',
+      availability: 'https://schema.org/InStock',
+      itemOffered: {
+        '@type': 'Service',
+        name: `Sesión de retrato ${p.nombre}`,
+        description: `${p.fotos} fotos editadas, ${p.duracionMin} minutos de sesión y ${p.looks} ${p.looks === 1 ? 'look' : 'looks'}. Incluye dirección de pose, iluminación de estudio y edición profesional.`,
+      },
+    })),
   },
-  "offers": { "@type": "Offer", "priceCurrency": "MXN", "price": "900", "priceSpecification": { "@type": "PriceSpecification", "minPrice": "900", "priceCurrency": "MXN", "description": "Paquetes desde $900 MXN" } }
-}
-</script>
+  offers: {
+    '@type': 'AggregateOffer',
+    priceCurrency: 'MXN',
+    lowPrice: String(PRECIO_DESDE),
+    highPrice: String(PRECIO_HASTA),
+    offerCount: String(PAQUETES.length),
+  },
+})} />
 
 <style is:global>
   .schedule-trigger {
@@ -477,8 +551,11 @@ import Layout from '../layouts/Layout.astro';
     position: absolute;
     top: 1rem;
     right: 1rem;
-    width: 2rem;
-    height: 2rem;
+    /* 44×44: mínimo táctil. */
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
     border: 0.5px solid rgba(245,242,237,0.16);
     background: transparent;
     color: var(--ash);
@@ -493,6 +570,7 @@ import Layout from '../layouts/Layout.astro';
   }
   .schedule-kicker {
     font-family: var(--f-mono);
+    font-weight: 400;
     font-size: var(--fs-label);
     letter-spacing: var(--ls-wide);
     color: var(--accent);
@@ -535,6 +613,7 @@ import Layout from '../layouts/Layout.astro';
   }
   .schedule-option span {
     font-family: var(--f-mono);
+    font-weight: 400;
     font-size: var(--fs-micro);
     font-weight: 300;
     letter-spacing: var(--ls-label);
@@ -600,6 +679,7 @@ import Layout from '../layouts/Layout.astro';
   .faq-acc-trigger:hover::before { opacity: 1; }
   .faq-acc-num {
     font-family: var(--f-mono);
+    font-weight: 400;
     font-size: var(--fs-micro);
     letter-spacing: var(--ls-wide);
     color: rgba(154,150,144,0.4);

@@ -1,12 +1,16 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { PRECIO_DESDE, PRECIO_HASTA, formatMXN } from '../lib/precios';
 
 const wa = 'https://wa.me/525512388782?text=Hola%20ANTE%2C%20me%20interesa%20una%20sesi%C3%B3n%20de%20fotograf%C3%ADa%20corporativa.';
+
+const desde = formatMXN(PRECIO_DESDE);
+const hasta = formatMXN(PRECIO_HASTA);
 
 const faqs = [
   {
     q: '¿Cuánto cuesta una sesión de fotografía corporativa en CDMX?',
-    a: 'Los paquetes de ANTE comienzan desde $900 MXN e incluyen dirección de pose, iluminación de estudio y edición profesional de las fotos seleccionadas. Para equipos completos el precio depende del número de personas: escríbenos y te cotizamos. Se reserva con 50% de anticipo y el resto se paga el día de la sesión.',
+    a: `Los paquetes individuales de ANTE van de ${desde} a ${hasta} MXN e incluyen dirección de pose, iluminación de estudio y edición profesional de las fotos seleccionadas. Para equipos completos el precio depende del número de personas: escríbenos y te cotizamos. Se reserva con 50% de anticipo y el resto se paga el día de la sesión.`,
   },
   {
     q: '¿Cuánto tardan en entregar las fotos?',
@@ -34,7 +38,7 @@ const schema = {
       'serviceType': 'Fotografía corporativa',
       'name': 'Fotografía corporativa y retratos para empresas',
       'description':
-        'Retratos corporativos en estudio para LinkedIn, perfiles profesionales, presentaciones y equipos completos. Iluminación de estudio, dirección de pose y edición profesional incluida. Desde $900 MXN.',
+        `Retratos corporativos en estudio para LinkedIn, perfiles profesionales, presentaciones y equipos completos. Iluminación de estudio, dirección de pose y edición profesional incluida. Desde ${desde} MXN.`,
       'url': 'https://www.ante.photo/fotografia-corporativa',
       'provider': {
         '@type': 'PhotographyBusiness',
@@ -52,15 +56,11 @@ const schema = {
       },
       'areaServed': { '@type': 'City', 'name': 'Ciudad de México' },
       'offers': {
-        '@type': 'Offer',
+        '@type': 'AggregateOffer',
         'priceCurrency': 'MXN',
-        'price': '900',
-        'priceSpecification': {
-          '@type': 'PriceSpecification',
-          'minPrice': '900',
-          'priceCurrency': 'MXN',
-          'description': 'Paquetes desde $900 MXN, edición incluida',
-        },
+        'lowPrice': String(PRECIO_DESDE),
+        'highPrice': String(PRECIO_HASTA),
+        'description': `Paquetes individuales de ${desde} a ${hasta} MXN, edición incluida`,
       },
     },
     {
@@ -76,7 +76,7 @@ const schema = {
 ---
 <Layout
   title="Fotografía Corporativa en CDMX · Retratos para Empresas | ANTE"
-  description="Retratos corporativos para LinkedIn, perfiles profesionales y equipos completos en nuestro estudio de Coyoacán, CDMX. Desde $900 MXN, edición incluida y entrega en 3–5 días."
+  description={`Retratos corporativos para LinkedIn, perfiles profesionales y equipos completos en nuestro estudio de Coyoacán, CDMX. Desde ${desde} MXN, edición incluida y entrega en 3–5 días.`}
 >
   <section class="corp-hero" aria-label="Fotografía corporativa en ANTE Estudio">
     <p class="corp-eyebrow">Para empresas</p>
@@ -129,7 +129,7 @@ const schema = {
       <li><strong>Dirección de pose durante toda la sesión.</strong> No necesitas saber posar.</li>
       <li><strong>Edición profesional</strong> de color, luz y retoque en las fotos seleccionadas.</li>
       <li><strong>Entrega digital en 3 a 5 días hábiles</strong>, en alta resolución.</li>
-      <li><strong>Desde $900 MXN.</strong> Se reserva con 50% de anticipo.</li>
+      <li><strong>De {desde} a {hasta} MXN</strong> por persona. Se reserva con 50% de anticipo. <a href="/#precios">Ver paquetes</a>.</li>
     </ul>
   </section>
 
@@ -194,6 +194,7 @@ const schema = {
     }
     .corp-eyebrow {
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-label);
       letter-spacing: var(--ls-wide);
       color: var(--accent);
@@ -245,7 +246,7 @@ const schema = {
     .corp-card h2 {
       font-family: var(--f-serif);
       font-size: 1.5rem;
-      font-weight: 400;
+      font-weight: 700;
       margin-bottom: 1rem;
       color: var(--paper);
     }
@@ -288,6 +289,7 @@ const schema = {
     }
     .paso-num {
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-micro);
       letter-spacing: var(--ls-label);
       color: var(--accent);
@@ -297,7 +299,7 @@ const schema = {
     .corp-pasos h2 {
       font-family: var(--f-serif);
       font-size: 1.25rem;
-      font-weight: 400;
+      font-weight: 700;
       margin-bottom: 0.8rem;
       color: var(--paper);
     }
@@ -344,6 +346,7 @@ const schema = {
     .corp-cta .cta-title { margin-bottom: 1.5rem; }
     .corp-cta-sub {
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-micro);
       letter-spacing: 0.15em;
       color: var(--ash);

@@ -5,6 +5,7 @@ import Layout from '../layouts/Layout.astro';
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '../lib/database.types';
 import { readEnv } from '../lib/sesiones';
+import { PAQUETES, PRECIO_DESDE, DESCUENTO_ESTUDIANTE, formatMXN } from '../lib/precios';
 
 const env = await readEnv();
 const sb =
@@ -21,6 +22,24 @@ const { data: paquetes } = sb
       .eq('activo', true)
       .order('orden')
   : { data: [] as any[] };
+
+// Supabase manda el `id` (lo necesita el lead); lo que se muestra sale de
+// precios.ts, que es la misma fuente que el home. Si un paquete de la base no
+// existe en el catálogo público se muestra tal cual viene, sin precio.
+const normaliza = (s: string) =>
+  s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+
+const opciones = (paquetes ?? []).map((p) => {
+  const publico = PAQUETES.find((x) => normaliza(x.nombre) === normaliza(p.nombre));
+  return {
+    id: p.id,
+    nombre: publico?.nombre ?? p.nombre,
+    fotos: publico?.fotos ?? p.fotos_incluidas,
+    min: publico?.duracionMin ?? p.duracion_min,
+    looks: publico?.looks ?? p.looks,
+    precio: publico?.precio ?? (p.precio_base != null ? Number(p.precio_base) : null),
+  };
+});
 ---
 <Layout
   title="Agendar Sesión | ANTE Estudio Fotográfico en Coyoacán"
@@ -102,14 +121,25 @@ const { data: paquetes } = sb
 
         <div class="form-row">
           <label for="paquete">Paquete que te interesa</label>
-          <select id="paquete" name="paquete_id">
+          <select
+            id="paquete"
+            name="paquete_id"
+            aria-describedby="paquete_note"
+            data-paquetes={JSON.stringify(opciones)}
+          >
             <option value="">— No estoy seguro —</option>
-            {paquetes?.map((p) => (
+            {opciones.map((p) => (
               <option value={p.id}>
-                {p.nombre} · {p.fotos_incluidas} fotos · {p.duracion_min} min
+                {/* El precio va en segundo lugar: en móvil la opción se trunca. */}
+                {p.nombre}
+                {p.precio != null && ` · ${formatMXN(p.precio)}`}
+                {` · ${p.fotos} fotos · ${p.min} min`}
               </option>
             ))}
           </select>
+          <p id="paquete_note" class="field-note">
+            Paquetes desde {formatMXN(PRECIO_DESDE)} MXN · <a href="/#precios">ver todos</a>
+          </p>
         </div>
 
         <div class="form-row">
@@ -128,7 +158,7 @@ const { data: paquetes } = sb
         <div class="form-row form-row-full">
           <label class="checkbox-row">
             <input id="es_estudiante" name="es_estudiante" type="checkbox" />
-            <span>Soy estudiante (aplico a tarifa preferencial con credencial)</span>
+            <span>Soy estudiante ({DESCUENTO_ESTUDIANTE * 100}% de descuento en cualquier paquete, presentando credencial vigente)</span>
           </label>
         </div>
 
@@ -150,6 +180,7 @@ const { data: paquetes } = sb
     }
     .agendar-eyebrow {
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-label);
       letter-spacing: var(--ls-wide);
       color: var(--accent);
@@ -188,6 +219,7 @@ const { data: paquetes } = sb
     .directo-label,
     .agendar-form-label {
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-label);
       letter-spacing: var(--ls-label);
       text-transform: uppercase;
@@ -217,6 +249,7 @@ const { data: paquetes } = sb
     }
     .directo-tipo {
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-micro);
       letter-spacing: var(--ls-label);
       text-transform: uppercase;
@@ -249,6 +282,7 @@ const { data: paquetes } = sb
     .form-row-full { grid-column: 1 / -1; }
     .field-note {
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-micro);
       letter-spacing: var(--ls-label);
       color: var(--ash);
@@ -258,6 +292,7 @@ const { data: paquetes } = sb
 
     .agendar-form label {
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-micro);
       letter-spacing: var(--ls-label);
       color: var(--ash);
@@ -275,6 +310,7 @@ const { data: paquetes } = sb
       border: 0.5px solid rgba(245,242,237,0.2);
       color: var(--paper);
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-label);
       letter-spacing: var(--ls-label);
       outline: none;
@@ -352,6 +388,7 @@ const { data: paquetes } = sb
     }
     .checkbox-row span {
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-micro);
       letter-spacing: var(--ls-label);
       color: var(--mist);
@@ -365,6 +402,7 @@ const { data: paquetes } = sb
       color: var(--ink);
       border: none;
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-label);
       letter-spacing: var(--ls-wide);
       text-transform: uppercase;
@@ -377,6 +415,7 @@ const { data: paquetes } = sb
     .agendar-msg {
       margin-top: 1.2rem;
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-micro);
       letter-spacing: var(--ls-label);
       color: var(--ash);
@@ -427,6 +466,50 @@ const { data: paquetes } = sb
       });
       fechaPreferida.addEventListener('paste', (event) => event.preventDefault());
       fechaPreferida.addEventListener('drop', (event) => event.preventDefault());
+    }
+
+    // Detalle del paquete elegido, debajo del selector. Reacciona también al
+    // checkbox de estudiante para que el descuento se vea aplicado.
+    const paqueteSel = document.getElementById('paquete');
+    const paqueteNota = document.getElementById('paquete_note');
+    const estudianteChk = document.getElementById('es_estudiante');
+
+    if (paqueteSel && paqueteNota) {
+      const notaInicial = paqueteNota.innerHTML;
+      const catalogo = JSON.parse(paqueteSel.dataset.paquetes || '[]');
+      const mxn = (n) => '$' + Number(n).toLocaleString('es-MX', { maximumFractionDigits: 0 });
+
+      const pintarNota = () => {
+        const p = catalogo.find((x) => x.id === paqueteSel.value);
+        if (!p) {
+          paqueteNota.innerHTML = notaInicial;
+          return;
+        }
+        const partes = [
+          `${p.fotos} fotos editadas`,
+          `${p.min} min`,
+          `${p.looks} ${p.looks === 1 ? 'look' : 'looks'}`,
+        ];
+        if (p.precio != null) {
+          const esEstudiante = estudianteChk?.checked;
+          const precio = esEstudiante ? Number(p.precio) * 0.5 : Number(p.precio);
+          partes.push(esEstudiante ? `${mxn(precio)} con descuento de estudiante` : mxn(precio));
+        }
+        paqueteNota.textContent = partes.join(' · ') + ' · se aparta con 50% de anticipo.';
+      };
+
+      // Las tarjetas de /#precios enlazan con ?paquete=Nombre.
+      const pedido = new URLSearchParams(location.search).get('paquete');
+      if (pedido) {
+        const match = catalogo.find(
+          (x) => x.nombre.toLowerCase() === pedido.toLowerCase(),
+        );
+        if (match) paqueteSel.value = match.id;
+      }
+
+      paqueteSel.addEventListener('change', pintarNota);
+      estudianteChk?.addEventListener('change', pintarNota);
+      pintarNota();
     }
 
     form.addEventListener('submit', async (e) => {

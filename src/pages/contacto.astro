@@ -149,23 +149,7 @@ import Layout from '../layouts/Layout.astro';
 
 <style is:global>
 
-    :root {
-      --ink: #0d0d0b;
-      --paper: #f5f2ed;
-      --bone: #e8e3da;
-      --ash: #9a9690;
-      --char: #1c1b18;
-      --mist: #ccc8c0;
-      --accent: #f5f5e9;
-      --f-serif: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-      --f-sans: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-      --f-mono: 'DM Mono', 'Courier New', monospace;
-      --fs-label: 0.62rem;
-      --fs-body: 0.9rem;
-      --fs-micro: 0.58rem;
-      --ls-label: 0.3em;
-      --ls-wide: 0.4em;
-    }
+    /* Los tokens viven en src/styles/global.css. */
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
@@ -224,6 +208,7 @@ import Layout from '../layouts/Layout.astro';
     }
     .nav-links a {
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-label);
       letter-spacing: var(--ls-label);
       color: var(--ash);
@@ -233,10 +218,11 @@ import Layout from '../layouts/Layout.astro';
     }
     .nav-links a:hover, .nav-links a.active { color: var(--paper); }
 
-    section { padding: 9rem 4rem; }
+    section { padding: var(--pad-section) var(--pad-inline); }
 
     .section-tag {
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-label);
       letter-spacing: var(--ls-wide);
       color: var(--accent);
@@ -261,6 +247,7 @@ import Layout from '../layouts/Layout.astro';
     }
     .page-eyebrow {
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-label);
       letter-spacing: var(--ls-wide);
       color: var(--accent);
@@ -304,6 +291,7 @@ import Layout from '../layouts/Layout.astro';
     .contact-block:last-child { border-right: none; }
     .contact-block-label {
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-label);
       letter-spacing: var(--ls-wide);
       color: var(--accent);
@@ -345,6 +333,7 @@ import Layout from '../layouts/Layout.astro';
     .contact-link:hover::after { transform: scaleX(1); }
     .contact-sub {
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-micro);
       letter-spacing: var(--ls-label);
       color: var(--ash);
@@ -368,6 +357,7 @@ import Layout from '../layouts/Layout.astro';
     .info-block:nth-last-child(-n+2) { border-bottom: none; }
     .info-label {
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-label);
       letter-spacing: var(--ls-wide);
       color: var(--accent);
@@ -408,6 +398,7 @@ import Layout from '../layouts/Layout.astro';
     .faq-item summary {
       list-style: none;
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-label);
       letter-spacing: var(--ls-label);
       color: var(--paper);
@@ -451,6 +442,7 @@ import Layout from '../layouts/Layout.astro';
     }
     .legal-text {
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-label);
       letter-spacing: var(--ls-label);
       color: var(--ash);
@@ -458,6 +450,7 @@ import Layout from '../layouts/Layout.astro';
     }
     .legal-link {
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-label);
       letter-spacing: var(--ls-label);
       color: var(--ash);
@@ -482,6 +475,7 @@ import Layout from '../layouts/Layout.astro';
     }
     .footer-logo {
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-label);
       letter-spacing: var(--ls-wide);
       color: var(--ash);
@@ -489,6 +483,7 @@ import Layout from '../layouts/Layout.astro';
     }
     .footer-info {
       font-family: var(--f-mono);
+      font-weight: 400;
       font-size: var(--fs-micro);
       letter-spacing: var(--ls-label);
       color: var(--ash);
@@ -512,13 +507,13 @@ import Layout from '../layouts/Layout.astro';
     @media (max-width: 768px) {
       nav { padding: 1.5rem 1.5rem; }
       .nav-links { gap: 1.5rem; }
-      section { padding: 6rem 1.5rem; }
+
       .page-hero { padding: 10rem 1.5rem 4rem; }
       .contact-main { grid-template-columns: 1fr; }
       .contact-block { padding: 3rem 1.5rem; border-right: none; border-bottom: 0.5px solid rgba(245,242,237,0.08); }
       .contact-info { grid-template-columns: 1fr; }
       .info-block { padding: 2.5rem 1.5rem; border-right: none; }
-      .faq-section { padding: 6rem 1.5rem; }
+
       .faq-grid { grid-template-columns: 1fr; }
       .legal-section { padding: 3rem 1.5rem; flex-direction: column; align-items: flex-start; }
       footer { flex-direction: column; gap: 1.5rem; text-align: center; }
