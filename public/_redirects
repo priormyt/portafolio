@@ -10,3 +10,32 @@
 # El sitemap ahora lo genera @astrojs/sitemap como /sitemap-index.xml.
 # Google ya conoce la URL vieja, así que la mandamos a la nueva en vez de dar 404.
 /sitemap.xml             /sitemap-index.xml 301
+
+# Imágenes renombradas a nombres descriptivos. Las URLs viejas pueden estar
+# indexadas en Google Imágenes, así que se redirigen en vez de dar 404.
+/img/Valeria1.jpg                        /img/retrato-profesional-valeria.jpg         301
+/img/Ricardo1.jpg                        /img/retrato-profesional-ricardo.jpg         301
+/img/Mich1.jpg                           /img/retrato-artistico-michelle.jpg          301
+/img/Jona1.jpg                           /img/retrato-profesional-jonathan.jpg        301
+/img/Carlos2.jpg                         /img/retrato-profesional-carlos.jpg          301
+/img/Christian1.jpg                      /img/retrato-profesional-christian.jpg       301
+/img/Mafer1.jpg                          /img/retrato-personal-mafer.jpg              301
+/img/Fondo3.jpg                          /img/estudio-fotografico-ante-coyoacan.jpg   301
+/img/Fondo4.jpg                          /img/foro-colibri-renta-foro-cdmx.jpg        301
+/img/Foro%20colibri.png                  /img/logo-foro-colibri.png                   301
+/img/thumb/Ricardo1.jpg                  /img/thumb/retrato-profesional-ricardo.jpg   301
+/img/thumb/Ricardo2.jpg                  /img/thumb/retrato-editorial-ricardo.jpg     301
+/img/thumb/Jona1.jpg                     /img/thumb/retrato-profesional-jonathan.jpg  301
+/img/thumb/Jona3.jpg                     /img/thumb/retrato-corporativo-jonathan.jpg  301
+/img/thumb/Valeria1.jpg                  /img/thumb/retrato-profesional-valeria.jpg   301
+/img/thumb/Mafer1.jpg                    /img/thumb/retrato-personal-mafer.jpg        301
+/img/thumb/Mafer2.jpg                    /img/thumb/retrato-personal-mafer-2.jpg      301
+/img/thumb/Carlos1.jpg                   /img/thumb/retrato-corporativo-carlos.jpg    301
+/img/thumb/Carlos2.jpg                   /img/thumb/retrato-profesional-carlos.jpg    301
+/img/thumb/Carlos3.jpg                   /img/thumb/retrato-editorial-carlos.jpg      301
+/img/thumb/Mich1.jpg                     /img/thumb/retrato-artistico-michelle.jpg    301
+/img/thumb/Mich4.jpg                     /img/thumb/retrato-personal-michelle.jpg     301
+/img/thumb/Christian1.jpg                /img/thumb/retrato-profesional-christian.jpg 301
+/img/thumb/Christian3.jpg                /img/thumb/retrato-editorial-christian.jpg   301
+/img/thumb/Javier_6.jpg                  /img/thumb/retrato-profesional-javier.jpg    301
+/img/thumb/Javier_15.jpg                 /img/thumb/retrato-editorial-javier.jpg      301

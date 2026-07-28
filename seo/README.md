@@ -125,6 +125,19 @@ Contenido redactado para la ficha: [contenido/gbp-ficha.md](contenido/gbp-ficha.
 
 ---
 
+## Convención de nombres de imagen
+
+Las fotos públicas se nombran `retrato-<tipo>-<persona>.jpg`, con el mismo tipo que usa
+su `alt`: `profesional`, `corporativo`, `editorial`, `personal`, `artistico`. Los recortes
+para la galería viven en `img/thumb/` con el mismo nombre que su versión grande.
+
+Al agregar fotos nuevas, nombrarlas así desde el inicio. Google Imágenes es un canal real
+para un estudio de fotografía y `IMG_4821.jpg` no le dice nada.
+
+Si se renombra una imagen ya publicada, agregar su 301 en `public/_redirects`.
+
+---
+
 ## Preferencias de trabajo
 
 - **Idioma:** todo el contenido y los entregables en español de México.
