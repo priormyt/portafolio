@@ -251,7 +251,7 @@ function footerRow(): string {
         <tr><td style="height:10px;line-height:10px;font-size:0;">&nbsp;</td></tr>
         <tr>
           <td style="font-family:${FONT_SANS};font-size:11px;line-height:1.7;color:${C.textMuted};">
-            WhatsApp <a href="https://wa.me/525951220554" style="color:${C.textDim};text-decoration:none;">+52 595 122 0554</a><br>
+            WhatsApp <a href="https://wa.me/525512388782" style="color:${C.textDim};text-decoration:none;">+52 55 1238 8782</a><br>
             Correo <a href="mailto:contacto@ante.photo" style="color:${C.textDim};text-decoration:none;">contacto@ante.photo</a><br>
             Ciudad de México · México
           </td>

@@ -16,7 +16,7 @@ import type { Env } from './sesiones';
  *      TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxx
  *      TWILIO_AUTH_TOKEN=xxxxxxxxxxxxxxxxx
  *      TWILIO_WHATSAPP_FROM=whatsapp:+14155238886   (número de sandbox)
- *      ADMIN_WHATSAPP_TO=whatsapp:+525951220554
+ *      ADMIN_WHATSAPP_TO=whatsapp:+525512388782
  *
  * Para producción real (no sandbox) hay que aprobar templates en Twilio.
  */
