@@ -19,4 +19,4 @@ Allow: /
 User-agent: Applebot-Extended
 Allow: /
 
-Sitemap: https://www.ante.photo/sitemap.xml
+Sitemap: https://www.ante.photo/sitemap-index.xml
