@@ -64,10 +64,12 @@ const schemaGraph = {
       "email": "contacto@ante.photo",
       "address": {
         "@type": "PostalAddress",
-        "addressLocality": "Ciudad de México",
-        "addressRegion": "CDMX",
+        "streetAddress": "Av. del Convento",
+        "addressLocality": "Coyoacán",
+        "addressRegion": "Ciudad de México",
         "addressCountry": "MX",
       },
+      "areaServed": { "@type": "City", "name": "Ciudad de México" },
       "priceRange": "$$",
       "openingHoursSpecification": [{
         "@type": "OpeningHoursSpecification",
@@ -162,7 +164,7 @@ const schemaGraph = {
       <a href="mailto:contacto@ante.photo" itemprop="email">contacto@ante.photo</a><br>
       <a href="tel:+525512388782" itemprop="telephone" class="footer-tel">+52 55 1238 8782</a><br>
       <span itemprop="address" itemscope itemtype="https://schema.org/PostalAddress">
-        <span itemprop="addressLocality">Ciudad de México</span> · <span itemprop="addressCountry">México</span>
+        <span itemprop="streetAddress">Av. del Convento</span> · <span itemprop="addressLocality">Coyoacán</span>, <span itemprop="addressRegion">Ciudad de México</span>
       </span>
     </address>
   </footer>
