@@ -5,7 +5,7 @@ import sitemap from '@astrojs/sitemap';
 
 // Solo estas rutas son públicas e indexables. Todo lo demás (/admin, /clientes,
 // las galerías privadas por código, /404) queda fuera del sitemap.
-const publicas = ['/', '/agendar', '/aviso-privacidad', '/contacto', '/galeria', '/mas', '/nosotros'];
+const publicas = ['/', '/agendar', '/aviso-privacidad', '/contacto', '/fotografia-corporativa', '/galeria', '/mas', '/nosotros'];
 
 // build.format: 'file' emite /galeria.html, pero el canonical del Layout apunta
 // a /galeria. El sitemap tiene que coincidir con el canonical, no con el archivo.

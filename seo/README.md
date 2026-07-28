@@ -41,6 +41,7 @@ Herramientas que **no** consumen créditos: `whoami`, `list_projects`, `get_sear
 | `/contacto` | Conversión (WhatsApp/mail) | Contacto \| ANTE Estudio de Fotografía en CDMX |
 | `/galeria` | Portafolio | Galería de Retratos \| ANTE Estudio de Fotografía CDMX |
 | `/nosotros` | Confianza / marca | Nosotros \| ANTE Estudio de Fotografía en CDMX |
+| `/fotografia-corporativa` | Servicio (objetivo #2) | Fotografía Corporativa en CDMX · Retratos para Empresas \| ANTE |
 | `/mas` | Foro Colibrí (renta de foro) | Foro Colibrí · Renta de Foro en CDMX \| ANTE Estudio |
 | `/aviso-privacidad` | Legal | Aviso de Privacidad \| ANTE Estudio Fotográfico |
 
@@ -200,3 +201,12 @@ Notas sobre estos datos:
   - Teléfono actualizado a **+52 55 1238 8782** en todo el sitio, plantillas de correo
     y `.env.example`. **Pendiente:** cambiar `ADMIN_WHATSAPP_TO` en el entorno de Cloudflare
     y el número en `legacy_html/` si esos archivos siguen sirviendo para algo.
+
+- **2026-07-27** — Nueva página `/fotografia-corporativa` para el objetivo #2.
+  Search Console tenía "fotografía corporativa cdmx" en posición 38.5 y
+  "fotografía corporativa méxico" en 47, sin una página que compitiera por ellas.
+  Incluye schema `Service` con oferta y `FAQPage`. Enlazada desde el nav
+  ("Corporativo"), desde la FAQ del home y presente en el sitemap.
+  **Sin verificar todavía:** si ANTE hace sesiones en la oficina del cliente. La
+  página describe todo en el estudio de Coyoacán. Si también van a domicilio,
+  falta cubrir "fotógrafo corporativo a domicilio", que es una búsqueda aparte.
