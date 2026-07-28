@@ -105,6 +105,25 @@ de compra en CDMX".
 
 ---
 
+## Google Business Profile
+
+Verificado. Datos leídos de Google Maps el 2026-07-27:
+
+- **Nombre en la ficha:** ANTE | Estudio Fotográfico (el sitio usa "ANTE Estudio de
+  Fotografía"; se agregó como `alternateName` en el schema).
+- **Dirección:** Av. del Convento 34, San Diego Churubusco, Coyoacán, 04120 CDMX.
+- **Coordenadas:** 19.3530727, -99.1488112.
+- **Categoría:** Estudio fotográfico. **Reseñas: 5.0 con solo 5 reseñas.**
+- **Horario en la ficha: "Abierto las 24 horas"**, que contradice el
+  `openingHoursSpecification` del sitio (L–S, 09:00–18:00). **Sin resolver: hay que
+  corregir uno de los dos, y solo el usuario sabe cuál.**
+- En el mismo edificio opera **VOLCAN / FORO COLIBRI** (4.4, 29 reseñas), que es el
+  Foro Colibrí al que enlaza `/mas`.
+
+Contenido redactado para la ficha: [contenido/gbp-ficha.md](contenido/gbp-ficha.md).
+
+---
+
 ## Preferencias de trabajo
 
 - **Idioma:** todo el contenido y los entregables en español de México.

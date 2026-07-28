@@ -62,13 +62,17 @@ const schemaGraph = {
       "image": siteUrl + "/img/Fondo3.jpg",
       "telephone": "+52-55-1238-8782",
       "email": "contacto@ante.photo",
+      "alternateName": "ANTE | Estudio Fotográfico",
       "address": {
         "@type": "PostalAddress",
-        "streetAddress": "Av. del Convento",
+        "streetAddress": "Av. del Convento 34, San Diego Churubusco",
         "addressLocality": "Coyoacán",
         "addressRegion": "Ciudad de México",
+        "postalCode": "04120",
         "addressCountry": "MX",
       },
+      "geo": { "@type": "GeoCoordinates", "latitude": 19.3530727, "longitude": -99.1488112 },
+      "hasMap": "https://www.google.com/maps/place/ANTE+%7C+Estudio+Fotogr%C3%A1fico",
       "areaServed": { "@type": "City", "name": "Ciudad de México" },
       "priceRange": "$$",
       "openingHoursSpecification": [{
@@ -104,9 +108,9 @@ const schemaGraph = {
   <meta name="keywords" content="fotografía profesional, retratos minimalistas, estudio fotográfico CDMX, retratos corporativos, fotografía artística, sesión de fotos profesional">
   <meta name="author" content="ANTE Estudio Fotográfico">
   <meta name="geo.region" content="MX-CMX">
-  <meta name="geo.placename" content="Ciudad de México">
-  <meta name="geo.position" content="19.4326;-99.1332">
-  <meta name="ICBM" content="19.4326, -99.1332">
+  <meta name="geo.placename" content="Coyoacán, Ciudad de México">
+  <meta name="geo.position" content="19.3530727;-99.1488112">
+  <meta name="ICBM" content="19.3530727, -99.1488112">
   <link rel="canonical" href={canonical}>
 
   <meta property="og:title" content={title}>
@@ -164,7 +168,7 @@ const schemaGraph = {
       <a href="mailto:contacto@ante.photo" itemprop="email">contacto@ante.photo</a><br>
       <a href="tel:+525512388782" itemprop="telephone" class="footer-tel">+52 55 1238 8782</a><br>
       <span itemprop="address" itemscope itemtype="https://schema.org/PostalAddress">
-        <span itemprop="streetAddress">Av. del Convento</span> · <span itemprop="addressLocality">Coyoacán</span>, <span itemprop="addressRegion">Ciudad de México</span>
+        <span itemprop="streetAddress">Av. del Convento 34</span>, San Diego Churubusco · <span itemprop="addressLocality">Coyoacán</span> <span itemprop="postalCode">04120</span>, <span itemprop="addressRegion">Ciudad de México</span>
       </span>
     </address>
   </footer>
