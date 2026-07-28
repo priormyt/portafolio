@@ -1,0 +1,5 @@
+# Los exports de Search Console son datos, no código. El repo es público:
+# se quedan en local y no se versionan.
+gsc/*.csv
+gsc/*.xlsx
+gsc/*.zip
