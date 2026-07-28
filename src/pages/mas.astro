@@ -5,11 +5,8 @@ import Layout from '../layouts/Layout.astro';
   title="Foro Colibrí · Renta de Foro en CDMX | ANTE Estudio"
   description="ANTE Estudio también ofrece renta de foro fotográfico en Ciudad de México a través de Foro Colibrí. Espacio profesional para sesiones, producciones y eventos."
 >
-<!-- VIDEO BG -->
-<video class="video-bg" id="bgVideo" autoplay muted loop playsinline preload="metadata" poster="/img/Fondo4.png">
-  <source src="/Dawn Timelapse Video.mp4" type="video/mp4">
-</video>
-<img id="bgFallback" src="/img/Fondo4.png" alt="Fondo ANTE Estudio" style="position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:cover;z-index:-1;filter:brightness(0.55) contrast(1.05);display:none;">
+<!-- FONDO -->
+<img class="video-bg" src="/img/Fondo4.jpg" alt="" width="1920" height="1188" fetchpriority="high" decoding="async">
 <div class="video-overlay"></div>
 
 <div class="center-wrap" aria-label="Renta de foro fotográfico en CDMX">
@@ -260,40 +257,6 @@ import Layout from '../layouts/Layout.astro';
       ring.style.borderColor = 'var(--accent)';
     });
   });
-
-  // Video fallback
-  (function() {
-    const video = document.getElementById('bgVideo');
-    const fallback = document.getElementById('bgFallback');
-    const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-    const isSaveData = conn && conn.saveData;
-    const isLowNetwork = conn && (['slow-2g','2g'].includes(conn.effectiveType || ''));
-
-    function showFallback() {
-      if (video) { video.pause(); video.style.display = 'none'; }
-      if (fallback) fallback.style.display = 'block';
-    }
-
-    if (!video) return;
-    if (isSaveData || isLowNetwork) { showFallback(); return; }
-
-    video.muted = true;
-    video.playsInline = true;
-
-    const tryPlay = () => {
-      const p = video.play && video.play();
-      if (p && typeof p.then === 'function') p.catch(() => {});
-    };
-    tryPlay();
-
-    setTimeout(() => {
-      if (video.paused || video.readyState < 2) showFallback();
-    }, 1500);
-
-    document.addEventListener('visibilitychange', () => {
-      if (!document.hidden && fallback && fallback.style.display !== 'block') tryPlay();
-    });
-  })();
 
 })();
 </script>
