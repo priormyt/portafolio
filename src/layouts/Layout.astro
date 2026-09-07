@@ -8,6 +8,10 @@ export interface Props {
   canonical?: string;
   ogImage?: string;
   noindex?: boolean;
+  /** Por defecto sigue a `noindex`: lo que no se indexa tampoco se mide.
+      Las páginas privadas (galerías de cliente, admin) llevan el código y el
+      nombre del cliente en URL y título, y eso no tiene por qué salir del sitio. */
+  analytics?: boolean;
 }
 
 const {
@@ -16,6 +20,7 @@ const {
   canonical: canonicalProp,
   ogImage = "https://www.ante.photo/img/estudio-fotografico-ante-coyoacan.jpg",
   noindex = false,
+  analytics = !noindex,
 } = Astro.props;
 
 const siteUrl = "https://www.ante.photo";
@@ -154,13 +159,17 @@ const schemaGraph = {
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;1,300;1,400&family=Gelasio:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
   
-  <script is:inline async src="https://www.googletagmanager.com/gtag/js?id=G-REE0NDQ50Y"></script>
-  <script is:inline>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-REE0NDQ50Y');
-  </script>
+  {analytics && (
+    <>
+      <script is:inline async src="https://www.googletagmanager.com/gtag/js?id=G-REE0NDQ50Y"></script>
+      <script is:inline>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-REE0NDQ50Y');
+      </script>
+    </>
+  )}
 </head>
 <body>
   <div class="cursor" id="cursor"></div>

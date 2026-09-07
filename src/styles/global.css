@@ -25,6 +25,10 @@
       --pad-section: 7rem;
       --pad-inline: 4rem;
       --gap-header: 3.5rem;
+      /* Alto de la barra fija: 2rem de padding arriba y abajo + los 44px
+         del logo. Lo consume cualquier cosa sticky que deba quedar por
+         debajo del nav. El bloque móvil lo redefine con su padding. */
+      --nav-h: calc(4rem + 44px);
     }
 
     @media (max-width: 768px) {

@@ -44,6 +44,17 @@ for (const f of fotosFinales) {
 }
 
 const fotosParaSeleccion = fotosPreview.length > 0 ? fotosPreview : fotosFinalesPrincipales;
+
+const WHATSAPP = '525512388782';
+const waPagoUrl = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(
+  `Hola, mi código es ${sesion.codigo} y quiero los datos de pago.`,
+)}`;
+const waArchivadaUrl = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(
+  `Hola, mi galería de ANTE fue archivada y me gustaría reactivarla. Mi código es ${sesion.codigo}`,
+)}`;
+const mailArchivadaUrl = `mailto:contacto@ante.photo?subject=${encodeURIComponent(
+  `Reactivar galería ${sesion.codigo}`,
+)}`;
 ---
 <Layout
   title={`Galería · ${sesion.nombre_cliente} | ANTE`}
@@ -164,7 +175,11 @@ const fotosParaSeleccion = fotosPreview.length > 0 ? fotosPreview : fotosFinales
                   draggable="false"
                   data-full={fotoUrl(env, foto.r2_key)}
                 />
-                <span class="watermark-corner">A</span>
+                <button
+                  class="galeria-zoom"
+                  type="button"
+                  aria-label={`Ver la foto ${i + 1} en grande`}
+                >⤢</button>
                 <span class="check-mark" aria-hidden="true">✓</span>
               </div>
               <figcaption class="galeria-caption">
@@ -211,7 +226,7 @@ const fotosParaSeleccion = fotosPreview.length > 0 ? fotosPreview : fotosFinales
             <p class="pago-instrucciones-label">Cómo pagar</p>
             <p>
               Manda el monto por transferencia, depósito o Mercado Pago. Si no tienes los datos,
-              <a href="https://wa.me/525512388782?text=Hola%2C%20mi%20c%C3%B3digo%20es%20{sesion.codigo}%20y%20quiero%20los%20datos%20de%20pago." target="_blank" rel="noopener">pídenoslos por WhatsApp</a>.
+              <a href={waPagoUrl} target="_blank" rel="noopener">pídenoslos por WhatsApp</a>.
             </p>
             <p>Cuando hagas la transferencia, sube aquí el comprobante (foto o PDF).</p>
           </div>
@@ -238,10 +253,10 @@ const fotosParaSeleccion = fotosPreview.length > 0 ? fotosPreview : fotosFinales
           Si necesitas que reactivemos tu galería, escríbenos por WhatsApp o correo y lo arreglamos.
         </p>
         <div class="archivada-actions">
-          <a class="btn-archivada" href="https://wa.me/525512388782?text=Hola%2C%20mi%20galer%C3%ADa%20de%20ANTE%20fue%20archivada%20y%20me%20gustar%C3%ADa%20reactivarla.%20Mi%20c%C3%B3digo%20es%20{sesion.codigo}" target="_blank" rel="noopener">
+          <a class="btn-archivada" href={waArchivadaUrl} target="_blank" rel="noopener">
             Escribir por WhatsApp
           </a>
-          <a class="btn-archivada btn-archivada-ghost" href="mailto:contacto@ante.photo?subject=Reactivar galería {sesion.codigo}">
+          <a class="btn-archivada btn-archivada-ghost" href={mailArchivadaUrl}>
             Escribir por correo
           </a>
         </div>
@@ -280,7 +295,6 @@ const fotosParaSeleccion = fotosPreview.length > 0 ? fotosPreview : fotosFinales
                       loading="lazy"
                       draggable="false"
                     />
-                    <span class="watermark-corner">A</span>
                   </div>
                 </figure>
               ))}
@@ -290,7 +304,14 @@ const fotosParaSeleccion = fotosPreview.length > 0 ? fotosPreview : fotosFinales
     )}
   </main>
 
-  <div id="lightbox" class="lightbox" hidden>
+  <div
+    id="lightbox"
+    class="lightbox"
+    hidden
+    role="dialog"
+    aria-modal="true"
+    aria-label="Foto ampliada"
+  >
     <button class="lightbox-close" aria-label="Cerrar">×</button>
     <button class="lightbox-prev" aria-label="Anterior">‹</button>
     <img id="lightboxImg" src="" alt="" />
@@ -423,20 +444,32 @@ const fotosParaSeleccion = fotosPreview.length > 0 ? fotosPreview : fotosFinales
     }
     .galeria-caption-alt { color: var(--accent); }
 
-    /* WATERMARK (selección) */
-    .watermark-corner {
-      position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      font-family: 'Marion', Georgia, serif;
-      font-size: 4rem;
-      color: rgba(245,242,237,0.35);
-      pointer-events: none;
-      user-select: none;
-    }
-
     /* SELECCIÓN */
     .galeria-item-selectable .galeria-frame { cursor: pointer; }
+    /* En selección el click selecciona, no amplía: la lupa dice zoom-in y
+       mentía. El zoom vive en su propio botón. */
+    .galeria-item-selectable .galeria-frame img { cursor: pointer; }
+    .galeria-zoom {
+      position: absolute;
+      top: 0.7rem;
+      left: 0.7rem;
+      width: 2rem; height: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(13,13,11,0.65);
+      color: var(--paper);
+      border: 0.5px solid rgba(245,242,237,0.3);
+      font-family: var(--f-mono);
+      font-size: 0.85rem;
+      line-height: 1;
+      opacity: 0;
+      cursor: pointer;
+      transition: opacity 0.25s, background 0.2s;
+    }
+    .galeria-item:hover .galeria-zoom,
+    .galeria-zoom:focus-visible { opacity: 1; }
+    .galeria-zoom:hover { background: var(--paper); color: var(--ink); }
     .galeria-item-selectable .check-mark {
       position: absolute;
       top: 0.7rem;
@@ -462,7 +495,9 @@ const fotosParaSeleccion = fotosPreview.length > 0 ? fotosPreview : fotosFinales
     /* CONTADOR (selección) */
     .seleccion-status {
       position: sticky;
-      top: 1rem;
+      /* El nav es fixed y transparente: con top:1rem esta barra se le metía
+         debajo al hacer scroll y los enlaces caían encima del contador. */
+      top: calc(var(--nav-h) + 0.5rem);
       z-index: 50;
       background: var(--ink);
       padding: 1.25rem 1.5rem;
@@ -506,7 +541,7 @@ const fotosParaSeleccion = fotosPreview.length > 0 ? fotosPreview : fotosFinales
       font-size: var(--fs-label);
       letter-spacing: var(--ls-wide);
       text-transform: uppercase;
-      cursor: none;
+      cursor: pointer;
       transition: background 0.2s, opacity 0.2s;
     }
     .btn-confirmar:hover { background: var(--accent); }
@@ -657,7 +692,7 @@ const fotosParaSeleccion = fotosPreview.length > 0 ? fotosPreview : fotosFinales
       letter-spacing: var(--ls-wide);
       text-transform: uppercase;
       text-decoration: none;
-      cursor: none;
+      cursor: pointer;
       transition: background 0.2s;
     }
     .btn-archivada:hover { background: var(--accent); }
@@ -725,7 +760,7 @@ const fotosParaSeleccion = fotosPreview.length > 0 ? fotosPreview : fotosFinales
       font-size: 1.6rem;
       width: 3rem; height: 3rem;
       display: flex; align-items: center; justify-content: center;
-      cursor: none;
+      cursor: pointer;
       transition: background 0.2s, border-color 0.2s;
     }
     .lightbox-close:hover, .lightbox-prev:hover, .lightbox-next:hover {
@@ -747,13 +782,24 @@ const fotosParaSeleccion = fotosPreview.length > 0 ? fotosPreview : fotosFinales
       text-transform: uppercase;
     }
 
+    /* El cursor personalizado solo existe con ratón fino (global.css lo scopea
+       igual). Sin este media query estos botones se quedaban sin puntero en
+       táctil e híbridos, y también si el JS del cursor fallaba. */
+    @media (hover: hover) and (pointer: fine) {
+      .btn-confirmar,
+      .btn-archivada,
+      .galeria-zoom,
+      .lightbox-close,
+      .lightbox-prev,
+      .lightbox-next { cursor: none; }
+    }
+
     @media (max-width: 768px) {
       .cliente-main { padding: 6.5rem 1.2rem 3rem; }
       .galeria-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
       .seleccion-status { padding: 1rem 1.1rem; }
       .contador-bar { font-size: var(--fs-micro); }
-      .watermark-corner { font-size: 3rem; }
-      .galeria-download { opacity: 1; }
+      .galeria-download, .galeria-zoom { opacity: 1; }
     }
   </style>
 
@@ -763,6 +809,7 @@ const fotosParaSeleccion = fotosPreview.length > 0 ? fotosPreview : fotosFinales
       const lightbox = document.getElementById('lightbox') as HTMLDivElement | null;
       const lbImg = document.getElementById('lightboxImg') as HTMLImageElement | null;
       const lbCounter = document.getElementById('lightboxCounter') as HTMLDivElement | null;
+      const lbClose = document.querySelector<HTMLButtonElement>('.lightbox-close');
       const lbPrev = document.querySelector<HTMLButtonElement>('.lightbox-prev');
       const lbNext = document.querySelector<HTMLButtonElement>('.lightbox-next');
       // Solo las imágenes "principales" se navegan con flechas/contador.
@@ -781,8 +828,20 @@ const fotosParaSeleccion = fotosPreview.length > 0 ? fotosPreview : fotosFinales
         if (lbNext) lbNext.style.display = visible ? '' : 'none';
       };
 
-      const openLightbox = (i: number) => {
+      let lastFocused: HTMLElement | null = null;
+
+      // Solo al entrar: pasar de foto con las flechas no debe robarle el foco
+      // al botón que estás pulsando ni reapilar el scroll-lock.
+      const enterLightbox = () => {
+        lastFocused = document.activeElement as HTMLElement | null;
+        // Mismo bloqueo que usa el menú móvil: sin esto la página seguía
+        // scrolleando detrás de la foto ampliada.
+        document.documentElement.toggleAttribute('data-scroll-lock', true);
+      };
+
+      const openLightbox = (i: number, entering = true) => {
         if (!lightbox || !lbImg || !lbCounter) return;
+        if (entering) enterLightbox();
         inAltMode = false;
         currentIdx = i;
         lbImg.src = items[i].dataset.full ?? items[i].src;
@@ -790,24 +849,44 @@ const fotosParaSeleccion = fotosPreview.length > 0 ? fotosPreview : fotosFinales
         lbCounter.textContent = `${String(i + 1).padStart(2, '0')} / ${String(items.length).padStart(2, '0')}`;
         setNavVisible(items.length > 1);
         lightbox.hidden = false;
+        if (entering) lbClose?.focus();
       };
       const openAlt = (img: HTMLImageElement) => {
         if (!lightbox || !lbImg || !lbCounter) return;
+        enterLightbox();
         inAltMode = true;
         lbImg.src = img.dataset.full ?? img.src;
         lbImg.alt = img.alt;
         lbCounter.textContent = 'Versión alterna';
         setNavVisible(false);
         lightbox.hidden = false;
+        lbClose?.focus();
       };
-      const closeLightbox = () => { if (lightbox) lightbox.hidden = true; };
+      const closeLightbox = () => {
+        if (!lightbox || lightbox.hidden) return;
+        lightbox.hidden = true;
+        document.documentElement.toggleAttribute('data-scroll-lock', false);
+        // Sin esto el foco cae al principio del documento al cerrar.
+        lastFocused?.focus();
+        lastFocused = null;
+      };
       const nav = (delta: number) => {
         if (inAltMode || items.length === 0) return;
-        openLightbox((currentIdx + delta + items.length) % items.length);
+        openLightbox((currentIdx + delta + items.length) % items.length, false);
       };
 
       items.forEach((img, i) => {
-        img.addEventListener('click', () => openLightbox(i));
+        // En selección el click en la foto la elige; abrir además el lightbox
+        // hacía que ampliar una foto la seleccionara sin querer.
+        const selectable = img.closest('.galeria-item-selectable');
+        if (selectable) {
+          selectable.querySelector('.galeria-zoom')?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openLightbox(i);
+          });
+        } else {
+          img.addEventListener('click', () => openLightbox(i));
+        }
       });
       altItems.forEach((img) => {
         img.addEventListener('click', (e) => {
@@ -816,7 +895,7 @@ const fotosParaSeleccion = fotosPreview.length > 0 ? fotosPreview : fotosFinales
         });
       });
 
-      document.querySelector('.lightbox-close')?.addEventListener('click', closeLightbox);
+      lbClose?.addEventListener('click', closeLightbox);
       document.querySelector('.lightbox-prev')?.addEventListener('click', () => nav(-1));
       document.querySelector('.lightbox-next')?.addEventListener('click', () => nav(1));
       document.addEventListener('keydown', (e) => {
@@ -824,91 +903,43 @@ const fotosParaSeleccion = fotosPreview.length > 0 ? fotosPreview : fotosFinales
         if (e.key === 'Escape') closeLightbox();
         if (e.key === 'ArrowLeft') nav(-1);
         if (e.key === 'ArrowRight') nav(1);
+        if (e.key !== 'Tab') return;
+        // Trampa de foco: es un diálogo modal, tabular fuera te dejaba
+        // recorriendo la galería de atrás sin poder ver dónde estabas.
+        const focusables = [lbClose, lbPrev, lbNext].filter(
+          (el): el is HTMLButtonElement => !!el && el.offsetParent !== null,
+        );
+        if (focusables.length === 0) return;
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        const dentro = focusables.includes(document.activeElement as HTMLButtonElement);
+        if (e.shiftKey && (!dentro || document.activeElement === first)) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && (!dentro || document.activeElement === last)) {
+          e.preventDefault();
+          first.focus();
+        }
       });
       lightbox?.addEventListener('click', (e) => {
         if (e.target === lightbox) closeLightbox();
       });
 
-      // ─── Selección ───────────────────────────────────
-      const seccion = document.querySelector<HTMLElement>('.estado-seleccion');
-      if (!seccion) return;
-
-      const sesionId = seccion.dataset.sesionId!;
-      const limite = parseInt(seccion.dataset.limite ?? '0', 10);
-      const precioExtra = parseFloat(seccion.dataset.precioExtra ?? '0');
-
-      const contadorEl = document.getElementById('contadorActual')!;
-      const extrasInfo = document.getElementById('extrasInfo')!;
-      const extrasCount = document.getElementById('extrasCount')!;
-      const extrasMonto = document.getElementById('extrasMonto')!;
-      const btnConfirmar = document.getElementById('btnConfirmar') as HTMLButtonElement;
-
-      const refresh = () => {
-        const seleccionadas = document.querySelectorAll('.galeria-item-selectable.selected').length;
-        contadorEl.textContent = String(seleccionadas);
-
-        const extras = Math.max(0, seleccionadas - limite);
-        const monto = extras * precioExtra;
-        extrasCount.textContent = String(extras);
-        extrasMonto.textContent = String(monto);
-        extrasInfo.style.display = extras > 0 ? '' : 'none';
-
-        btnConfirmar.disabled = seleccionadas === 0;
-        btnConfirmar.textContent = extras > 0
-          ? `Confirmar selección y pagar $${monto} MXN`
-          : 'Confirmar selección';
-      };
-
-      document.querySelectorAll<HTMLElement>('.galeria-item-selectable').forEach((item) => {
-        const fotoId = item.dataset.fotoId!;
-        const frame = item.querySelector('.galeria-frame');
-        // Click en la foto (excluyendo el download): toggle selección
-        frame?.addEventListener('click', async (e) => {
-          // Si dieron click en la imagen para zoom, abrir lightbox en vez de seleccionar
-          // Mantenemos seleccionar como acción por click en frame; el zoom se hace con dblclick
-          e.preventDefault();
-          item.classList.toggle('selected');
-          refresh();
-
-          try {
-            const res = await fetch('/api/seleccionar', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ sesionId, fotoId }),
-            });
-            if (!res.ok) throw new Error('Error al guardar');
-          } catch (err) {
-            // Revertir UI
-            item.classList.toggle('selected');
-            refresh();
-            console.error(err);
-            alert('No se pudo guardar la selección. Intenta de nuevo.');
-          }
-        });
-      });
-
-      btnConfirmar?.addEventListener('click', async () => {
-        if (!confirm('¿Confirmar tu selección? Después de esto ya no podrás cambiarla.')) return;
-        btnConfirmar.disabled = true;
-        btnConfirmar.textContent = 'Procesando...';
-        try {
-          const res = await fetch('/api/confirmar', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ sesionId }),
-          });
-          if (!res.ok) throw new Error('Error al confirmar');
-          const json = await res.json() as { redirect?: string };
-          window.location.href = json.redirect ?? window.location.href;
-        } catch (err) {
-          console.error(err);
-          alert('No se pudo confirmar. Intenta de nuevo.');
-          btnConfirmar.disabled = false;
-          refresh();
-        }
-      });
-
-      refresh();
+      // Swipe horizontal: en táctil las flechas quedan pegadas al borde y
+      // encima de la foto, así que pasar de imagen era incómodo.
+      let touchX = 0;
+      let touchY = 0;
+      lightbox?.addEventListener('touchstart', (e) => {
+        touchX = e.changedTouches[0].clientX;
+        touchY = e.changedTouches[0].clientY;
+      }, { passive: true });
+      lightbox?.addEventListener('touchend', (e) => {
+        const dx = e.changedTouches[0].clientX - touchX;
+        const dy = e.changedTouches[0].clientY - touchY;
+        // Solo gestos claramente horizontales, para no robarle el toque a un
+        // scroll vertical ni a un tap en el fondo para cerrar.
+        if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) nav(dx < 0 ? 1 : -1);
+      }, { passive: true });
 
       // ─── Subir comprobante (cliente, pago_pendiente) ────
       const compSection = document.querySelector<HTMLElement>('.estado-pago, .estado-pendiente[data-codigo]');
@@ -966,6 +997,85 @@ const fotosParaSeleccion = fotosPreview.length > 0 ? fotosPreview : fotosFinales
           if (f) subirComprobante(f);
         });
       }
+      // ─── Selección ───────────────────────────────────
+      const seccion = document.querySelector<HTMLElement>('.estado-seleccion');
+      if (!seccion) return;
+
+      const sesionId = seccion.dataset.sesionId!;
+      const limite = parseInt(seccion.dataset.limite ?? '0', 10);
+      const precioExtra = parseFloat(seccion.dataset.precioExtra ?? '0');
+
+      const contadorEl = document.getElementById('contadorActual')!;
+      const extrasInfo = document.getElementById('extrasInfo')!;
+      const extrasCount = document.getElementById('extrasCount')!;
+      const extrasMonto = document.getElementById('extrasMonto')!;
+      const btnConfirmar = document.getElementById('btnConfirmar') as HTMLButtonElement;
+
+      const refresh = () => {
+        const seleccionadas = document.querySelectorAll('.galeria-item-selectable.selected').length;
+        contadorEl.textContent = String(seleccionadas);
+
+        const extras = Math.max(0, seleccionadas - limite);
+        const monto = extras * precioExtra;
+        extrasCount.textContent = String(extras);
+        extrasMonto.textContent = String(monto);
+        extrasInfo.style.display = extras > 0 ? '' : 'none';
+
+        btnConfirmar.disabled = seleccionadas === 0;
+        btnConfirmar.textContent = extras > 0
+          ? `Confirmar selección y pagar $${monto} MXN`
+          : 'Confirmar selección';
+      };
+
+      document.querySelectorAll<HTMLElement>('.galeria-item-selectable').forEach((item) => {
+        const fotoId = item.dataset.fotoId!;
+        const frame = item.querySelector('.galeria-frame');
+        // Click en la foto (excluyendo el download): toggle selección
+        frame?.addEventListener('click', async (e) => {
+          e.preventDefault();
+          item.classList.toggle('selected');
+          refresh();
+
+          try {
+            const res = await fetch('/api/seleccionar', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ sesionId, fotoId }),
+            });
+            if (!res.ok) throw new Error('Error al guardar');
+          } catch (err) {
+            // Revertir UI
+            item.classList.toggle('selected');
+            refresh();
+            console.error(err);
+            alert('No se pudo guardar la selección. Intenta de nuevo.');
+          }
+        });
+      });
+
+      btnConfirmar?.addEventListener('click', async () => {
+        if (!confirm('¿Confirmar tu selección? Después de esto ya no podrás cambiarla.')) return;
+        btnConfirmar.disabled = true;
+        btnConfirmar.textContent = 'Procesando...';
+        try {
+          const res = await fetch('/api/confirmar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sesionId }),
+          });
+          if (!res.ok) throw new Error('Error al confirmar');
+          const json = await res.json() as { redirect?: string };
+          window.location.href = json.redirect ?? window.location.href;
+        } catch (err) {
+          console.error(err);
+          alert('No se pudo confirmar. Intenta de nuevo.');
+          btnConfirmar.disabled = false;
+          refresh();
+        }
+      });
+
+      refresh();
+
     })();
   </script>
 </Layout>
