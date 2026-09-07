@@ -35,6 +35,26 @@ const pageNames: Record<string, string> = {
 };
 const currentPageName = pageNames[rawPath] ?? 'Página';
 
+// El orden del array es el de escritorio. En móvil el panel reordena por CSS
+// (`order`) según `kind`, así que mover algo aquí solo afecta a la barra ancha.
+const navKinds = ['main', 'cta', 'util'];
+const navSource = [
+  { href: '/galeria', label: 'Galería', kind: 'main' },
+  { href: '/fotografia-corporativa', label: 'Corporativo', kind: 'main' },
+  { href: '/nosotros', label: 'Nosotros', kind: 'main' },
+  { href: '/agendar', label: 'Agendar', kind: 'cta' },
+  { href: '/contacto', label: 'Contacto', kind: 'main' },
+  { href: '/clientes', label: 'Clientes', kind: 'util' },
+  { href: '/mas', label: 'Más', kind: 'util' },
+];
+// El panel móvil reordena por `order` en CSS, así que el índice del DOM no
+// sirve para escalonar la entrada: haría animar Agendar antes que Contacto
+// cuando aparece debajo. Se precalcula la posición que tendrá en pantalla.
+const navOrder = [...navSource].sort(
+  (a, b) => navKinds.indexOf(a.kind) - navKinds.indexOf(b.kind)
+);
+const navItems = navSource.map((item) => ({ ...item, i: navOrder.indexOf(item) }));
+
 const breadcrumbItems = rawPath === '/'
   ? [{ "@type": "ListItem", "position": 1, "name": "Inicio", "item": siteUrl + '/' }]
   : [
@@ -154,20 +174,27 @@ const schemaGraph = {
         type="button"
         id="navToggle"
         aria-expanded="false"
-        aria-controls="navLinks"
+        aria-controls="navPanel"
         aria-label="Abrir menú"
       >
         <span></span><span></span><span></span>
       </button>
-      <ul class="nav-links" id="navLinks">
-        <li><a href="/galeria">Galería</a></li>
-        <li><a href="/fotografia-corporativa">Corporativo</a></li>
-        <li><a href="/nosotros">Nosotros</a></li>
-        <li><a href="/agendar">Agendar</a></li>
-        <li><a href="/contacto">Contacto</a></li>
-        <li><a href="/clientes">Clientes</a></li>
-        <li><a href="/mas">Más</a></li>
-      </ul>
+      <div class="nav-panel" id="navPanel">
+        <ul class="nav-links">
+          {navItems.map((item) => (
+            <li class={`nav-item nav-item--${item.kind}`} style={`--i:${item.i}`}>
+              <a href={item.href} aria-current={rawPath === item.href ? 'page' : undefined}>{item.label}</a>
+            </li>
+          ))}
+        </ul>
+        {/* Pie del panel: solo visible en móvil, donde el panel llega hasta abajo
+            y quedaría un hueco muerto. */}
+        <div class="nav-panel-foot">
+          <a href="mailto:contacto@ante.photo">contacto@ante.photo</a>
+          <a href="tel:+525512388782">+52 55 1238 8782</a>
+          <a href="https://www.instagram.com/ante.estudio" target="_blank" rel="noopener">Instagram</a>
+        </div>
+      </div>
     </nav>
   </header>
 
@@ -190,26 +217,54 @@ const schemaGraph = {
   // Menú móvil colapsable
   (function () {
     const toggle = document.getElementById('navToggle');
-    const links = document.getElementById('navLinks');
-    if (!toggle || !links) return;
+    const panel = document.getElementById('navPanel');
+    if (!toggle || !panel) return;
+
+    const isOpen = () => document.body.hasAttribute('data-nav-open');
 
     const setOpen = (open) => {
+      if (open === isOpen()) return;
       document.body.toggleAttribute('data-nav-open', open);
       toggle.setAttribute('aria-expanded', String(open));
       toggle.setAttribute('aria-label', open ? 'Cerrar menú' : 'Abrir menú');
+      // El panel cubre la pantalla completa: si el body sigue scrolleando, al
+      // cerrar apareces en otro punto de la página del que dejaste.
+      document.documentElement.toggleAttribute('data-scroll-lock', open);
+      if (open) {
+        // Leer offsetHeight fuerza el recálculo de estilo pendiente. Sin esto
+        // el panel sigue siendo `visibility: hidden` para el motor y focus()
+        // no hace nada (un rAF tampoco basta: corre antes del recálculo).
+        void panel.offsetHeight;
+        // El primer enlace, no el panel: así el lector de pantalla anuncia un
+        // destino y no un contenedor vacío.
+        panel.querySelector('a')?.focus();
+      } else {
+        // Sin esto el foco cae al principio del documento al cerrar con Escape.
+        toggle.focus();
+      }
     };
 
-    toggle.addEventListener('click', () => {
-      setOpen(!document.body.hasAttribute('data-nav-open'));
-    });
+    toggle.addEventListener('click', () => setOpen(!isOpen()));
 
     // Los anclas dentro de la misma página no navegan, así que hay que cerrar a mano.
-    links.addEventListener('click', (e) => {
+    panel.addEventListener('click', (e) => {
       if (e.target.closest('a')) setOpen(false);
     });
 
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') setOpen(false);
+      if (!isOpen()) return;
+      if (e.key === 'Escape') { setOpen(false); return; }
+      if (e.key !== 'Tab') return;
+      // Trampa de foco: el panel tapa la página, así que tabular hacia lo de
+      // atrás deja al teclado navegando algo que no se ve.
+      const focusables = [toggle, ...panel.querySelectorAll('a')];
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault(); last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault(); first.focus();
+      }
     });
 
     // Si se agranda la ventana con el menú abierto, el panel quedaría colgando.
