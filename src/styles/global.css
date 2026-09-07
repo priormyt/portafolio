@@ -32,6 +32,9 @@
         --pad-section: 4rem;
         --pad-inline: 1.5rem;
         --gap-header: 2rem;
+        /* Alto de la barra: 1.5rem de padding arriba y abajo + los 44px del
+           botón. El panel lo usa para no empezar debajo del logo. */
+        --nav-h: calc(3rem + 44px);
       }
     }
 
@@ -46,6 +49,10 @@
       font-weight: 300;
       overflow-x: hidden;
     }
+
+    /* Con el menú abierto el panel tapa la pantalla; si el body sigue
+       scrolleando, al cerrar apareces en otro punto del que dejaste. */
+    html[data-scroll-lock], html[data-scroll-lock] body { overflow: hidden; }
 
     /* Anillo de foco: no había ninguno declarado y sobre este fondo los enlaces
        no llevan subrayado, así que quien navega con teclado se quedaba sin
@@ -133,7 +140,10 @@
       text-transform: uppercase;
       transition: color 0.3s;
     }
-    .nav-links a:hover { color: var(--paper); }
+    .nav-links a:hover,
+    .nav-links a[aria-current="page"] { color: var(--paper); }
+    /* El pie del panel solo tiene sentido cuando el panel ocupa la pantalla. */
+    .nav-panel-foot { display: none; }
 
     /* Botón hamburguesa: solo existe en móvil, ver el bloque responsive */
     .nav-toggle {
@@ -1119,35 +1129,146 @@
 
     /* RESPONSIVE */
     @media (max-width: 768px) {
-      nav {
+      /* Especificidad `header nav` a propósito en todo este bloque: varias
+         páginas redefinen `nav` y `.nav-links` en su propio <style> y, al ir
+         después en el documento, ganaban por orden de fuente. Fijar la altura
+         de la barra aquí es lo que permite que --nav-h sea de fiar. */
+      header nav {
         align-items: center;
-        padding: 1.35rem 1.5rem;
+        padding: 1.5rem 1.5rem;
       }
-      /* El menú se colapsa detrás del botón. Especificidad alta a propósito:
-         varias páginas redefinen .nav-links en su propio bloque de estilos. */
       .nav-toggle { display: flex; }
-      header nav .nav-links {
-        display: none;
-        position: absolute;
-        top: 100%;
-        left: 0;
-        right: 0;
+      /* Logo y botón por encima del panel, que es fixed y si no los taparía. */
+      .nav-logo, .nav-toggle { position: relative; z-index: 1; }
+
+      /* PANEL MÓVIL — pantalla completa.
+         Antes era un desplegable de altura automática: se cortaba a media
+         pantalla y, con fondo al 97%, el hero se transparentaba detrás de los
+         últimos enlaces. */
+      header nav .nav-panel {
+        position: fixed;
+        top: 0; left: 0; right: 0;
+        height: 100dvh;
+        display: flex;
         flex-direction: column;
-        gap: 0;
-        padding: 0 1.5rem 1rem;
-        background: rgba(13,13,11,0.97);
-        border-bottom: 0.5px solid rgba(245,242,237,0.1);
+        padding: calc(var(--nav-h) + 2.5rem) 1.5rem 2rem;
+        background: var(--ink);
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        /* `visibility` en vez de `display` para poder animar la entrada, y
+           porque también saca los enlaces del orden de tabulación. */
+        visibility: hidden;
+        opacity: 0;
+        /* Asimétrica a propósito. Al abrir, `visibility` salta a visible en el
+           frame 0 —si se interpola, el panel sigue siendo hidden para el motor
+           y el focus() del script no engancha—; al cerrar espera a que termine
+           el fundido para no cortarlo de golpe. */
+        transition: opacity 0.4s ease, visibility 0s linear 0.4s;
       }
-      body[data-nav-open] header nav .nav-links { display: flex; }
-      header nav .nav-links li { width: 100%; }
+      body[data-nav-open] header nav .nav-panel {
+        visibility: visible;
+        opacity: 1;
+        transition: opacity 0.4s ease, visibility 0s;
+      }
+
+      header nav .nav-links {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+        list-style: none;
+      }
+      /* El DOM sigue el orden de escritorio; aquí se reagrupa en navegar →
+         reservar → utilidades, que es como se usa el menú en el teléfono. */
+      .nav-item--main { order: 1; }
+      .nav-item--cta  { order: 2; }
+      .nav-item--util { order: 3; }
+
       header nav .nav-links a {
         display: block;
-        padding: 1rem 0;
-        font-size: 0.6rem;
-        letter-spacing: 0.28em;
-        border-bottom: 0.5px solid rgba(245,242,237,0.07);
+        padding: 0.85rem 0;
+        font-family: var(--f-serif);
+        font-size: 1.7rem;
+        font-weight: 300;
+        letter-spacing: 0;
+        text-transform: none;
+        color: var(--mist);
+        transition: color 0.3s;
       }
-      header nav .nav-links li:last-child a { border-bottom: 0; }
+      header nav .nav-links a[aria-current="page"] { color: var(--paper); }
+      /* Marca la página actual sin depender solo del color. */
+      header nav .nav-links a[aria-current="page"]::before {
+        content: '';
+        display: inline-block;
+        width: 1.4rem;
+        height: 1px;
+        margin-right: 0.7rem;
+        vertical-align: middle;
+        background: var(--accent);
+      }
+
+      /* Agendar es la única acción que convierte; en la lista plana pesaba lo
+         mismo que "Más". */
+      .nav-item--cta {
+        margin: 1.5rem 0 2rem;
+      }
+      header nav .nav-links .nav-item--cta a {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1.05rem 1.4rem;
+        border: 0.5px solid rgba(245,242,237,0.35);
+        color: var(--paper);
+      }
+      header nav .nav-links .nav-item--cta a::after {
+        content: '→';
+        color: var(--accent);
+      }
+
+      /* Clientes (portal privado) y Más son utilidades, no destinos primarios. */
+      header nav .nav-links .nav-item--util a {
+        font-family: var(--f-mono);
+        font-size: var(--fs-label);
+        letter-spacing: var(--ls-label);
+        text-transform: uppercase;
+        color: var(--ash);
+        /* 0.95rem para llegar a los 44px de alto táctil con texto de 11px. */
+        padding: 0.95rem 0;
+      }
+
+      header nav .nav-panel-foot {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        /* Empuja el bloque al fondo del panel: a pantalla completa el hueco
+           bajo los enlaces era aire muerto. */
+        margin-top: auto;
+        padding-top: 2.5rem;
+        font-family: var(--f-mono);
+        font-size: var(--fs-label);
+        letter-spacing: 0.1em;
+      }
+      header nav .nav-panel-foot a {
+        /* El correo y el teléfono son enlaces que se tocan: con el interlineado
+           de la fuente sola el blanco medía 24px de alto. */
+        padding: 0.95rem 0;
+        color: var(--ash);
+        text-decoration: none;
+      }
+
+      /* Entrada escalonada, en la misma clave lenta que los .reveal del sitio. */
+      header nav .nav-panel .nav-item,
+      header nav .nav-panel-foot {
+        opacity: 0;
+        transform: translateY(14px);
+      }
+      body[data-nav-open] header nav .nav-panel .nav-item,
+      body[data-nav-open] header nav .nav-panel-foot {
+        opacity: 1;
+        transform: translateY(0);
+        transition: opacity 0.5s ease, transform 0.5s ease;
+        transition-delay: calc(0.06s * var(--i, 7) + 0.08s);
+      }
       /* El padding responsivo vive en los tokens :root. */
       .hero-content { padding: 0 1.5rem 4rem; }
       .hero-scroll { right: 1.5rem; bottom: 2rem; }
@@ -1179,14 +1300,35 @@
       footer { flex-direction: column; gap: 1.5rem; text-align: center; }
       .footer-info { text-align: center; }
     }
-    @media (max-width: 520px) {
-      /* Con el menú colapsado la barra se queda en una sola línea: logo y botón. */
-      nav {
+    @media (max-width: 768px) {
+      /* Con el menú colapsado la barra se queda en una sola línea: logo y botón.
+         El degradado le da fondo al logo sobre el hero, que es claro arriba.
+         Antes esto vivía en un breakpoint de 520px, así que entre 521 y 768 la
+         barra quedaba transparente sobre el panel oscuro: se veía la costura. */
+      header nav {
         flex-direction: row;
-        align-items: center;
         gap: 0.8rem;
-        padding: 1.2rem 1.5rem;
         background: linear-gradient(to bottom, rgba(13,13,11,0.86), rgba(13,13,11,0.18), transparent);
       }
-      body[data-nav-open] nav { background: rgba(13,13,11,0.97); }
+      /* Ya no hace falta oscurecer la barra al abrir: el panel la cubre. */
+      body[data-nav-open] header nav { background: none; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      /* Los selectores repiten `body[data-nav-open]` para igualar la
+         especificidad de las reglas de arriba; sin eso no ganaban y el
+         escalonado seguía corriendo. El panel sigue apareciendo y
+         desapareciendo, pero sin fundido ni desplazamiento. */
+      header nav .nav-panel,
+      body[data-nav-open] header nav .nav-panel {
+        transition: none;
+      }
+      header nav .nav-panel .nav-item,
+      header nav .nav-panel-foot,
+      body[data-nav-open] header nav .nav-panel .nav-item,
+      body[data-nav-open] header nav .nav-panel-foot {
+        opacity: 1;
+        transform: none;
+        transition: none;
+      }
     }
