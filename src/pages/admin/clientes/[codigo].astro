@@ -29,6 +29,11 @@ for (const f of fotosFinales) {
 }
 const diasRestantes = sesion.estado === 'entregada' ? diasParaArchivar(sesion.fecha_entrega) : null;
 
+// Las preview nuevas continúan la numeración en vez de reiniciar en 1: si
+// reiniciaran, chocarían con las que el cliente ya está viendo y le
+// reordenarían la galería a media selección.
+const maxOrdenPreview = fotosPreview.reduce((m, f) => Math.max(m, f.orden ?? 0), 0);
+
 const precioCalculado =
   (paquete?.precio_base ? Number(paquete.precio_base) : 0) +
   (sesion.monto_extras ? Number(sesion.monto_extras) : 0);
@@ -163,6 +168,22 @@ const estadoLabel: Record<string, string> = {
     <section class="admin-block">
       <h2 class="admin-h2">Fotos preview ({fotosPreview.length})</h2>
       <p class="form-hint">Las que el cliente ve para seleccionar. Con marca de agua, baja resolución.</p>
+
+      <div id="previewDropzone" class="dropzone" data-orden-base={maxOrdenPreview}>
+        <p class="dropzone-text">Arrastra aquí más fotos para seleccionar</p>
+        <p class="dropzone-sub">Se procesan a 800px con marca de agua · se añaden al final de la galería</p>
+        <input id="previewFileInput" type="file" accept="image/jpeg,image/png" multiple hidden />
+      </div>
+      <ul id="previewFileList" class="file-list"></ul>
+      <button id="btnSubirPreviews" type="button" class="btn-primary" style="margin-top:1rem;display:none">Subir fotos preview</button>
+      <p id="previewMsg" class="form-msg" aria-live="polite"></p>
+
+      {sesion.estado !== 'seleccion' && fotosPreview.length > 0 && (
+        <p class="form-hint" style="margin-top:0.8rem">
+          Ojo: esta sesión ya no está en "Seleccionando", así que el cliente no
+          podrá elegir las que subas ahora.
+        </p>
+      )}
 
       {fotosPreview.length === 0 ? (
         <p class="empty-block">Sin fotos preview todavía.</p>
@@ -512,6 +533,99 @@ const estadoLabel: Record<string, string> = {
       btnSubir.textContent = 'Subir fotos finales';
       if (fail === 0) setTimeout(() => window.location.reload(), 1200);
     });
+
+    // ─── Subir más fotos preview ──────────────────────────────
+    // En su propio ámbito: el bloque de finales declara `archivos`, `msg` y
+    // `btnSubir` en el nivel superior de este script.
+    (() => {
+      const dropzone = document.getElementById('previewDropzone');
+      const input = document.getElementById('previewFileInput');
+      const lista = document.getElementById('previewFileList');
+      const boton = document.getElementById('btnSubirPreviews');
+      const aviso = document.getElementById('previewMsg');
+      if (!dropzone || !input || !lista || !boton || !aviso) return;
+
+      const ordenBase = parseInt(dropzone.dataset.ordenBase ?? '0', 10) || 0;
+      const cola = [];
+
+      const pintar = () => {
+        lista.innerHTML = '';
+        cola.forEach((f, i) => {
+          const li = document.createElement('li');
+          li.id = `preview-file-${i}`;
+          li.innerHTML = `<span>${f.name} · ${(f.size / 1024 / 1024).toFixed(1)} MB</span><span class="file-status">Pendiente</span>`;
+          lista.appendChild(li);
+        });
+        boton.style.display = cola.length > 0 ? '' : 'none';
+      };
+
+      const estado = (i, txt, cls = '') => {
+        const el = document.querySelector(`#preview-file-${i} .file-status`);
+        if (el) { el.textContent = txt; el.className = `file-status ${cls}`; }
+      };
+
+      const agregar = (files) => {
+        for (const f of files) {
+          if (!f.type.startsWith('image/')) continue;
+          if (cola.some((a) => a.name === f.name && a.size === f.size)) continue;
+          cola.push(f);
+        }
+        pintar();
+      };
+
+      dropzone.addEventListener('click', () => input.click());
+      dropzone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropzone.classList.add('drag-over');
+      });
+      dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
+      dropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('drag-over');
+        agregar(e.dataTransfer?.files ?? []);
+      });
+      input.addEventListener('change', () => agregar(input.files ?? []));
+
+      boton.addEventListener('click', async () => {
+        boton.disabled = true;
+        boton.textContent = 'Subiendo...';
+        aviso.textContent = '';
+        aviso.className = 'form-msg';
+        let ok = 0, fail = 0;
+
+        for (let i = 0; i < cola.length; i++) {
+          const file = cola[i];
+          try {
+            estado(i, 'Procesando...');
+            const blob = await window.imageProcessor.generaPreview(file);
+            estado(i, 'Subiendo...');
+            const fd = new FormData();
+            fd.set('codigo', codigo);
+            fd.set('tipo', 'preview');
+            // Continúa desde el máximo actual para no reordenar la galería.
+            fd.set('orden', String(ordenBase + i + 1));
+            fd.set('file', new File([blob], file.name.replace(/\.[^.]+$/, '') + '.jpg', { type: 'image/jpeg' }));
+            const res = await fetch('/admin/api/upload', { method: 'POST', body: fd });
+            if (!res.ok) {
+              const j = await res.json().catch(() => ({}));
+              throw new Error(j.error || `HTTP ${res.status}`);
+            }
+            estado(i, 'Listo', 'ok');
+            ok++;
+          } catch (err) {
+            estado(i, 'Error', 'error');
+            console.error(err);
+            fail++;
+          }
+        }
+
+        aviso.textContent = `${ok} subidas${fail ? `, ${fail} fallidas` : ''}.`;
+        aviso.className = `form-msg ${fail ? 'error' : 'ok'}`;
+        boton.disabled = false;
+        boton.textContent = 'Subir fotos preview';
+        if (fail === 0) setTimeout(() => window.location.reload(), 1200);
+      });
+    })();
 
     // ─── Subir versión alternativa por foto final ─────────────
     const altInput = document.getElementById('altFileInput');
