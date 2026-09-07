@@ -56,6 +56,39 @@ export async function r2Delete(env: R2Env, key: string): Promise<void> {
   }
 }
 
+/**
+ * Content-Type derivado SOLO de la extensión, contra una lista blanca.
+ *
+ * No usar `file.type` para esto: lo pone quien sube. Con un tipo elegido a
+ * mano se puede dejar un HTML servido desde el bucket público de R2, que es
+ * el mismo dominio desde el que se sirven las fotos de los clientes.
+ *
+ * Devuelve null si la extensión no está permitida.
+ */
+export function tipoPermitido(
+  filename: string,
+  permitidos: Readonly<Record<string, string>>,
+): string | null {
+  const ext = filename.toLowerCase().split('.').pop() ?? '';
+  return permitidos[ext] ?? null;
+}
+
+/** Comprobantes de pago: lo que el cliente puede mandar como justificante. */
+export const TIPOS_COMPROBANTE = {
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  png: 'image/png',
+  pdf: 'application/pdf',
+} as const;
+
+/** Fotos de sesión. El navegador siempre las convierte a JPEG antes de subir. */
+export const TIPOS_FOTO = {
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  png: 'image/png',
+  webp: 'image/webp',
+} as const;
+
 export function contentTypeFor(filename: string): string {
   const ext = filename.toLowerCase().split('.').pop();
   if (ext === 'jpg' || ext === 'jpeg') return 'image/jpeg';

@@ -5,7 +5,7 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from '../../../lib/database.types';
 import { readEnv, fotoUrl } from '../../../lib/sesiones';
 import { requireAdmin } from '../../../lib/admin-auth';
-import { r2Put, contentTypeFor } from '../../../lib/r2';
+import { r2Put, tipoPermitido, TIPOS_COMPROBANTE } from '../../../lib/r2';
 import { syncSesionToNotionBackground } from '../../../lib/notion';
 
 /**
@@ -47,8 +47,10 @@ export const POST: APIRoute = async ({ request }) => {
 
   const f = file as File;
   const safeName = f.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+  const ct = tipoPermitido(safeName, TIPOS_COMPROBANTE);
+  if (!ct) return json({ error: 'formato no permitido: usa JPG, PNG o PDF' }, 415);
+
   const r2Key = `clientes/${codigo}/comprobantes/${safeName}`;
-  const ct = f.type || contentTypeFor(safeName);
 
   try {
     await r2Put(env, r2Key, await f.arrayBuffer(), ct);

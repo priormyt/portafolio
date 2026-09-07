@@ -5,7 +5,7 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database, FotoTipo } from '../../../lib/database.types';
 import { readEnv } from '../../../lib/sesiones';
 import { requireAdmin } from '../../../lib/admin-auth';
-import { r2Put, contentTypeFor } from '../../../lib/r2';
+import { r2Put, tipoPermitido, TIPOS_FOTO } from '../../../lib/r2';
 
 /**
  * Recibe multipart/form-data con: codigo, tipo, orden, file.
@@ -70,7 +70,8 @@ export const POST: APIRoute = async ({ request }) => {
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
   const folder = tipo === 'preview' ? 'previews' : parentId ? 'finales/alt' : 'finales';
   const r2Key = `clientes/${codigo}/${folder}/${safeName}`;
-  const ct = file.type || contentTypeFor(safeName);
+  const ct = tipoPermitido(safeName, TIPOS_FOTO);
+  if (!ct) return json({ error: 'formato de imagen no permitido' }, 415);
 
   try {
     const buf = await file.arrayBuffer();

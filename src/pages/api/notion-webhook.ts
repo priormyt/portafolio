@@ -44,19 +44,32 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   // ─── 1) Verification flow ─────────────────────────────────────
+  // Solo mientras el webhook no está configurado. Una vez hay token, esta
+  // rama queda cerrada: si no, es un camino sin firma, abierto para siempre,
+  // que además loguea lo que le manden.
   if (body.verification_token) {
+    if (env.NOTION_WEBHOOK_TOKEN) {
+      console.warn('[notion webhook] verification_token recibido con el webhook ya configurado; ignorado');
+      return new Response('already configured', { status: 403 });
+    }
     console.log('[notion webhook] ★ VERIFICATION TOKEN ★', body.verification_token);
     return jsonRes({ ok: true, hint: 'token logueado' });
   }
 
   // ─── 2) Verificar firma HMAC ──────────────────────────────────
-  if (env.NOTION_WEBHOOK_TOKEN) {
-    const sigHeader = request.headers.get('X-Notion-Signature') ?? '';
-    const computed = await hmacHex(env.NOTION_WEBHOOK_TOKEN, bodyText);
-    if (!timingSafeEq(sigHeader, `sha256=${computed}`)) {
-      console.warn('[notion webhook] firma inválida. recibida:', sigHeader);
-      return new Response('invalid signature', { status: 401 });
-    }
+  // Falla cerrado a propósito. Antes, si faltaba el token, se saltaba la
+  // comprobación entera y se procesaba cualquier POST sin autenticar: este
+  // endpoint cambia estados de sesión y puede disparar archivarSesion, que
+  // borra las fotos de R2.
+  if (!env.NOTION_WEBHOOK_TOKEN) {
+    console.error('[notion webhook] NOTION_WEBHOOK_TOKEN sin configurar; no se procesa nada');
+    return new Response('webhook not configured', { status: 503 });
+  }
+  const sigHeader = request.headers.get('X-Notion-Signature') ?? '';
+  const computed = await hmacHex(env.NOTION_WEBHOOK_TOKEN, bodyText);
+  if (!timingSafeEq(sigHeader, `sha256=${computed}`)) {
+    console.warn('[notion webhook] firma inválida. recibida:', sigHeader);
+    return new Response('invalid signature', { status: 401 });
   }
 
   // ─── 3) Filtros ──────────────────────────────────────────────

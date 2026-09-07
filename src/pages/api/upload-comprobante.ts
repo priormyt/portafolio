@@ -4,7 +4,7 @@ import type { APIRoute } from 'astro';
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '../../lib/database.types';
 import { readEnv, fotoUrl } from '../../lib/sesiones';
-import { r2Put, contentTypeFor } from '../../lib/r2';
+import { r2Put, tipoPermitido, TIPOS_COMPROBANTE } from '../../lib/r2';
 import { syncSesionToNotionBackground } from '../../lib/notion';
 import { notifyAdminComprobante } from '../../lib/mail';
 import { notifyAdminWAComprobante } from '../../lib/whatsapp';
@@ -34,6 +34,12 @@ export const POST: APIRoute = async ({ request }) => {
   if (!(file instanceof File)) return json({ error: 'falta el archivo' }, 400);
   if (file.size > 8 * 1024 * 1024) return json({ error: 'el archivo excede 8 MB' }, 400);
 
+  // Endpoint público: validamos la entrada antes de tocar la BD. El tipo sale
+  // de la extensión, nunca de `file.type`, que lo pone quien sube.
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+  const ct = tipoPermitido(safeName, TIPOS_COMPROBANTE);
+  if (!ct) return json({ error: 'formato no permitido: usa JPG, PNG o PDF' }, 415);
+
   const sb = createClient<Database>(env.PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
@@ -48,10 +54,8 @@ export const POST: APIRoute = async ({ request }) => {
     return json({ error: 'esta sesión no espera comprobante' }, 409);
   }
 
-  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
   const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
   const r2Key = `clientes/${codigo}/comprobantes/${stamp}_${safeName}`;
-  const ct = file.type || contentTypeFor(safeName);
 
   try {
     await r2Put(env, r2Key, await file.arrayBuffer(), ct);
