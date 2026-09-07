@@ -59,7 +59,8 @@ function loadImage(file) {
 }
 
 function drawWatermark(ctx, w, h) {
-  const fontSize = Math.min(w, h) * 0.45;
+  // 0.315 = un 30% menos que el 0.45 original.
+  const fontSize = Math.min(w, h) * 0.315;
   ctx.save();
   ctx.font = `${fontSize}px "Marion", Georgia, serif`;
   ctx.textAlign = 'center';

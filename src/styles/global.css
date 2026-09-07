@@ -25,10 +25,10 @@
       --pad-section: 7rem;
       --pad-inline: 4rem;
       --gap-header: 3.5rem;
-      /* Alto de la barra fija: 2rem de padding arriba y abajo + los 44px
+      /* Alto de la barra fija: 1rem de padding arriba y abajo + los 44px
          del logo. Lo consume cualquier cosa sticky que deba quedar por
          debajo del nav. El bloque móvil lo redefine con su padding. */
-      --nav-h: calc(4rem + 44px);
+      --nav-h: calc(2rem + 44px);
     }
 
     @media (max-width: 768px) {
@@ -36,9 +36,9 @@
         --pad-section: 4rem;
         --pad-inline: 1.5rem;
         --gap-header: 2rem;
-        /* Alto de la barra: 1.5rem de padding arriba y abajo + los 44px del
+        /* Alto de la barra: 1rem de padding arriba y abajo + los 44px del
            botón. El panel lo usa para no empezar debajo del logo. */
-        --nav-h: calc(3rem + 44px);
+        --nav-h: calc(2rem + 44px);
       }
     }
 
@@ -112,7 +112,7 @@
       justify-content: space-between;
       align-items: center;
       gap: 1.5rem;
-      padding: 2rem 4rem;
+      padding: 1rem 4rem;
     }
     .nav-logo {
       font-family: var(--f-marca);
@@ -1139,7 +1139,7 @@
          de la barra aquí es lo que permite que --nav-h sea de fiar. */
       header nav {
         align-items: center;
-        padding: 1.5rem 1.5rem;
+        padding: 1rem 1.5rem;
       }
       .nav-toggle { display: flex; }
       /* Logo y botón por encima del panel, que es fixed y si no los taparía. */

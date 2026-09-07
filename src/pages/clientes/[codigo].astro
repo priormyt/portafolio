@@ -320,16 +320,31 @@ const mailArchivadaUrl = `mailto:contacto@ante.photo?subject=${encodeURIComponen
   </div>
 
   <style is:global>
+    /* El nav global es fixed y transparente. Sobre una galería a pantalla
+       completa eso se leía como un agujero: las fotos seguían pasando por
+       detrás y los enlaces quedaban encima de ellas. Aquí lo devolvemos al
+       flujo para que se vaya con el scroll; la barra de "elige tus fotos"
+       es la que se queda fija arriba. */
+    header nav { position: static; }
+
     .cliente-main {
       max-width: 1280px;
       margin: 0 auto;
-      padding: 8rem 2rem 4rem;
+      /* Sin nav fixed ya no hay que reservarle hueco arriba. */
+      padding: 2.5rem 2rem 4rem;
     }
 
+    /* global.css aplica `section { padding: 7rem 4rem }` a toda <section> para
+       el ritmo aireado de las páginas de marketing. Aquí cada bloque es una
+       section, así que eso dejaba 112px de negro arriba y abajo de cada uno.
+       Los estados con caja propia (.estado-pago, .estado-pendiente…) ya
+       declaran su padding y no se tocan. */
     .cliente-intro {
+      padding: 0;
       margin-bottom: 3rem;
       text-align: center;
     }
+    .estado-entregada { padding: 0; }
     .cliente-eyebrow {
       font-family: var(--f-mono);
       font-size: var(--fs-label);
@@ -495,13 +510,18 @@ const mailArchivadaUrl = `mailto:contacto@ante.photo?subject=${encodeURIComponen
     /* CONTADOR (selección) */
     .seleccion-status {
       position: sticky;
-      /* El nav es fixed y transparente: con top:1rem esta barra se le metía
-         debajo al hacer scroll y los enlaces caían encima del contador. */
-      top: calc(var(--nav-h) + 0.5rem);
+      /* Pegada al borde: en esta página el nav no es fijo, así que esta barra
+         es lo único que permanece arriba mientras elige. */
+      top: 0;
       z-index: 50;
       background: var(--ink);
-      padding: 1.25rem 1.5rem;
-      border: 0.5px solid rgba(245,242,237,0.12);
+      /* A todo el ancho, como el footer: se sale de los 1280px de
+         .cliente-main. body ya lleva overflow-x:hidden, así que el 100vw no
+         provoca scroll horizontal aunque haya barra de scroll visible. */
+      width: 100vw;
+      margin-left: calc(50% - 50vw);
+      padding: 1.25rem 4rem;
+      border-bottom: 0.5px solid rgba(245,242,237,0.12);
       margin-bottom: 2rem;
     }
     .seleccion-instructions {
@@ -527,11 +547,21 @@ const mailArchivadaUrl = `mailto:contacto@ante.photo?subject=${encodeURIComponen
     .contador-extras { color: var(--accent); }
     .contador-extras strong { color: var(--paper); }
 
+    /* Fija abajo: antes vivía al final del documento y con 19 fotos había que
+       recorrer toda la galería para encontrarla. */
     .confirmar-bar {
-      margin-top: 3rem;
+      position: fixed;
+      left: 0; right: 0; bottom: 0;
+      z-index: 60;
       display: flex;
       justify-content: center;
+      padding: 1rem 1.5rem;
+      padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+      background: var(--ink);
+      border-top: 0.5px solid rgba(245,242,237,0.12);
     }
+    /* Hueco para que la última fila de fotos no quede debajo de la barra. */
+    .estado-seleccion { padding: 0 0 7rem; }
     .btn-confirmar {
       padding: 1rem 3rem;
       background: var(--paper);
@@ -545,7 +575,11 @@ const mailArchivadaUrl = `mailto:contacto@ante.photo?subject=${encodeURIComponen
       transition: background 0.2s, opacity 0.2s;
     }
     .btn-confirmar:hover { background: var(--accent); }
-    .btn-confirmar:disabled { opacity: 0.4; pointer-events: none; }
+    /* Apagado mientras no llegue a las fotos de su paquete; encendido al
+       alcanzarlas o pasarlas. Sin seleccionar nada no hay nada que confirmar. */
+    .btn-confirmar { opacity: 0.45; }
+    .btn-confirmar.completo { opacity: 1; }
+    .btn-confirmar:disabled { opacity: 0.25; pointer-events: none; }
 
     /* ESTADOS NO INTERACTIVOS */
     /* ESTADO PAGO (cliente sube comprobante) */
@@ -795,9 +829,9 @@ const mailArchivadaUrl = `mailto:contacto@ante.photo?subject=${encodeURIComponen
     }
 
     @media (max-width: 768px) {
-      .cliente-main { padding: 6.5rem 1.2rem 3rem; }
+      .cliente-main { padding: 1.5rem 1.2rem 3rem; }
       .galeria-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
-      .seleccion-status { padding: 1rem 1.1rem; }
+      .seleccion-status { padding: 1rem 1.5rem; }
       .contador-bar { font-size: var(--fs-micro); }
       .galeria-download, .galeria-zoom { opacity: 1; }
     }
@@ -1022,6 +1056,8 @@ const mailArchivadaUrl = `mailto:contacto@ante.photo?subject=${encodeURIComponen
         extrasInfo.style.display = extras > 0 ? '' : 'none';
 
         btnConfirmar.disabled = seleccionadas === 0;
+        // Con limite 0 (sesión sin paquete) basta con haber elegido algo.
+        btnConfirmar.classList.toggle('completo', seleccionadas >= Math.max(limite, 1));
         btnConfirmar.textContent = extras > 0
           ? `Confirmar selección y pagar $${monto} MXN`
           : 'Confirmar selección';
