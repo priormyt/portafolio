@@ -1,0 +1,48 @@
+# PROPUESTA — no se aplica desde aquí.
+#
+# `cloudflared` como paquete de MÁQUINA en `maquinas/kokoroco-central/capas/base.yml` del repo
+# `priormyt/prior` (ese repo lo toca la Mac, por PR). Va en `base.yml` y no en `servicios.yml`:
+# `servicios.yml` son recetas de contenedores, y los repositorios apt de terceros (docker,
+# tailscale, nodesource) ya viven en `base.yml`, bajo «Repositorios de terceros en formato .list».
+# Es el primer túnel de la máquina (ANTE, `wa.ante.photo`) y KokoroCo usará el mismo binario con
+# su propio túnel y su propia unidad: por eso el paquete es de la máquina y las unidades son de
+# cada proyecto (capa-proyectos-ante.propuesta.yml).
+#
+# [MEDIDO 12 sep 2026, 10:37 CST] Instalado así en la máquina (lo corrió Pablo como root):
+# cloudflared 2026.9.1, del repositorio apt oficial, línea genérica `any main` (la página
+# https://pkg.cloudflare.com/index.html trae `any` y bookworm, no trixie). El paquete NO trae
+# unidad de systemd propia.
+#
+# Tres cambios, cada uno en su sitio de base.yml:
+
+# ── 1 · En `vars.versiones_medidas` ──────────────────────────────────────────────
+#      cloudflared: "2026.9.1"   # [MEDIDO 12 sep 2026]
+
+# ── 2 · La llave. NO pertenece a ningún paquete (como docker.gpg y nodesource.gpg): ─
+#       se descarga, y se ANCLA su huella para que quien la reponga compruebe que es la misma.
+- name: "Llave del repositorio de Cloudflare (se descarga; su huella se ancla)"
+  ansible.builtin.get_url:
+    url: https://pkg.cloudflare.com/cloudflare-main.gpg
+    dest: /usr/share/keyrings/cloudflare-main.gpg
+    mode: "0644"
+    checksum: "sha256:1bd95f4082b320d541bee351560fc2765aa9f9cd8efa4c9e32135e63f252721d"
+  # [MEDIDO 12 sep 2026] sha256 del archivo en la máquina; huella de la llave
+  # CC94 B39C 77AE 7342 A68B 8962 8A68 2D30 8D4E 5E73. Si Cloudflare rota la llave, esta tarea
+  # FALLA a propósito: se mide la nueva, se compara la huella y se cambia aquí por PR.
+
+# ── 3 · El repositorio y el paquete ─────────────────────────────────────────────────
+#       En la lista «Repositorios de terceros en formato .list», un elemento más:
+#         - repo: "deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared any main"
+#           filename: cloudflared
+#       Y en «Paquetes que definen esta máquina», un renglón más:
+#         - cloudflared       # el túnel de Cloudflare; las unidades son de cada proyecto
+#
+# ⚠ Lo que esta capa NO hace, a propósito:
+#   · No crea ningún túnel ni guarda ninguna credencial. Los túneles de esta máquina son
+#     ADMINISTRADOS EN LOCAL (`cloudflared tunnel login` + `tunnel create`): el cert.pem de la
+#     cuenta se destruye al terminar y la credencial JSON de cada túnel va cifrada con
+#     systemd-creds en el directorio de su proyecto. Nada de eso viaja en un repositorio.
+#   · No habilita ningún `cloudflared.service` genérico ni corre `cloudflared service install`:
+#     cada proyecto trae su unidad, con su usuario, su config y su credencial cifrada.
+#   · No abre puertos: el túnel sale de la máquina hacia Cloudflare. La regla de la casa
+#     «nada en 0.0.0.0» se sigue cumpliendo (el agente escucha en 127.0.0.1).

@@ -1,0 +1,9 @@
+# Drop-in de svc-ante con lo que es de la cuenta de Pablo y no va al repo público.
+# Se instala como /etc/systemd/system/svc-ante.service.d/meta.conf (root, 0644).
+# Ver agente/despliegue/PARA-ROOT.md, paso 4.
+[Service]
+# El «Phone number ID» de la pantalla WhatsApp > API Setup de la app (sólo dígitos).
+Environment=META_PHONE_NUMBER_ID=PONER_EL_PHONE_NUMBER_ID
+# Sólo si Pablo creó y le aprobaron la plantilla de utilidad para avisos (ver LEEME):
+#Environment=AGENTE_PLANTILLA_AVISO=aviso_asistente
+#Environment=AGENTE_PLANTILLA_IDIOMA=es_MX

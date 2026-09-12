@@ -1,0 +1,97 @@
+[Unit]
+Description=svc-ante — agente de WhatsApp de ANTE: webhook de Meta en 127.0.0.1:9186 (compartimento ante; ver servidor/doc/COMPARTIMENTOS.md)
+Documentation=file:///koko/srv/ante/app/agente/LEEME.md
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=600
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=svc-ante
+Group=ante
+WorkingDirectory=/koko/srv/ante/app
+ExecStart=/usr/bin/node /koko/srv/ante/app/agente/src/main.ts
+
+# ── Secretos ────────────────────────────────────────────────────────────────
+# Descifrados en un tmpfs que sólo lee este servicio ($CREDENTIALS_DIRECTORY);
+# nunca en el entorno. Se siembran con agente/despliegue/PARA-ROOT.md, paso 2.
+# ADMIN_WHATSAPP_TO va aquí aunque no sea una llave: es el teléfono de Pablo y
+# este archivo vive en un repositorio público.
+LoadCredentialEncrypted=META_ACCESS_TOKEN:/etc/ante/credenciales/META_ACCESS_TOKEN.cred
+LoadCredentialEncrypted=META_APP_SECRET:/etc/ante/credenciales/META_APP_SECRET.cred
+LoadCredentialEncrypted=META_VERIFY_TOKEN:/etc/ante/credenciales/META_VERIFY_TOKEN.cred
+LoadCredentialEncrypted=DEEPSEEK_API_KEY:/etc/ante/credenciales/DEEPSEEK_API_KEY.cred
+LoadCredentialEncrypted=ADMIN_WHATSAPP_TO:/etc/ante/credenciales/ADMIN_WHATSAPP_TO.cred
+
+# ── Lo que no es secreto ───────────────────────────────────────────────────
+# Escucha SÓLO en 127.0.0.1:9186 y una sola ruta; el túnel cloudflared-ante le
+# manda https://wa.ante.photo/webhook/meta y nada más. Sale a internet sólo a
+# graph.facebook.com y api.deepseek.com.
+# META_PHONE_NUMBER_ID (y, si Pablo crea la plantilla, AGENTE_PLANTILLA_AVISO y
+# AGENTE_PLANTILLA_IDIOMA) van en el drop-in /etc/systemd/system/svc-ante.service.d/meta.conf:
+# son de la cuenta de Pablo y este archivo es público. Sin el drop-in, el
+# servicio no arranca (código 78).
+Environment=AGENTE_HOST=127.0.0.1
+Environment=AGENTE_PUERTO=9186
+Environment=AGENTE_RUTA=/webhook/meta
+Environment=META_GRAPH_VERSION=v26.0
+Environment=AGENTE_DATOS=/koko/srv/ante/datos/agente
+# Proveedor explícito: si falta la llave, el servicio NO arranca (en vez de
+# contestarle a clientes reales con el simulado).
+Environment=AGENTE_PROVEEDOR=deepseek
+Environment=AGENTE_MODELO=deepseek-flash
+Environment=AGENTE_TOPE_DIARIO_USD=0.50
+Environment=AGENTE_MAX_TOKENS=400
+Environment=AGENTE_TIEMPO_MODELO_MS=20000
+Environment=AGENTE_PRESENTARSE=si
+Environment=AGENTE_LIMITE_POR_NUMERO_HORA=20
+Environment=AGENTE_LIMITE_GLOBAL_HORA=200
+Environment=AGENTE_RETENCION_DIAS=30
+Environment=TZ=America/Mexico_City
+Environment=NODE_ENV=production
+
+# ── Blindaje (el de la plantilla, entero) ──────────────────────────────────
+ReadWritePaths=/koko/srv/ante/datos
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+RestrictNamespaces=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+
+# ── Blindaje añadido ───────────────────────────────────────────────────────
+# Red: IPv4/IPv6 (escuchar en loopback, salir a Meta y DeepSeek) y AF_UNIX para
+# el journal. Node no necesita AF_NETLINK.
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+PrivateDevices=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectClock=yes
+ProtectHostname=yes
+ProtectProc=invisible
+RestrictRealtime=yes
+RemoveIPC=yes
+KeyringMode=private
+CapabilityBoundingSet=
+AmbientCapabilities=
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallFilter=~@privileged @mount @debug @cpu-emulation @obsolete @raw-io @reboot @swap @module @clock
+SystemCallErrorNumber=EPERM
+UMask=0077
+# Node usa JIT: MemoryDenyWriteExecute=yes lo ROMPE (V8 necesita páginas
+# escribibles y ejecutables). No se pone a propósito.
+# ProcSubset=pid tampoco: Node lee /proc/cpuinfo y /proc/meminfo al arrancar.
+MemoryMax=256M
+TasksMax=64
+LimitNOFILE=1024
+
+Restart=on-failure
+RestartSec=30
+# 78 = configuración incompleta (falta un secreto, el drop-in, host no
+# permitido…): no se reintenta en bucle, se arregla la configuración.
+RestartPreventExitStatus=78
