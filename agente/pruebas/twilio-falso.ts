@@ -55,7 +55,8 @@ export async function crearTwilioFalso(o: { sid: string; token: string }): Promi
   const servidor = http.createServer((req, res) => {
     const u = new URL(req.url ?? '/', 'http://127.0.0.1');
     const json = (estado: number, cuerpo: unknown) => {
-      res.writeHead(estado, { 'Content-Type': 'application/json' });
+      // Sin keep-alive: con conexiones reusadas tras una espera, undici tardaba 2 s de más en el reintento.
+      res.writeHead(estado, { 'Content-Type': 'application/json', Connection: 'close' });
       res.end(JSON.stringify(cuerpo));
     };
     if (u.pathname !== ruta) return json(404, { code: 20404, message: 'The requested resource was not found' });

@@ -38,6 +38,28 @@ export function configPrueba(extra: Record<string, string | undefined> = {}): Co
   return cargarConfig(entornoBase(extra));
 }
 
+/**
+ * Los campos que Twilio manda al webhook de un WhatsApp entrante
+ * (https://www.twilio.com/docs/messaging/guides/webhook-request), con datos de mentira.
+ */
+export function paramsTwilio(cuerpo: string, de: string, sid: string): Record<string, string> {
+  return {
+    AccountSid: SID_FALSO,
+    ApiVersion: '2010-04-01',
+    Body: cuerpo,
+    From: de,
+    MessageSid: sid,
+    NumMedia: '0',
+    NumSegments: '1',
+    ProfileName: 'Cliente de prueba',
+    SmsMessageSid: sid,
+    SmsSid: sid,
+    SmsStatus: 'received',
+    To: NUESTRO,
+    WaId: de.replace('whatsapp:+', ''),
+  };
+}
+
 /** Captura el registro (y lo silencia) mientras dura una prueba. */
 export function capturarRegistro(): string[] {
   const lineas: string[] = [];

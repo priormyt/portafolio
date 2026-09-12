@@ -1,0 +1,113 @@
+# PROPUESTA — no se aplica desde aquí.
+#
+# Cambio a la sección «ANTE» de `maquinas/kokoroco-central/capas/proyectos.yml` del repo
+# `priormyt/prior` (ese repo lo toca la Mac, por PR). Hoy esa sección dice «taller sin servicio» y
+# que `svc-ante.service` «existe por el patrón y no corre». Esto es lo que diría cuando el agente de
+# WhatsApp esté corriendo. Se escribió leyendo la capa actual (12 sep 2026) y siguiendo la forma de
+# la de Aristóteles: credenciales en un directorio vacío y cerrado, la unidad como fichero, y la
+# comprobación del blindaje sobre lo que systemd CARGÓ.
+#
+# Qué cambia respecto de la capa actual:
+#   1. el comentario de cabecera (el servicio ya corre algo);
+#   2. el nombre del play («taller sin servicio» → «taller + agente de WhatsApp»);
+#   3. el comentario del usuario svc-ante («no corre nada hoy» → qué corre);
+#   4. cuatro tareas nuevas al final: /etc/ante/credenciales, /koko/srv/ante/datos/agente,
+#      la unidad copiada de ../ficheros/svc-ante.service y la comprobación del blindaje;
+#   5. un handler de daemon-reload.
+# Lo demás (grupo, uids, dataset, app/ y datos/) queda EXACTAMENTE como está.
+#
+# Para aplicarla, la Mac copia `agente/despliegue/svc-ante.service` de priormyt/portafolio a
+# `maquinas/kokoroco-central/ficheros/svc-ante.service` y marca con [MEDIDO <fecha>] lo que haya
+# comprobado en la máquina (hasta entonces, todo lo de abajo es [PROPUESTO]).
+
+# ── ANTE · el portafolio de fotografía de Pablo, y su agente de WhatsApp ────────
+# [MEDIDO 7 sep 2026] Compartimento dado de alta con `kokoro-nuevo-proyecto ante --exec`
+# por orden textual de Pablo («crea el espacio para mi página de fotografía de ANTE dentro
+# del server»). El código es `priormyt/portafolio` (Astro 6 + adaptador de Cloudflare), y
+# **el sitio NO se sirve desde esta máquina**: lo despliega GitHub Actions en Cloudflare
+# Workers con cada push a `main`.
+# [PROPUESTO 12 sep 2026] `svc-ante.service` corre el AGENTE DE WHATSAPP de ANTE
+# (`agente/` del mismo repo; Node 24 sin dependencias, `node agente/src/main.ts`): piloto
+# pedido por Pablo («un agente de whats app que atienda ANTE»). Modo SONDEO: sólo sale a
+# api.twilio.com y api.deepseek.com, no escucha nada, no hay túnel. Sus datos
+# (conversaciones con 30 días de retención, gasto, bajas) viven en /koko/srv/ante/datos/agente
+# y entran al respaldo por el dataset. Cuatro credenciales cifradas en /etc/ante/credenciales.
+# `enable` o no es palabra de Pablo: esta capa describe la unidad, no la habilita.
+# Esta capa DESCRIBE lo que el guion creó, con los ids fijos que salieron, para que una
+# resurrección los reproduzca iguales (los archivos restaurados de la bóveda vienen con
+# estos números). No lo aplica por primera vez: eso lo hace el guion.
+- name: "Capa 5 · proyectos — ANTE (taller + agente de WhatsApp)"
+  hosts: kokoroco
+  become: true
+
+  tasks:
+
+    # … «Grupo ante, gid FIJO» sin cambios …
+
+    - name: "Usuario de servicio svc-ante (sin login; corre el agente de WhatsApp)"
+      ansible.builtin.user:
+        name: svc-ante
+        uid: 105
+        group: svc-ante
+        groups: [ante]
+        home: /nonexistent
+        shell: /usr/sbin/nologin
+        system: true
+        create_home: false
+      # Lee el código de app/ por el grupo ante (app/ es dev-ante:ante 2750) y escribe SÓLO en
+      # /koko/srv/ante/datos (ReadWritePaths de la unidad).
+
+    # … «Usuario de taller dev-ante», el dataset y «app/ del taller, datos/ del servicio, /etc/ante
+    #   para llaves» sin cambios …
+
+    - name: "Directorio de credenciales del agente, vacío y cerrado"
+      ansible.builtin.file:
+        path: /etc/ante/credenciales
+        state: directory
+        owner: root
+        group: root
+        mode: "0700"
+      # Se crea VACÍO a propósito, como el de Aristóteles. Los cuatro .cred
+      # (TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, DEEPSEEK_API_KEY, ADMIN_WHATSAPP_TO) están cifrados
+      # con la llave de ESTE anfitrión, que no tiene TPM: no se traen de ningún respaldo, se
+      # re-siembran con `systemd-creds encrypt` (agente/despliegue/PARA-ROOT.md, paso 2).
+      # ADMIN_WHATSAPP_TO es el teléfono de Pablo: va cifrado porque la unidad vive en un repo público.
+
+    - name: "Datos del agente (conversaciones, gasto, bajas)"
+      ansible.builtin.file:
+        path: /koko/srv/ante/datos/agente
+        state: directory
+        owner: svc-ante
+        group: ante
+        mode: "0700"
+
+    - name: "La unidad del agente, copiada exacta de la máquina"
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/svc-ante.service
+        mode: "0644"
+        src: ../ficheros/svc-ante.service
+      notify: Recargar systemd
+      # Fichero y no YAML, por lo mismo que Aristóteles: cuatro LoadCredentialEncrypted y el
+      # blindaje entero; pegados aquí invitan a que alguien «arregle» uno al editar el playbook.
+      # Fuente: priormyt/portafolio, agente/despliegue/svc-ante.service.
+
+    - name: "Comprobar el blindaje del agente (lo que systemd CARGÓ)"
+      ansible.builtin.command: systemctl show svc-ante.service -p {{ item.prop }}  # noqa: command-instead-of-module
+      register: blindaje_ante
+      changed_when: false
+      failed_when: blindaje_ante.stdout | trim != item.esperado
+      loop:
+        - { prop: User, esperado: "User=svc-ante" }
+        - { prop: NoNewPrivileges, esperado: "NoNewPrivileges=yes" }
+        - { prop: ProtectSystem, esperado: "ProtectSystem=strict" }
+        - { prop: ProtectHome, esperado: "ProtectHome=yes" }
+        - { prop: PrivateDevices, esperado: "PrivateDevices=yes" }
+        - { prop: RestrictAddressFamilies, esperado: "RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6" }
+      # ⚠ El orden en que systemd imprime RestrictAddressFamilies se MIDE en la máquina antes de
+      # fusionar esta capa; si difiere, se corrige el `esperado`, no la unidad.
+      # No se comprueba ActiveState a propósito: si está encendido o no lo decide Pablo.
+
+  handlers:
+    - name: Recargar systemd
+      ansible.builtin.systemd_service:
+        daemon_reload: true

@@ -148,7 +148,7 @@ function buscarFecha(textoOriginal: string): string | undefined {
 }
 
 function buscarNombre(texto: string): string | undefined {
-  const m = /(?:soy|me llamo|mi nombre es)\s+([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)?)/.exec(texto);
+  const m = /(?:[Ss]oy|[Mm]e llamo|[Mm]i nombre es)\s+([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)?)/.exec(texto);
   return m?.[1];
 }
 
@@ -186,14 +186,15 @@ export function crearSimulado(c: Conocimiento, humano = 'Pablo'): Proveedor {
         'Los ves completos en https://www.ante.photo/#precios',
       ].join('\n');
     }
-    if (fecha || /\b(disponib|horario|lugar|espacio)/.test(n)) {
-      return [
-        `La agenda no la veo desde aquí: la disponibilidad sólo la confirma ${humano}.`,
-        `Si quieres apartar${fecha ? ` el ${fecha}` : ''}, dime tu nombre y qué paquete te interesa y le paso la solicitud.`,
-      ].join(' ');
-    }
     if (/\b(gracias|hasta luego|adios|bye|nos vemos)\b/.test(n)) {
       return `Gracias a ti. ${humano} te escribe por aquí para confirmar. Que estés muy bien.`;
+    }
+    const fechaAhora = buscarFecha(ultimo);
+    if (fechaAhora || /\b(disponib|horario|lugar|espacio)/.test(n)) {
+      return [
+        `La agenda no la veo desde aquí: la disponibilidad sólo la confirma ${humano}.`,
+        `Si quieres apartar${fechaAhora ? ` el ${fechaAhora}` : ''}, dime tu nombre y qué paquete te interesa y le paso la solicitud.`,
+      ].join(' ');
     }
     if (/\b(hola|buenas?|buenos dias|buenas tardes|buenas noches|que tal)\b/.test(n)) {
       return '¿En qué te ayudo? Te puedo contar de los paquetes y precios, o pasar tu solicitud para apartar una sesión.';

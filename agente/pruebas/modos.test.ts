@@ -8,7 +8,7 @@ import { iniciar } from '../src/main.ts';
 import { TWIML_VACIO } from '../src/webhook.ts';
 import type { TwilioFalso } from './twilio-falso.ts';
 import { crearTwilioFalso, nuevoSid } from './twilio-falso.ts';
-import { capturarRegistro, CLIENTE, configPrueba, NUESTRO, OTRO_CLIENTE, SID_FALSO, TOKEN_FALSO, URL_PUBLICA } from './utiles.ts';
+import { capturarRegistro, CLIENTE, configPrueba, NUESTRO, OTRO_CLIENTE, paramsTwilio, SID_FALSO, TOKEN_FALSO, URL_PUBLICA } from './utiles.ts';
 
 capturarRegistro();
 
@@ -28,23 +28,8 @@ async function montar(modo: 'webhook' | 'sondeo', extra: Record<string, string> 
   return { i, t };
 }
 
-function paramsTwilio(cuerpo: string, de = CLIENTE, sid = nuevoSid()): Record<string, string> {
-  // Los campos que manda Twilio al webhook de un WhatsApp entrante.
-  return {
-    AccountSid: SID_FALSO,
-    ApiVersion: '2010-04-01',
-    Body: cuerpo,
-    From: de,
-    MessageSid: sid,
-    NumMedia: '0',
-    NumSegments: '1',
-    ProfileName: 'Cliente de prueba',
-    SmsMessageSid: sid,
-    SmsSid: sid,
-    SmsStatus: 'received',
-    To: NUESTRO,
-    WaId: de.replace('whatsapp:+', ''),
-  };
+function params(cuerpo: string, de = CLIENTE, sid = nuevoSid()): Record<string, string> {
+  return paramsTwilio(cuerpo, de, sid);
 }
 
 async function postear(puerto: number, params: Record<string, string>, firma: string | undefined, ruta = '/twilio/whatsapp') {
@@ -62,7 +47,7 @@ test('webhook: escucha sólo en 127.0.0.1', async () => {
 
 test('webhook: firma buena → 200 con TwiML vacío en el acto, y la respuesta sale por la API REST', async () => {
   const { i, t } = await montar('webhook');
-  const p = paramsTwilio('Hola');
+  const p = params('Hola');
   const r = await postear(i.puerto!, p, calcularFirma(TOKEN_FALSO, URL_PUBLICA, p));
   assert.equal(r.estado, 200);
   assert.equal(r.cuerpo, TWIML_VACIO);
@@ -75,7 +60,7 @@ test('webhook: firma buena → 200 con TwiML vacío en el acto, y la respuesta s
 
 test('webhook: firma mala o ausente → 403 y el mensaje no se procesa', async () => {
   const { i, t } = await montar('webhook');
-  const p = paramsTwilio('Hola');
+  const p = params('Hola');
   const mala = await postear(i.puerto!, p, 'AAAAAAAAAAAAAAAAAAAAAAAAAAA=');
   const sin = await postear(i.puerto!, p, undefined);
   const otroToken = await postear(i.puerto!, p, calcularFirma('otro-token', URL_PUBLICA, p));
@@ -88,7 +73,7 @@ test('webhook: firma mala o ausente → 403 y el mensaje no se procesa', async (
 
 test('webhook: firmado con la URL local (127.0.0.1) en vez de la pública → 403', async () => {
   const { i, t } = await montar('webhook');
-  const p = paramsTwilio('Hola');
+  const p = params('Hola');
   const local = `http://127.0.0.1:${i.puerto}/twilio/whatsapp`;
   const r = await postear(i.puerto!, p, calcularFirma(TOKEN_FALSO, local, p));
   assert.equal(r.estado, 403);
@@ -98,17 +83,17 @@ test('webhook: firmado con la URL local (127.0.0.1) en vez de la pública → 40
 
 test('webhook: la query con la que llega entra en la firma', async () => {
   const { i, t } = await montar('webhook');
-  const p = paramsTwilio('Hola');
+  const p = params('Hola');
   const bien = await postear(i.puerto!, p, calcularFirma(TOKEN_FALSO, `${URL_PUBLICA}?x=1`, p), '/twilio/whatsapp?x=1');
   assert.equal(bien.estado, 200);
-  const mal = await postear(i.puerto!, paramsTwilio('Hola'), calcularFirma(TOKEN_FALSO, URL_PUBLICA, p), '/twilio/whatsapp?x=1');
+  const mal = await postear(i.puerto!, params('Hola'), calcularFirma(TOKEN_FALSO, URL_PUBLICA, p), '/twilio/whatsapp?x=1');
   assert.equal(mal.estado, 403);
   await t.esperarEnviados(CLIENTE, 1);
 });
 
 test('webhook: Twilio reintenta el mismo MessageSid → una sola respuesta', async () => {
   const { i, t } = await montar('webhook');
-  const p = paramsTwilio('Hola');
+  const p = params('Hola');
   const f = calcularFirma(TOKEN_FALSO, URL_PUBLICA, p);
   assert.equal((await postear(i.puerto!, p, f)).estado, 200);
   assert.equal((await postear(i.puerto!, p, f)).estado, 200);

@@ -21,12 +21,12 @@ test('salida: las tablas de Markdown se aplanan', () => {
 
 test('salida: sólo sobreviven los enlaces de ante.photo', () => {
   const { texto, quitados } = filtrarEnlaces(
-    'Mira https://www.ante.photo/galeria y https://ante.photo/agendar. También https://evil.example.com/x, www.otro.com, wa.me/5215500000000, bit.ly/abc y escribe a alguien@gmail.com o a hola@ante.photo.',
+    'Mira https://www.ante.photo/galeria y https://ante.photo/agendar. También https://evil.example.com/x, www.otro.com, wa.me/5215500000000, bit.ly/abc y escribe a alguien@example.com o a ejemplo@ante.photo.',
   );
   assert.match(texto, /https:\/\/www\.ante\.photo\/galeria/);
   assert.match(texto, /https:\/\/ante\.photo\/agendar/);
-  assert.match(texto, /hola@ante\.photo/);
-  for (const malo of ['evil.example.com', 'otro.com', 'wa.me', 'bit.ly', 'gmail.com']) assert.doesNotMatch(texto, new RegExp(malo.replace('.', '\\.')));
+  assert.match(texto, /ejemplo@ante\.photo/);
+  for (const malo of ['evil.example.com', 'otro.com', 'wa.me', 'bit.ly', 'example.com']) assert.doesNotMatch(texto, new RegExp(malo.replace('.', '\\.')));
   assert.equal(quitados.length, 5);
 });
 

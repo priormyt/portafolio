@@ -33,7 +33,7 @@ export function registrar(nivel: Nivel, evento: string, datos: Record<string, un
   salida(limpiar(linea));
 }
 
-/** whatsapp:+5215512345678 → whatsapp:+521…5678. Suficiente para seguir un caso sin exponerlo. */
+/** whatsapp:+5215500001234 → whatsapp:+521…1234. Suficiente para seguir un caso sin exponerlo. */
 export function enmascarar(numero: string | undefined): string {
   if (!numero) return '(sin número)';
   const m = /^(whatsapp:)?\+?(\d+)$/.exec(numero.trim());
