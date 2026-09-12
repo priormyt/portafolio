@@ -1,0 +1,19 @@
+# /etc/cloudflared-ante/config.yml (root, 0644), tal como quedó el 12 sep 2026 — salvo el UUID.
+# El UUID del túnel `ante-wa` vive sólo en la máquina, en ese archivo; aquí va <UUID>.
+# No es la credencial: la credencial es el JSON del túnel, cifrado en
+# /etc/ante/credenciales/CLOUDFLARED_CRED.cred, y la unidad se lo pasa a cloudflared con
+# --credentials-file %d/CLOUDFLARED_CRED. `cloudflared tunnel run` saca el túnel de su argumento o
+# de la clave `tunnel:` de este archivo; del archivo de credenciales no.
+#
+# UNA sola ruta: `path` es una expresión regular de Go que se compara con la ruta de la URL sin la
+# query (cloudflared llama FindMatchingRule(req.Host, req.URL.Path)), así que el GET de
+# verificación de Meta (/webhook/meta?hub.mode=…) sí entra. Todo lo demás: 404 del propio túnel.
+# Receta: tunel-ante.sh (paso 6 de PARA-ROOT.md).
+tunnel: <UUID>
+no-autoupdate: true
+metrics: 127.0.0.1:9187
+ingress:
+  - hostname: wa.ante.photo
+    path: ^/webhook/meta$
+    service: http://127.0.0.1:9186
+  - service: http_status:404

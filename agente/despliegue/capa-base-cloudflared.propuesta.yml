@@ -8,14 +8,15 @@
 # su propio túnel y su propia unidad: por eso el paquete es de la máquina y las unidades son de
 # cada proyecto (capa-proyectos-ante.propuesta.yml).
 #
-# Fuente de los comandos: https://pkg.cloudflare.com/index.html, instrucciones «Any Debian Based
-# Distribution» (12 sep 2026). La página trae una línea genérica `any` y una para bookworm; no una
-# para trixie, así que se usa `any`.
+# [MEDIDO 12 sep 2026, 10:37 CST] Instalado así en la máquina (lo corrió Pablo como root):
+# cloudflared 2026.9.1, del repositorio apt oficial, línea genérica `any main` (la página
+# https://pkg.cloudflare.com/index.html trae `any` y bookworm, no trixie). El paquete NO trae
+# unidad de systemd propia.
 #
 # Tres cambios, cada uno en su sitio de base.yml:
 
-# ── 1 · En `vars.versiones_medidas`, cuando root lo instale y lo mida ─────────────
-#      cloudflared: "<la que dé `cloudflared --version`>"   # ≥ 2025.4.0: --token-file
+# ── 1 · En `vars.versiones_medidas` ──────────────────────────────────────────────
+#      cloudflared: "2026.9.1"   # [MEDIDO 12 sep 2026]
 
 # ── 2 · La llave. NO pertenece a ningún paquete (como docker.gpg y nodesource.gpg): ─
 #       se descarga, y se ANCLA su huella para que quien la reponga compruebe que es la misma.
@@ -24,8 +25,10 @@
     url: https://pkg.cloudflare.com/cloudflare-main.gpg
     dest: /usr/share/keyrings/cloudflare-main.gpg
     mode: "0644"
-    # checksum: "sha256:<la que mida root en PARA-ROOT.md, paso 6.1>"
-  # HUECO hasta que root la mida: sin `checksum`, esta tarea confía en la descarga del día.
+    checksum: "sha256:1bd95f4082b320d541bee351560fc2765aa9f9cd8efa4c9e32135e63f252721d"
+  # [MEDIDO 12 sep 2026] sha256 del archivo en la máquina; huella de la llave
+  # CC94 B39C 77AE 7342 A68B 8962 8A68 2D30 8D4E 5E73. Si Cloudflare rota la llave, esta tarea
+  # FALLA a propósito: se mide la nueva, se compara la huella y se cambia aquí por PR.
 
 # ── 3 · El repositorio y el paquete ─────────────────────────────────────────────────
 #       En la lista «Repositorios de terceros en formato .list», un elemento más:
@@ -35,10 +38,11 @@
 #         - cloudflared       # el túnel de Cloudflare; las unidades son de cada proyecto
 #
 # ⚠ Lo que esta capa NO hace, a propósito:
-#   · No crea ningún túnel ni guarda ningún token: los túneles se administran desde el panel de
-#     Cloudflare y su token es un secreto que se re-siembra (maquinas/kokoroco-central/SECRETOS.md).
-#   · No habilita el `cloudflared.service` genérico ni corre `cloudflared service install`: esa
-#     unidad deja el token en ExecStart, visible en `ps`. Cada proyecto trae la suya con
-#     `--token-file` y la credencial cifrada.
+#   · No crea ningún túnel ni guarda ninguna credencial. Los túneles de esta máquina son
+#     ADMINISTRADOS EN LOCAL (`cloudflared tunnel login` + `tunnel create`): el cert.pem de la
+#     cuenta se destruye al terminar y la credencial JSON de cada túnel va cifrada con
+#     systemd-creds en el directorio de su proyecto. Nada de eso viaja en un repositorio.
+#   · No habilita ningún `cloudflared.service` genérico ni corre `cloudflared service install`:
+#     cada proyecto trae su unidad, con su usuario, su config y su credencial cifrada.
 #   · No abre puertos: el túnel sale de la máquina hacia Cloudflare. La regla de la casa
 #     «nada en 0.0.0.0» se sigue cumpliendo (el agente escucha en 127.0.0.1).

@@ -92,7 +92,7 @@ node --test 'agente/**/*.test.ts'
 | `src/salida.ts` | Validación de lo que el modelo escribió, y los marcadores de acción. |
 | `src/historial.ts`, `src/estado.ts`, `src/gasto.ts` | Historial, deduplicación, bajas, límites, tope de gasto. |
 | `conocimiento.md` | **Lo único que el agente sabe**, escrito desde el sitio con la ruta de cada dato. |
-| `despliegue/` | Las dos unidades de systemd, el drop-in de ejemplo, la guía para root y dos propuestas de capa. |
+| `despliegue/` | Las dos unidades de systemd (la del túnel, tal como quedó desplegada), el config del túnel y el drop-in de ejemplo, la guía para root y dos propuestas de capa. |
 
 ### Qué garantiza el código (y no el modelo)
 
@@ -208,19 +208,28 @@ No secretos (por omisión entre paréntesis): `META_PHONE_NUMBER_ID` (obligatori
   /usr/share/keyrings/cloudflare-main.gpg` y `deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg]
   https://pkg.cloudflare.com/cloudflared any main` en `/etc/apt/sources.list.d/cloudflared.list`
   (https://pkg.cloudflare.com/index.html; hay línea `any` y línea bookworm, no trixie).
-- **Token desde archivo:** `cloudflared tunnel run --token-file <PATH>`, «For remotely-managed tunnels
-  only. Requires `2025.4.0` or later»; también `--no-autoupdate`, `--loglevel`, `--metrics <IP:PORT>`
-  (https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/configure-tunnels/run-parameters/).
-  `cloudflared service install` deja el token en `ExecStart` (…/local-management/as-a-service/linux/): por eso no se usa.
+- **Lo que quedó en la máquina (medido el 12 sep, 10:37 CST):** `cloudflared` 2026.9.1; llave
+  sha256 `1bd95f4082b320d541bee351560fc2765aa9f9cd8efa4c9e32135e63f252721d` (huella
+  `CC94 B39C 77AE 7342 A68B 8962 8A68 2D30 8D4E 5E73`); el paquete **no trae unidad propia**. Túnel
+  `ante-wa` **administrado en local**, CNAME `wa.ante.photo` con proxy. Desde fuera, sin el agente:
+  `/webhook/meta` → 502, `/` → 404, `/webhook/meta/x` → 404. Detalle en `despliegue/PARA-ROOT.md`, paso 6.
+- **Túnel administrado en local:** `cloudflared tunnel login` «Prompts a browser window where you can
+  authenticate your tunnel to your Cloudflare account»; `tunnel create` «Creates a tunnel, registers it
+  with the Cloudflare edge and generates a credential file to run this tunnel»; `tunnel route dns`
+  «Creates a DNS CNAME record hostname that points to the tunnel»
+  (https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/do-more-with-tunnels/local-management/tunnel-useful-commands/).
+  Si `tunnel delete` borra también el CNAME, esa página no lo dice.
+- **La credencial desde archivo:** `--credentials-file`, «Filepath at which to read/write the tunnel
+  credentials» (`cmd/cloudflared/tunnel/subcommands.go` de https://github.com/cloudflare/cloudflared).
+  El túnel se toma del argumento o de la clave `tunnel:` del config, no del archivo de credenciales
+  (mismo archivo): por eso el config lleva el UUID.
+- **La ruta única:** en el config, «You can also enter regular expressions for the path key», con
+  sintaxis de Go, y la última regla tiene que atrapar todo
+  (https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/do-more-with-tunnels/local-management/configuration-file/).
+  Se compara sólo la ruta, sin la query: `FindMatchingRule(req.Host, req.URL.Path)` en
+  `proxy/proxy.go` del mismo repositorio. Así el GET de verificación de Meta (con `?hub.…`) entra.
 - **systemd:** `%d` = «Credentials directory … the value of the `$CREDENTIALS_DIRECTORY` environment
   variable» (fuente de `systemd.unit(5)`, https://github.com/systemd/systemd/blob/main/man/systemd.unit.xml).
-- **Panel:** «Networking > Tunnels» → «Create a tunnel» → «Create Tunnel» → sistema operativo y
-  comando → «Continue»; y para publicar: «On the Routes tab, select Add route, then select Published
-  application», subdominio, «Domain», «Service URL», «Add route». Sobre la ruta: «Specifying a path
-  routes matching requests to the service URL, but does not strip or rewrite the path»
-  (https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/get-started/create-remote-tunnel/);
-  la ruta es una expresión regular de Go (configuration-file). El campo «Path» como casilla aparte en
-  esa pantalla **no lo vi citado**.
 - **Regla WAF:** «Security rules» → «Create rule» → «Custom rules», «Rule name», «Choose action»,
   «Deploy» (https://developers.cloudflare.com/waf/custom-rules/create-dashboard/). Campo
   `ip.src.asnum`: «The 16-bit or 32-bit integer representing the Autonomous System (AS) number
@@ -249,34 +258,38 @@ en el plan de Pablo: no verificado.
 Los nombres entre comillas salen de la documentación; los marcados con † no los encontré citados
 textualmente y pueden llamarse un poco distinto en su pantalla.
 
-**Meta**
+**El túnel de Cloudflare ya está hecho** (12 sep, `wa.ante.photo` → `/webhook/meta`, habilitado):
+en Cloudflare a Pablo sólo le queda la regla WAF (paso 8).
+
+**Meta y DeepSeek: cinco cosas en un solo archivo `ante.env`**, una por línea, `NOMBRE=valor`, sin
+comillas:
+```
+META_ACCESS_TOKEN=…
+META_APP_SECRET=…
+META_PHONE_NUMBER_ID=…
+ADMIN_WHATSAPP_TO=+52…
+DEEPSEEK_API_KEY=…
+```
 1. En developers.facebook.com: «Create App», caso de uso «Connect with customers through WhatsApp».
-2. En la app, «WhatsApp» → «API Setup»: queda el número de prueba. Anotar el **Phone number ID** y,
-   en «To», agregar su propio teléfono y confirmarlo con el código que llega.
+2. En la app, «WhatsApp» → «API Setup»: queda el número de prueba. El **Phone number ID** va a
+   `META_PHONE_NUMBER_ID`; en «To», agregar su propio teléfono y confirmarlo con el código que llega.
 3. En Business Settings (Meta Business Suite): «System Users» → crear uno, asignarle la app, y
    «Generate token» con «business_management», «whatsapp_business_management» y
-   «whatsapp_business_messaging». Guardar el token en un archivo `META_ACCESS_TOKEN`.
-4. En la app, App settings → Basic† → **App Secret**: guardarlo en `META_APP_SECRET`.
-5. Su WhatsApp en E.164 (`+52…`) en `ADMIN_WHATSAPP_TO`, y la llave de DeepSeek en `DEEPSEEK_API_KEY`.
+   «whatsapp_business_messaging». El token va a `META_ACCESS_TOKEN`.
+4. En la app, App settings → Basic† → **App Secret**: va a `META_APP_SECRET`.
+5. Su WhatsApp en E.164 (`+52…`) va a `ADMIN_WHATSAPP_TO`, y la llave de DeepSeek a `DEEPSEEK_API_KEY`.
+6. Subir `ante.env` por `scp` a su casa en el servidor (`~pablo-admin/ante.env`) y avisar a root.
 
-**Cloudflare**
-6. «Networking» → «Tunnels» → «Create a tunnel» → nombre `ante-wa` → «Create Tunnel». En el paso del
-   sistema operativo, copiar **sólo el token** del comando que muestra (la cadena larga después de
-   `--token`) a un archivo `CLOUDFLARED_TOKEN`; no correr el comando. «Continue».
-7. En el túnel, pestaña «Routes» → «Add route» → «Published application»: subdominio `wa`,
-   «Domain» `ante.photo`, Path† `webhook/meta`, «Service URL» `http://127.0.0.1:9186` (127.0.0.1 y no
-   `localhost`: el agente escucha sólo en IPv4) → «Add route».
-8. Subir los seis archivos (ver `despliegue/PARA-ROOT.md` § 0) al servidor por `scp` y avisar a root.
+**Root hace los pasos 1–5 de `PARA-ROOT.md`** (lee `ante.env` sin ejecutarlo, cifra los secretos,
+escribe el Phone number ID en el drop-in, destruye el archivo y arranca el agente). Después, Pablo:
 
-**Root hace los pasos 1–6 de `PARA-ROOT.md`.** Después, Pablo:
-
-9. En la app de Meta, «WhatsApp» → «Configuration»: Callback URL† `https://wa.ante.photo/webhook/meta`,
+7. En la app de Meta, «WhatsApp» → «Configuration»: Callback URL† `https://wa.ante.photo/webhook/meta`,
    «Verify Token» = el que root le dejó en `~pablo-admin/META_VERIFY_TOKEN.txt`, «Verify and save»†;
    luego, en los campos del webhook, suscribir «messages»†.
-10. En Cloudflare, «Security rules» → «Create rule» → «Custom rules»: la regla WAF de arriba, acción
-    Block, «Deploy».
-11. Desde su teléfono, escribir «Hola» al número de prueba. Si responde, el pipeline está completo.
-12. Si quiere los avisos fuera de su ventana de 24 h: crear la plantilla `aviso_asistente` (arriba) y,
+8. En Cloudflare, «Security rules» → «Create rule» → «Custom rules»: la regla WAF de arriba, acción
+   Block, «Deploy».
+9. Desde su teléfono, escribir «Hola» al número de prueba. Si responde, el pipeline está completo.
+10. Si quiere los avisos fuera de su ventana de 24 h: crear la plantilla `aviso_asistente` (arriba) y,
     cuando la aprueben, pasarle el nombre y el idioma a root para el drop-in.
 
 ## Lo que decide Pablo (cada una se contesta con una palabra)
@@ -291,16 +304,19 @@ textualmente y pueden llamarse un poco distinto en su pantalla.
 8. **Plantilla de avisos:** ¿crea `aviso_asistente` para que los avisos le lleguen aunque no haya escrito en 24 h? Sin ella, esperan a que escriba. — *sí / no*
 9. **Otro canal para los avisos** (correo, por ejemplo) cuando no hay ventana ni plantilla. — *sí / no*
 10. **Regla WAF:** ¿la pone (refuerzo, no condición)? — *sí / no*
-11. **Encender para siempre** (`systemctl enable` de `svc-ante` y `cloudflared-ante`) después de la prueba. — *sí / no*
+11. **Encender el agente para siempre** (`systemctl enable svc-ante`) después de la prueba; `cloudflared-ante` ya lo habilitó el 12 sep. — *sí / no*
 12. **Número real en coexistencia** (paso 2 de «Con quién habla»), cuando el de prueba funcione. — *sí / no*
 
 ## Límites conocidos
 
-- No hay número de Meta ni túnel todavía: todo lo de Meta y Cloudflare está probado contra falsos.
+- El túnel existe y responde (502 mientras el agente no corra), pero no hay número de Meta todavía:
+  todo lo de Meta está probado contra falsos.
 - La comparación en tiempo constante no la puede vigilar una prueba funcional (es una propiedad de
   tiempos): la cuida la revisión del código.
-- `SystemCallFilter=` y `MemoryDenyWriteExecute=` (en cloudflared) no se pudieron probar: en la Mac no
-  hay systemd. `PARA-ROOT.md` dice qué hacer si estorban.
+- Los `SystemCallFilter=` de `svc-ante` no se pudieron probar: en la Mac no hay systemd.
+  `PARA-ROOT.md` dice qué hacer si estorban. En `cloudflared-ante` se quitaron
+  `MemoryDenyWriteExecute=` y la lista negra de llamadas al desplegar, por prudencia y sin probar si
+  rompían: queda `SystemCallFilter=@system-service`.
 - La regla WAF supone que Meta llama desde AS32934, como documenta; no lo he visto en vivo.
 - El proveedor simulado no conversa: la calidad se ve con el modelo real.
 - Los mensajes de Pablo al número también reciben respuesta del asistente y cuentan para los
