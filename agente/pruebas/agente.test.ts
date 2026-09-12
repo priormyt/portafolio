@@ -82,10 +82,20 @@ test('BAJA: confirma una vez y deja de contestar; ALTA lo reactiva', async () =>
   assert.equal((await agente.recibir(msj('BAJA'))).desenlace, 'baja');
   assert.match(t.enviados(CLIENTE)[0].body, /ya no te escribirá/);
   assert.equal((await agente.recibir(msj('¿sigues ahí?'))).desenlace, 'silencio_baja');
-  assert.equal((await agente.recibir(msj('STOP'))).desenlace, 'baja');
+  assert.equal((await agente.recibir(msj('STOP'))).desenlace, 'silencio_baja', 'ya estaba de baja: no se vuelve a confirmar');
+  assert.equal(t.enviados(CLIENTE).length, 1);
   assert.equal(p.llamadas.length, 0, 'el modelo nunca se llamó');
   assert.equal((await agente.recibir(msj('ALTA'))).desenlace, 'alta');
   assert.equal((await agente.recibir(msj('hola'))).desenlace, 'respondido');
+});
+
+test('BAJA/ALTA alternados no disparan envíos sin fin: cuentan para el límite, y la baja se respeta igual', async () => {
+  const { t, agente } = await montar(proveedorFijo(['Va.']), { AGENTE_LIMITE_POR_NUMERO_HORA: '2' });
+  const d: string[] = [];
+  for (const texto of ['BAJA', 'ALTA', 'BAJA', 'ALTA', 'BAJA', 'ALTA']) d.push((await agente.recibir(msj(texto))).desenlace);
+  assert.deepEqual(d, ['baja', 'alta', 'baja', 'limite_numero', 'silencio_baja', 'limite_numero']);
+  assert.equal(t.enviados(CLIENTE).length, 2, 'sólo dos confirmaciones pagadas');
+  assert.equal(agente.d.bajas.es(CLIENTE), true, 'la última palabra fue BAJA y quedó de baja');
 });
 
 test('tope de gasto: pasado el tope no se llama al modelo; mensaje fijo al cliente y aviso a Pablo', async () => {

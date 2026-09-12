@@ -10,6 +10,17 @@ Node 24 sin dependencias (sin `npm install`): `node:http`, `fetch`, `node:crypto
 ficheros. TypeScript con la eliminación de tipos nativa de Node. Probado con Node 22.23 y 26.7 (en
 el servidor hay 24.20).
 
+## Con quién habla hoy
+
+Con el **Sandbox de Twilio**: contesta en el número compartido de Twilio (+1 415 523 8886), **no** en
+el WhatsApp de ANTE que publica el sitio. Y el Sandbox sólo habla con quien antes le escribió
+`join <código>`: «You can only message end users who have joined your Sandbox»
+(https://www.twilio.com/docs/whatsapp/sandbox). Un cliente que escriba hoy al WhatsApp de ANTE **no**
+llega al agente; en la prueba hablan con él Pablo y quien él invite a unirse. Eso es lo que la hace de
+bajo riesgo. Para que conteste el número real de ANTE hay que darlo de alta en la plataforma de
+WhatsApp Business por Twilio (qué pasa entonces con ese número en la app del teléfono no lo verifiqué:
+se revisa antes): es la decisión 12.
+
 ## Verlo funcionar, en un minuto
 
 ```sh
@@ -73,8 +84,9 @@ WhatsApp del cliente ──► Twilio ──┬─ modo sondeo: el agente pregun
 - **Tiempo máximo por llamada** (20 s), `max_tokens` acotado (400) y un solo reintento corto.
 - **Deduplicación por `MessageSid`**, en disco: Twilio reintenta y el sondeo vuelve a ver lo mismo.
 - **Límites:** 20 mensajes por número por hora y 200 en total (en memoria: un reinicio los vacía).
-- **BAJA / STOP** (el mensaje entero): confirma una vez y no vuelve a contestar ni a guardar lo que
-  escriba ese número. **ALTA** lo reactiva.
+- **BAJA / STOP** (el mensaje entero): la baja se respeta siempre; confirma una sola vez (dentro del
+  límite por número, para que alternar BAJA/ALTA no dispare envíos pagados) y no vuelve a contestar
+  ni a guardar lo que escriba ese número. **ALTA** lo reactiva.
 - **Se presenta como asistente automático de ANTE** en el primer mensaje de cada conversación
   (tras 12 h de silencio empieza otra). Es una frase fija que pone el código, no el modelo.
 - **Privacidad:** historial por número en JSON Lines, podado a las últimas 12 vueltas y 8,000
@@ -191,6 +203,7 @@ Cada una se contesta con una palabra:
 9. **Avisos:** en el Sandbox, un aviso a tu WhatsApp fuera de tu ventana de 24 h puede no llegar; ¿te basta escribirle al Sandbox una vez al día mientras dure la prueba? — *sí / no*
 10. **Encenderlo para siempre** (`systemctl enable`) después de la prueba. — *sí / no*
 11. **Webhook:** ¿túnel público en `wa.ante.photo` para el modo webhook? (hoy: no; sondeo) — *sí / no*
+12. **Número real:** ¿pasar el WhatsApp de ANTE a la plataforma de WhatsApp Business por Twilio para que lo atienda el agente (los avisos a Pablo necesitarían plantillas aprobadas, y hay que revisar antes qué pasa con ese número en la app del teléfono)? Hasta entonces sólo habla quien se une al Sandbox. — *sí / no*
 
 ## Límites conocidos
 

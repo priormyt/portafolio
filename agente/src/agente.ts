@@ -125,19 +125,22 @@ export class Agente {
 
     const clave = palabraClave(m.cuerpo);
     if (clave === 'baja') {
+      // La baja se respeta SIEMPRE; la confirmación (un envío que se paga) sólo
+      // una vez y dentro del límite por número: alternar BAJA/ALTA no dispara
+      // envíos sin fin.
+      const yaEstaba = bajas.es(de);
       bajas.darDeBaja(de, ahora);
-      await this.d.twilio.enviar(de, this.t.baja);
-      registrar('info', 'agente.baja', log);
-      return { desenlace: 'baja', respuesta: this.t.baja };
+      if (yaEstaba) {
+        registrar('info', 'agente.silencio_baja', log);
+        return { desenlace: 'silencio_baja' };
+      }
+      const confirma = limites.permitir(de, ahora).ok;
+      if (confirma) await this.d.twilio.enviar(de, this.t.baja);
+      registrar('info', 'agente.baja', { ...log, confirmada: confirma });
+      return { desenlace: 'baja', respuesta: confirma ? this.t.baja : undefined };
     }
-    if (clave === 'alta' && bajas.es(de)) {
-      bajas.darDeAlta(de);
-      await this.d.twilio.enviar(de, this.t.alta);
-      registrar('info', 'agente.alta', log);
-      return { desenlace: 'alta', respuesta: this.t.alta };
-    }
-    if (bajas.es(de)) {
-      // Ni se contesta ni se guarda lo que escribió.
+    if (bajas.es(de) && clave !== 'alta') {
+      // Ni se contesta ni se guarda lo que escribió, ni cuenta para los límites.
       registrar('info', 'agente.silencio_baja', log);
       return { desenlace: 'silencio_baja' };
     }
@@ -154,6 +157,13 @@ export class Agente {
         return { desenlace: 'limite_global' };
       }
       return { desenlace: 'limite_numero' };
+    }
+
+    if (clave === 'alta' && bajas.es(de)) {
+      bajas.darDeAlta(de);
+      await this.d.twilio.enviar(de, this.t.alta);
+      registrar('info', 'agente.alta', log);
+      return { desenlace: 'alta', respuesta: this.t.alta };
     }
 
     if (!m.cuerpo.trim()) {
