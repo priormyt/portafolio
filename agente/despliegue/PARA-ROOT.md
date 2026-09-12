@@ -1,46 +1,56 @@
-# PARA ROOT · poner a prueba el agente de WhatsApp de ANTE en `kokoroco-central`
+# PARA ROOT · el agente de WhatsApp de ANTE y el primer túnel de `kokoroco-central`
 
 Escrito el 12 sep 2026, **sin ejecutar nada en el servidor**. Cada paso trae su comprobación y su
-vuelta atrás. Se corre como root (`ssh root@100.93.106.86`), en orden. Nada de esto abre un puerto
-ni publica nada: en modo **sondeo** el servicio sólo sale a `api.twilio.com` y `api.deepseek.com`.
+vuelta atrás. Se corre como root (`ssh root@100.93.106.86`), en orden.
 
-Lo que **no** hace esta guía: `systemctl enable` (dejarlo encendido para siempre es palabra de
-Pablo: su comando va aparte, en el paso 8) ni el túnel del modo webhook (§ «Para pasar a webhook»).
+**Qué se monta.** El pipeline que después usará KokoroCo:
 
-## 0 · Antes de empezar: lo que tiene que haber hecho Pablo
+```
+Meta (Cloud API) ──HTTPS──► borde de Cloudflare ──túnel cloudflared-ante──► 127.0.0.1:9186  svc-ante
+   POST firmado             wa.ante.photo            UNA ruta: /webhook/meta     verifica la firma sobre los
+   (X-Hub-Signature-256)    + regla WAF (AS32934)                                bytes crudos, 200 en el acto,
+                                                                                 contesta por la Graph API
+```
 
-1. Cuenta de Twilio con el Sandbox de WhatsApp activo, y su teléfono unido al Sandbox mandando
-   `join <código>` al +1 415 523 8886. **La unión caduca a los 3 días** («The Sandbox session
-   expires three days after joining», https://www.twilio.com/docs/whatsapp/sandbox): antes de cada
-   tanda de pruebas, volver a unirse.
-2. En la consola de Twilio, Sandbox → *When a message comes in*: que no conteste nada por su cuenta
-   (vacío o sin respuesta automática). Si ahí hay una respuesta de demostración, el cliente verá dos
-   respuestas: la de Twilio y la del agente.
-3. Cuatro ficheros de una sola línea, sin comillas, en `/etc/ante/` (como `/etc/ante` es
-   `root:root 0700`, Pablo los sube por `scp` a su casa y root los mueve con
-   `install -m 0600 -o root -g root ~pablo-admin/<NOMBRE> /etc/ante/<NOMBRE>`):
+Nada se ata a `0.0.0.0` y no se abre ningún puerto del módem: el túnel sale de la máquina hacia
+Cloudflare. **Es exposición pública (una ruta) y la decidió Pablo** (12 sep: «sí vamos directo con
+meta»). Lo que sigue sin su palabra: `systemctl enable` de las dos unidades (paso 10).
 
-   | Fichero | Qué es | Forma |
-   |---|---|---|
-   | `/etc/ante/TWILIO_ACCOUNT_SID` | SID de la cuenta | `AC` + 32 hex |
-   | `/etc/ante/TWILIO_AUTH_TOKEN` | Auth Token de la cuenta | 32 caracteres |
-   | `/etc/ante/DEEPSEEK_API_KEY` | llave de la API de DeepSeek | `sk-…` |
-   | `/etc/ante/ADMIN_WHATSAPP_TO` | el WhatsApp de Pablo, a donde llegan los avisos | `whatsapp:+52…` |
+`cloudflared` es el **primer túnel del servidor** y KokoroCo usará el mismo binario (con su propio
+túnel y su propia unidad): por eso se instala desde el repositorio apt de Cloudflare, como capa de
+máquina (`capa-base-cloudflared.propuesta.yml`), y no a mano.
 
-   Si en vez de eso dejó un solo fichero en la forma de `.env.example` (`NOMBRE=valor` por renglón),
-   el paso 2 trae la variante.
+## 0 · Lo que tiene que haber hecho Pablo antes
+
+Paso por paso, con los nombres de las pantallas, en `agente/LEEME.md` § «Lo que hace Pablo». Al
+final, root necesita en `/etc/ante/` estos ficheros de una línea, sin comillas (como `/etc/ante` es
+`root:root 0700`, Pablo los sube por `scp` a su casa y root los mueve con
+`install -m 0600 -o root -g root ~pablo-admin/<NOMBRE> /etc/ante/<NOMBRE>`):
+
+| Fichero | Qué es | De dónde sale |
+|---|---|---|
+| `META_ACCESS_TOKEN` | token permanente de un System User | Business Settings → System users → Generate token |
+| `META_APP_SECRET` | App Secret de la app | App settings → Basic → App secret |
+| `DEEPSEEK_API_KEY` | llave de DeepSeek | platform.deepseek.com |
+| `ADMIN_WHATSAPP_TO` | el WhatsApp de Pablo, E.164: `+52…` | — |
+| `CLOUDFLARED_TOKEN` | el token del túnel `ante-wa` | Cloudflare → Networking → Tunnels → Create a tunnel |
+
+Y el **Phone number ID** (no es secreto, pero es de su cuenta): el número que muestra
+WhatsApp → API Setup junto al número de prueba.
+
+`META_VERIFY_TOKEN` **no** lo trae Pablo: lo genera root en el paso 2 y se lo pasa.
 
 ## 1 · El código en el clon del servidor
 
-El servicio corre `/koko/srv/ante/app/agente/src/main.ts`. Ese clon es el taller de `dev-ante`
-(hay una sesión de Claude Code trabajando ahí): **no cambies su rama sin avisarle**.
+El servicio corre `/koko/srv/ante/app/agente/src/main.ts`. Ese clon es el taller de `dev-ante` (hay
+una sesión de Claude Code trabajando ahí): **no le cambies la rama sin avisar**.
 
-- **Lo normal:** esperar a que Pablo fusione el PR a `main` y traerlo:
+- **Lo normal:** esperar a que Pablo fusione el PR y traerlo:
   ```sh
   sudo -u dev-ante git -C /koko/srv/ante/app status --short   # debe salir vacío
   sudo -u dev-ante git -C /koko/srv/ante/app pull --ff-only origin main
   ```
-- **Para probar antes de fusionar** (sólo con el taller en paz):
+- **Para probar antes de fusionar** (con el taller en paz):
   ```sh
   sudo -u dev-ante git -C /koko/srv/ante/app fetch origin mac/2026-09-12-agente-whatsapp
   sudo -u dev-ante git -C /koko/srv/ante/app switch --detach FETCH_HEAD
@@ -49,11 +59,10 @@ El servicio corre `/koko/srv/ante/app/agente/src/main.ts`. Ese clon es el taller
 **Comprobación:**
 ```sh
 sudo -u svc-ante test -r /koko/srv/ante/app/agente/src/main.ts && echo LEGIBLE
-/usr/bin/node --version        # v24.x
-sudo -u svc-ante /usr/bin/node --test '/koko/srv/ante/app/agente/pruebas/*.test.ts' 2>&1 | tail -8
+/usr/bin/node --version                                         # v24.x
+sudo -u svc-ante /usr/bin/node --test '/koko/srv/ante/app/agente/pruebas/*.test.ts' 2>&1 | tail -8   # fail 0
 ```
-Las pruebas tienen que salir con `fail 0`: no tocan la red (usan un Twilio y un DeepSeek falsos en
-127.0.0.1) y escriben sólo en `/tmp`.
+Las pruebas no tocan la red (Meta y DeepSeek son falsos, en 127.0.0.1) y escriben sólo en `/tmp`.
 
 **Vuelta atrás:** `sudo -u dev-ante git -C /koko/srv/ante/app switch main`.
 
@@ -61,32 +70,33 @@ Las pruebas tienen que salir con `fail 0`: no tocan la red (usan un Twilio y un 
 
 ```sh
 install -d -m 0700 -o root -g root /etc/ante/credenciales
-for N in TWILIO_ACCOUNT_SID TWILIO_AUTH_TOKEN DEEPSEEK_API_KEY ADMIN_WHATSAPP_TO; do
+
+# El verify token lo genera root, y Pablo lo pega en Meta (paso 7).
+openssl rand -hex 32 > /etc/ante/META_VERIFY_TOKEN
+install -m 0400 -o pablo-admin -g "$(id -gn pablo-admin)" /etc/ante/META_VERIFY_TOKEN ~pablo-admin/META_VERIFY_TOKEN.txt
+
+for N in META_ACCESS_TOKEN META_APP_SECRET META_VERIFY_TOKEN DEEPSEEK_API_KEY ADMIN_WHATSAPP_TO CLOUDFLARED_TOKEN; do
   test -s "/etc/ante/$N" || { echo "FALTA /etc/ante/$N"; continue; }
   tr -d '\r\n' < "/etc/ante/$N" | systemd-creds encrypt --name="$N" - "/etc/ante/credenciales/$N.cred"
 done
 ```
-Variante, si Pablo dejó un solo fichero `NOMBRE=valor` (p. ej. `/etc/ante/ante.env`): en el bucle,
-cambia la línea de `tr` por
-`grep -E "^$N=" /etc/ante/ante.env | head -1 | cut -d= -f2- | tr -d '\r\n"' | systemd-creds encrypt --name="$N" - "/etc/ante/credenciales/$N.cred"`.
-
-**Comprobación** (imprime longitudes y formas, **nunca** los valores):
+**Comprobación** (longitudes y formas, **nunca** los valores):
 ```sh
-for N in TWILIO_ACCOUNT_SID TWILIO_AUTH_TOKEN DEEPSEEK_API_KEY ADMIN_WHATSAPP_TO; do
+for N in META_ACCESS_TOKEN META_APP_SECRET META_VERIFY_TOKEN DEEPSEEK_API_KEY ADMIN_WHATSAPP_TO CLOUDFLARED_TOKEN; do
   printf '%-20s %s caracteres\n' "$N" "$(systemd-creds decrypt --name="$N" "/etc/ante/credenciales/$N.cred" - | wc -c)"
 done
-systemd-creds decrypt --name=TWILIO_ACCOUNT_SID /etc/ante/credenciales/TWILIO_ACCOUNT_SID.cred - | grep -Eq '^AC[0-9a-f]{32}$' && echo SID-FORMA-OK
-systemd-creds decrypt --name=ADMIN_WHATSAPP_TO /etc/ante/credenciales/ADMIN_WHATSAPP_TO.cred - | grep -Eq '^whatsapp:\+[0-9]{8,15}$' && echo ADMIN-FORMA-OK
-ls -l /etc/ante/credenciales    # cuatro .cred de root; el directorio es 0700
+systemd-creds decrypt --name=ADMIN_WHATSAPP_TO /etc/ante/credenciales/ADMIN_WHATSAPP_TO.cred - | grep -Eq '^\+[0-9]{8,15}$' && echo ADMIN-E164-OK
+systemd-creds decrypt --name=META_VERIFY_TOKEN /etc/ante/credenciales/META_VERIFY_TOKEN.cred - | grep -Eq '^[0-9a-f]{64}$' && echo VERIFY-OK
+ls -l /etc/ante/credenciales       # seis .cred de root; el directorio es 0700
 ```
-**Sólo si todo salió bien**, se destruyen los originales en claro:
+**Sólo si todo salió bien**, se destruyen los originales en claro (el verify token queda en la
+casa de Pablo hasta el paso 7):
 ```sh
-for N in TWILIO_ACCOUNT_SID TWILIO_AUTH_TOKEN DEEPSEEK_API_KEY ADMIN_WHATSAPP_TO; do shred -u "/etc/ante/$N"; done
-# y, si existió, también ~pablo-admin/<NOMBRE> y /etc/ante/ante.env
+for N in META_ACCESS_TOKEN META_APP_SECRET META_VERIFY_TOKEN DEEPSEEK_API_KEY ADMIN_WHATSAPP_TO CLOUDFLARED_TOKEN; do shred -u "/etc/ante/$N"; done
+# y los que hayan quedado en ~pablo-admin/ (salvo META_VERIFY_TOKEN.txt)
 ```
-**Vuelta atrás:** `rm /etc/ante/credenciales/<NOMBRE>.cred` y Pablo vuelve a mandar el fichero.
-Los `.cred` no se pueden traer de un respaldo a otra máquina (van cifrados con la llave de ésta):
-en una resurrección se re-siembran igual.
+**Vuelta atrás:** `rm /etc/ante/credenciales/<NOMBRE>.cred` y Pablo vuelve a mandar el fichero. Los
+`.cred` van cifrados con la llave de este anfitrión (sin TPM): en una resurrección se re-siembran.
 
 ## 3 · El directorio de datos del agente
 
@@ -94,130 +104,170 @@ en una resurrección se re-siembran igual.
 ls -ld /koko/srv/ante/datos          # svc-ante ante drwxr-x--- (lo creó el guion el 7 sep)
 install -d -m 0700 -o svc-ante -g ante /koko/srv/ante/datos/agente
 ```
-**Comprobación:** `sudo -u svc-ante test -w /koko/srv/ante/datos/agente && echo ESCRIBIBLE`.
-Ahí vivirán `conversaciones/*.jsonl`, `vistos.jsonl`, `bajas.json`, `gasto.json` y `sondeo.json`.
-Está bajo el dataset `koko/srv/ante`, así que entra solo al respaldo nocturno.
+**Comprobación:** `sudo -u svc-ante test -w /koko/srv/ante/datos/agente && echo ESCRIBIBLE`. Ahí
+vivirán `conversaciones/*.jsonl`, `vistos.jsonl`, `bajas.json`, `gasto.json`, `ventanas.json` y
+`avisos-pendientes.jsonl`. Está bajo el dataset `koko/srv/ante`: entra solo al respaldo nocturno.
 
 **Vuelta atrás:** `rm -r /koko/srv/ante/datos/agente` (con el servicio parado).
 
-## 4 · La unidad
+## 4 · La unidad del agente y su drop-in
 
 ```sh
 cp -a /etc/systemd/system/svc-ante.service /root/svc-ante.service.plantilla-2026-09-12
 install -m 0644 -o root -g root /koko/srv/ante/app/agente/despliegue/svc-ante.service /etc/systemd/system/svc-ante.service
+install -d -m 0755 /etc/systemd/system/svc-ante.service.d
+install -m 0644 -o root -g root /koko/srv/ante/app/agente/despliegue/svc-ante.meta.conf.ejemplo /etc/systemd/system/svc-ante.service.d/meta.conf
+editor /etc/systemd/system/svc-ante.service.d/meta.conf      # poner el Phone number ID de Pablo
 systemd-analyze verify /etc/systemd/system/svc-ante.service
 systemctl daemon-reload
 ```
 **Comprobación** (lo que systemd CARGÓ, no lo que dice el archivo):
 ```sh
-systemctl show svc-ante -p User -p Group -p ExecStart -p NoNewPrivileges -p ProtectSystem -p ProtectHome -p RestrictAddressFamilies -p MemoryMax -p LoadCredentialEncrypted
-systemd-analyze security svc-ante.service | tail -1     # la nota global; que no diga UNSAFE
+systemctl show svc-ante -p User -p ExecStart -p NoNewPrivileges -p ProtectSystem -p RestrictAddressFamilies -p MemoryMax
+systemctl show svc-ante -p Environment | tr ' ' '\n' | grep -E '^(META_PHONE_NUMBER_ID|AGENTE_RUTA|AGENTE_HOST)='
+systemd-analyze security svc-ante.service | tail -1
 ```
 **Vuelta atrás:**
 ```sh
 install -m 0644 /root/svc-ante.service.plantilla-2026-09-12 /etc/systemd/system/svc-ante.service
+rm -r /etc/systemd/system/svc-ante.service.d
 systemctl daemon-reload
 ```
 
-## 5 · Arrancar para la prueba (sin `enable`)
+## 5 · Arrancar el agente (sin `enable`) y probarlo desde dentro
 
 ```sh
 systemctl start svc-ante
-systemctl is-active svc-ante                       # active
-journalctl -u svc-ante -n 30 --no-pager -o cat
+systemctl is-active svc-ante                                   # active
+journalctl -u svc-ante -n 20 --no-pager -o cat                 # "evento":"arranque", "escucha":"127.0.0.1:9186/webhook/meta"
+V=$(systemd-creds decrypt --name=META_VERIFY_TOKEN /etc/ante/credenciales/META_VERIFY_TOKEN.cred -)
+curl -s "http://127.0.0.1:9186/webhook/meta?hub.mode=subscribe&hub.verify_token=$V&hub.challenge=123"; echo   # 123
+curl -s -o /dev/null -w '%{http_code}\n' "http://127.0.0.1:9186/webhook/meta?hub.mode=subscribe&hub.verify_token=x&hub.challenge=123"   # 403
+curl -s -o /dev/null -w '%{http_code}\n' -X POST -d '{}' http://127.0.0.1:9186/webhook/meta                                              # 403 (sin firma)
+curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:9186/otra                                                                    # 404
+unset V
 ```
-En el registro (una línea JSON por evento) tiene que aparecer `"evento":"arranque"` con
-`"modo":"sondeo"`, `"proveedorActivo":"deepseek:deepseek-flash"` y `"avisosAlAdmin":"sí"`. Ninguna
-línea lleva secretos ni números completos (van como `whatsapp:+521…1234`) ni el texto de los
-mensajes.
+Si sale `"evento":"config"` y se detiene con código 78: falta algo (el mensaje dice qué, nunca el
+valor). Si muere con `status=31/SYS` o un `EPERM` raro, es el filtro de llamadas al sistema: comenta
+las dos líneas `SystemCallFilter=` y avisa (en la Mac no hay systemd para probarlo).
 
-Si sale `"evento":"config"` y el servicio se detiene con código 78: falta algo (el mensaje dice
-qué, nunca el valor). Por `RestartPreventExitStatus=78` no se queda reintentando.
+**Vuelta atrás:** `systemctl stop svc-ante`.
 
-Si muere con `status=31/SYS` o un `EPERM` raro al arrancar, es el filtro de llamadas al sistema:
-comenta las dos líneas `SystemCallFilter=` de la unidad, `daemon-reload`, `restart`, y avisa (el
-filtro se probó sólo en papel: en la Mac no hay systemd).
+## 6 · cloudflared: instalar, usuario propio, unidad, arrancar
 
-## 6 · La prueba en vivo
-
-Pablo, desde su teléfono unido al Sandbox, escribe «Hola» al +1 415 523 8886. En 5 a 10 segundos le
-contesta el asistente, presentándose. Mientras:
+**6.1 · El paquete, del repositorio apt oficial** (https://pkg.cloudflare.com/index.html, instrucciones
+«Any Debian Based Distribution»; la página no trae una línea para trixie, sólo la genérica `any` y
+bookworm):
 ```sh
-journalctl -u svc-ante -f -o cat     # sondeo.entregados → agente.modelo.ok → agente.respuesta "enviado":true
-cat /koko/srv/ante/datos/agente/gasto.json     # tokens y dólares del día
+mkdir -p --mode=0755 /usr/share/keyrings
+curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg | tee /usr/share/keyrings/cloudflare-main.gpg >/dev/null
+sha256sum /usr/share/keyrings/cloudflare-main.gpg      # anótalo en la capa (como docker.gpg y nodesource.gpg)
+echo 'deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared any main' | tee /etc/apt/sources.list.d/cloudflared.list
+apt-get update && apt-get install cloudflared
+cloudflared --version        # tiene que ser 2025.4.0 o posterior: --token-file no existe antes
 ```
-Luego: «¿Qué paquetes tienen?», «Quiero agendar, soy … el Estándar el sábado» (le llega a Pablo el
-aviso «Solicitud de sesión»), una pregunta que no esté en el conocimiento (aviso «te pasa una
-conversación»), y «BAJA» (confirma y deja de contestar; «ALTA» lo reactiva).
+**Vuelta atrás:** `apt-get remove cloudflared && rm /etc/apt/sources.list.d/cloudflared.list /usr/share/keyrings/cloudflare-main.gpg && apt-get update`.
 
-**Si pasan 30 segundos y en el registro no aparece `sondeo.entregados`:** la hipótesis del modo
-sondeo falló en el Sandbox. La documentación de Twilio confirma que los mensajes entrantes son
-recursos `Message` con `direction: inbound` que se pueden consultar por la API, pero no dice en
-ningún lado, para el Sandbox en particular, que queden listados sin webhook. Se para (paso 7), se
-anota en el PR, y la alternativa es el modo webhook, que necesita un túnel público: lo decide Pablo.
+Si `apt` instala un `cloudflared.service` propio del paquete, no se habilita ni se toca: se usa
+`cloudflared-ante.service`. Tampoco se corre `cloudflared service install <token>`: esa unidad deja
+el token en `ExecStart`, a la vista de `ps` (así lo muestra Cloudflare en
+https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/do-more-with-tunnels/local-management/as-a-service/linux/).
 
-## 7 · Pararlo
-
+**6.2 · Usuario de sistema propio** (sin casa, sin login, sin grupos):
 ```sh
-systemctl stop svc-ante
-systemctl is-active svc-ante        # inactive
+useradd --system --no-create-home --home-dir /nonexistent --shell /usr/sbin/nologin --user-group cloudflared-ante
+getent passwd cloudflared-ante     # comprobación
 ```
-Parado no hace nada: no escucha, no consulta, no gasta. Los datos quedan en
-`/koko/srv/ante/datos/agente` (30 días como mucho; el propio agente borra lo más viejo).
+No es dueño de ningún fichero (el token lo entrega systemd como credencial), así que su uid no
+necesita ser fijo. **Vuelta atrás:** `userdel cloudflared-ante`.
 
-## 8 · Dejarlo encendido — SÓLO con la palabra de Pablo
-
+**6.3 · La unidad.** El token entra como credencial cifrada y `cloudflared` lo lee con
+`--token-file %d/CLOUDFLARED_TOKEN` (`%d` = el directorio de credenciales de la unidad, según
+`systemd.unit(5)`). No aparece ni en el archivo de unidad ni en `ps`.
 ```sh
-systemctl enable --now svc-ante
-```
-Vuelta atrás: `systemctl disable --now svc-ante`.
-
-## 9 · Vuelta atrás completa
-
-```sh
-systemctl disable --now svc-ante 2>/dev/null; systemctl stop svc-ante
-install -m 0644 /root/svc-ante.service.plantilla-2026-09-12 /etc/systemd/system/svc-ante.service
+install -m 0644 -o root -g root /koko/srv/ante/app/agente/despliegue/cloudflared-ante.service /etc/systemd/system/cloudflared-ante.service
+systemd-analyze verify /etc/systemd/system/cloudflared-ante.service
 systemctl daemon-reload
-rm -f /etc/ante/credenciales/{TWILIO_ACCOUNT_SID,TWILIO_AUTH_TOKEN,DEEPSEEK_API_KEY,ADMIN_WHATSAPP_TO}.cred
-rm -r /koko/srv/ante/datos/agente
+systemctl start cloudflared-ante
+systemctl is-active cloudflared-ante
+journalctl -u cloudflared-ante -n 30 --no-pager -o cat     # «Registered tunnel connection» (varias)
+ps -o args= -C cloudflared                                  # se ve --token-file /run/credentials/…, NUNCA el token
 ```
-Y revocar en Twilio y en DeepSeek las llaves sembradas, si ya no se van a usar.
+En el panel de Cloudflare (Networking → Tunnels) el túnel `ante-wa` debe verse conectado (el
+nombre exacto del estado no lo verifiqué en la documentación).
+
+**6.4 · Comprobación de punta a punta** (antes de la regla WAF del paso 8, que bloquearía esto):
+```sh
+curl -s -o /dev/null -w '%{http_code}\n' https://wa.ante.photo/webhook/meta          # 403: llegó al agente (GET sin token)
+curl -s -o /dev/null -w '%{http_code}\n' https://wa.ante.photo/cualquier-otra-cosa   # 404
+journalctl -u svc-ante -n 5 --no-pager -o cat | grep webhook.verificacion             # "ok":false: fue el agente quien contestó
+```
+**Vuelta atrás:** `systemctl stop cloudflared-ante && rm /etc/systemd/system/cloudflared-ante.service && systemctl daemon-reload`.
+Con el túnel parado, `wa.ante.photo` deja de llegar a la máquina.
+
+## 7 · Meta: la URL del webhook (lo hace Pablo; root sólo mira)
+
+Pablo, en su app → **WhatsApp → Configuration**: URL de callback `https://wa.ante.photo/webhook/meta`,
+**Verify token** = el contenido de `~pablo-admin/META_VERIFY_TOKEN.txt`, **Verify and save**; luego
+suscribe el campo **messages**. Root mira:
+```sh
+journalctl -u svc-ante -f -o cat | grep webhook.verificacion   # "ok":true
+```
+Y después: `shred -u ~pablo-admin/META_VERIFY_TOKEN.txt`.
+
+## 8 · La regla WAF de refuerzo (la pone Pablo en el panel de Cloudflare)
+
+Texto exacto en `agente/LEEME.md` § «La regla WAF». Sólo esa ruta y sólo desde la red de Meta
+(AS32934); todo lo demás de `wa.ante.photo`, bloqueado en el borde. **Comprobación** desde el
+servidor (que NO es de Meta): `curl -s -o /dev/null -w '%{http_code}\n' https://wa.ante.photo/webhook/meta`
+→ ahora lo corta Cloudflare (403 del borde), y en `journalctl -u svc-ante` **no** aparece la petición.
+Un mensaje real sigue entrando (paso 9). **Vuelta atrás:** desactivar la regla en el panel.
+
+⚠ Si la verificación del paso 7 falla con la regla puesta, se desactiva un momento, se verifica y se
+reactiva: Meta documenta que sus servidores de webhooks están en AS32934, pero no lo he visto en vivo.
+
+## 9 · La prueba en vivo
+
+Pablo, desde su teléfono (agregado como destinatario del número de prueba), escribe «Hola» al número
+de prueba. En segundos le contesta el asistente:
+```sh
+journalctl -u svc-ante -f -o cat     # agente.modelo.ok → agente.respuesta "enviado":true
+cat /koko/srv/ante/datos/agente/gasto.json
+```
+Luego: «¿Qué paquetes tienen?», «Quiero agendar, soy … el Estándar el sábado» (el aviso «Solicitud de
+sesión» le llega como texto porque su ventana está abierta: acaba de escribir), una pregunta fuera
+del conocimiento (aviso «te pasa una conversación») y «BAJA» (confirma y deja de contestar; «ALTA»
+lo reactiva).
+
+**Avisos pendientes:** si en el registro aparece `aviso_admin.NO_ENTREGADO`, el aviso está en
+`/koko/srv/ante/datos/agente/avisos-pendientes.jsonl` y sale en cuanto Pablo le escriba cualquier
+cosa al número. El arranque también lo dice (`"avisosPendientes": N`, nivel `error`).
+
+## 10 · Pararlo, y dejarlo encendido SÓLO con la palabra de Pablo
+
+```sh
+systemctl stop cloudflared-ante svc-ante        # parar: primero el túnel
+systemctl enable --now svc-ante cloudflared-ante   # SÓLO con la palabra de Pablo
+```
+Vuelta atrás del `enable`: `systemctl disable --now cloudflared-ante svc-ante`.
+
+## 11 · Vuelta atrás completa
+
+```sh
+systemctl disable --now cloudflared-ante svc-ante 2>/dev/null; systemctl stop cloudflared-ante svc-ante
+rm /etc/systemd/system/cloudflared-ante.service
+install -m 0644 /root/svc-ante.service.plantilla-2026-09-12 /etc/systemd/system/svc-ante.service
+rm -r /etc/systemd/system/svc-ante.service.d
+systemctl daemon-reload
+rm -f /etc/ante/credenciales/{META_ACCESS_TOKEN,META_APP_SECRET,META_VERIFY_TOKEN,DEEPSEEK_API_KEY,ADMIN_WHATSAPP_TO,CLOUDFLARED_TOKEN}.cred
+rm -r /koko/srv/ante/datos/agente
+userdel cloudflared-ante
+apt-get remove cloudflared   # sólo si KokoroCo no lo usa ya
+```
+Y en los paneles: borrar el túnel `ante-wa` y su hostname en Cloudflare, la regla WAF, la URL del
+webhook en Meta, y revocar el token del System User y la llave de DeepSeek.
 
 ---
 
-## Para pasar a webhook (NO ejecutar: es exposición pública y la decide Pablo)
-
-Medido el 12 sep 2026 por la sesión que lanzó este trabajo: en el servidor **no hay `cloudflared`**
-ni túnel alguno. El modo webhook es más inmediato (Twilio avisa en el acto, sin consultar cada 5 s),
-pero exige una URL pública que llegue a `127.0.0.1:9186`. Lo que haría falta:
-
-1. **Instalar `cloudflared`** (paquete de Cloudflare para Debian) como `pablo-admin` con sudo, y
-   **crear un túnel con nombre** en la cuenta de Cloudflare de Pablo:
-   `cloudflared tunnel login` · `cloudflared tunnel create ante-wa`.
-2. **Un hostname en la zona `ante.photo`**, p. ej. `wa.ante.photo`, apuntado al túnel
-   (`cloudflared tunnel route dns ante-wa wa.ante.photo`), con esta regla de ingreso en su
-   `config.yml` — una sola ruta, lo demás 404:
-   ```yaml
-   tunnel: ante-wa
-   credentials-file: /etc/cloudflared/ante-wa.json
-   ingress:
-     - hostname: wa.ante.photo
-       path: ^/twilio/whatsapp$
-       service: http://127.0.0.1:9186
-     - service: http_status:404
-   ```
-   (9186 está libre: los ocupados en 127.0.0.1 son 139, 445, 5432, 5678, 8080, 9180, 9181, 9184 y 34273.)
-   Ojo: `ante.photo` es la zona del sitio de producción; un registro DNS nuevo no toca el sitio,
-   pero se hace con cuidado.
-3. **En la unidad:** `Environment=AGENTE_MODO=webhook` y
-   `Environment=AGENTE_URL_PUBLICA=https://wa.ante.photo/twilio/whatsapp` — **idéntica** a la que se
-   ponga en Twilio: la firma se calcula sobre esa URL, no sobre la de 127.0.0.1. `daemon-reload` y
-   `restart`. `RestrictAddressFamilies` no cambia (el servidor escucha en AF_INET de loopback).
-4. **En la consola de Twilio** (Sandbox → *When a message comes in*): esa misma URL, método POST.
-5. **Comprobación:** `curl -s https://wa.ante.photo/twilio/whatsapp -X POST -d x=1` → `403 firma
-   inválida` (bien: nadie sin el Auth Token entra). Un WhatsApp real → 200 y respuesta.
-6. **Vuelta atrás:** borrar la URL en Twilio, `AGENTE_MODO=sondeo`, `cloudflared tunnel delete
-   ante-wa` y el registro DNS.
-
-El agente acepta sólo la ruta de `AGENTE_URL_PUBLICA`, rechaza con 403 lo que no venga firmado por
-Twilio y contesta 200 con TwiML vacío en el acto; la respuesta sale por la API REST.
+Puertos en `127.0.0.1` que ya estaban ocupados: 139, 445, 5432, 5678, 8080, 9180, 9181, 9184, 34273.
+Éste usa **9186** (agente) y **9187** (métricas de cloudflared).

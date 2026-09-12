@@ -1,5 +1,5 @@
 [Unit]
-Description=svc-ante — agente de WhatsApp de ANTE (compartimento ante; ver servidor/doc/COMPARTIMENTOS.md)
+Description=svc-ante — agente de WhatsApp de ANTE: webhook de Meta en 127.0.0.1:9186 (compartimento ante; ver servidor/doc/COMPARTIMENTOS.md)
 Documentation=file:///koko/srv/ante/app/agente/LEEME.md
 After=network-online.target
 Wants=network-online.target
@@ -18,19 +18,24 @@ ExecStart=/usr/bin/node /koko/srv/ante/app/agente/src/main.ts
 # nunca en el entorno. Se siembran con agente/despliegue/PARA-ROOT.md, paso 2.
 # ADMIN_WHATSAPP_TO va aquí aunque no sea una llave: es el teléfono de Pablo y
 # este archivo vive en un repositorio público.
-LoadCredentialEncrypted=TWILIO_ACCOUNT_SID:/etc/ante/credenciales/TWILIO_ACCOUNT_SID.cred
-LoadCredentialEncrypted=TWILIO_AUTH_TOKEN:/etc/ante/credenciales/TWILIO_AUTH_TOKEN.cred
+LoadCredentialEncrypted=META_ACCESS_TOKEN:/etc/ante/credenciales/META_ACCESS_TOKEN.cred
+LoadCredentialEncrypted=META_APP_SECRET:/etc/ante/credenciales/META_APP_SECRET.cred
+LoadCredentialEncrypted=META_VERIFY_TOKEN:/etc/ante/credenciales/META_VERIFY_TOKEN.cred
 LoadCredentialEncrypted=DEEPSEEK_API_KEY:/etc/ante/credenciales/DEEPSEEK_API_KEY.cred
 LoadCredentialEncrypted=ADMIN_WHATSAPP_TO:/etc/ante/credenciales/ADMIN_WHATSAPP_TO.cred
 
 # ── Lo que no es secreto ───────────────────────────────────────────────────
-# Modo sondeo: el servicio sólo SALE a internet (api.twilio.com y
-# api.deepseek.com); no escucha nada. Para webhook, ver PARA-ROOT.md §«Para
-# pasar a webhook» (AGENTE_MODO=webhook, AGENTE_URL_PUBLICA=…, y un túnel).
-Environment=AGENTE_MODO=sondeo
-Environment=AGENTE_SONDEO_MS=5000
+# Escucha SÓLO en 127.0.0.1:9186 y una sola ruta; el túnel cloudflared-ante le
+# manda https://wa.ante.photo/webhook/meta y nada más. Sale a internet sólo a
+# graph.facebook.com y api.deepseek.com.
+# META_PHONE_NUMBER_ID (y, si Pablo crea la plantilla, AGENTE_PLANTILLA_AVISO y
+# AGENTE_PLANTILLA_IDIOMA) van en el drop-in /etc/systemd/system/svc-ante.service.d/meta.conf:
+# son de la cuenta de Pablo y este archivo es público. Sin el drop-in, el
+# servicio no arranca (código 78).
 Environment=AGENTE_HOST=127.0.0.1
 Environment=AGENTE_PUERTO=9186
+Environment=AGENTE_RUTA=/webhook/meta
+Environment=META_GRAPH_VERSION=v26.0
 Environment=AGENTE_DATOS=/koko/srv/ante/datos/agente
 # Proveedor explícito: si falta la llave, el servicio NO arranca (en vez de
 # contestarle a clientes reales con el simulado).
@@ -40,10 +45,6 @@ Environment=AGENTE_TOPE_DIARIO_USD=0.50
 Environment=AGENTE_MAX_TOKENS=400
 Environment=AGENTE_TIEMPO_MODELO_MS=20000
 Environment=AGENTE_PRESENTARSE=si
-# Número compartido del Sandbox de Twilio (público; https://www.twilio.com/docs/whatsapp/sandbox).
-# Con número propio aprobado, cámbialo y baja AGENTE_ENVIO_INTERVALO_MS.
-Environment=TWILIO_WHATSAPP_FROM=whatsapp:+14155238886
-Environment=AGENTE_ENVIO_INTERVALO_MS=3000
 Environment=AGENTE_LIMITE_POR_NUMERO_HORA=20
 Environment=AGENTE_LIMITE_GLOBAL_HORA=200
 Environment=AGENTE_RETENCION_DIAS=30
@@ -63,8 +64,8 @@ RestrictSUIDSGID=yes
 LockPersonality=yes
 
 # ── Blindaje añadido ───────────────────────────────────────────────────────
-# Red: IPv4/IPv6 para salir a Twilio y DeepSeek; AF_UNIX para el journal y
-# systemd. AF_NETLINK no hace falta a Node.
+# Red: IPv4/IPv6 (escuchar en loopback, salir a Meta y DeepSeek) y AF_UNIX para
+# el journal. Node no necesita AF_NETLINK.
 RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
 PrivateDevices=yes
 ProtectKernelModules=yes
@@ -91,6 +92,6 @@ LimitNOFILE=1024
 
 Restart=on-failure
 RestartSec=30
-# 78 = configuración incompleta (falta un secreto, host no permitido…): no se
-# reintenta en bucle, se arregla la configuración.
+# 78 = configuración incompleta (falta un secreto, el drop-in, host no
+# permitido…): no se reintenta en bucle, se arregla la configuración.
 RestartPreventExitStatus=78

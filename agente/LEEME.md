@@ -2,118 +2,139 @@
 
 Un asistente automático que contesta el WhatsApp de ANTE: dice qué paquetes hay y cuánto cuestan,
 junta los datos para apartar una sesión y se los pasa a Pablo, y todo lo que no sabe se lo pasa a
-Pablo también. Es el **piloto** que pidió Pablo para ver cómo trabaja un agente de WhatsApp, con
-ANTE porque es de bajo riesgo. Corre en el servidor `kokoroco-central` (compartimento `ante`, unidad
-`svc-ante.service`); **no forma parte del sitio**: `tsconfig.json` lo excluye y nada de `src/` lo importa.
+Pablo también. Es el **piloto del pipeline que va a usar KokoroCo**; Pablo, 12 sep 2026: «sí vamos
+directo con meta o lo que sea que vayamos a usar en el día a día con kokoroco, tiene que quedar el
+mismo pipeline para probarlo».
 
-Node 24 sin dependencias (sin `npm install`): `node:http`, `fetch`, `node:crypto`, `node:test` y
-ficheros. TypeScript con la eliminación de tipos nativa de Node. Probado con Node 22.23 y 26.7 (en
-el servidor hay 24.20).
+```
+Meta (WhatsApp Cloud API) ──HTTPS──► borde de Cloudflare ──túnel cloudflared-ante──► 127.0.0.1:9186
+   POST firmado                      wa.ante.photo             UNA ruta: /webhook/meta     svc-ante (este programa)
+   X-Hub-Signature-256               + regla WAF: sólo AS32934                             firma sobre los bytes crudos,
+                                                                                           200 en el acto, responde por
+                                                                                           la Graph API · DeepSeek Flash
+```
 
-## Con quién habla hoy
+Corre en el servidor `kokoroco-central` (compartimento `ante`). **No forma parte del sitio**:
+`tsconfig.json` lo excluye y nada de `src/` lo importa (el aviso al admin del sitio,
+`src/lib/whatsapp.ts`, no se tocó). Node 24 sin dependencias (sin `npm install`): `node:http`,
+`fetch`, `node:crypto`, `node:test` y ficheros; TypeScript con la eliminación de tipos nativa de
+Node. Probado con Node 22.23 y 26.7 (en el servidor hay 24.20).
 
-Con el **Sandbox de Twilio**: contesta en el número compartido de Twilio (+1 415 523 8886), **no** en
-el WhatsApp de ANTE que publica el sitio. Y el Sandbox sólo habla con quien antes le escribió
-`join <código>`: «You can only message end users who have joined your Sandbox»
-(https://www.twilio.com/docs/whatsapp/sandbox). Un cliente que escriba hoy al WhatsApp de ANTE **no**
-llega al agente; en la prueba hablan con él Pablo y quien él invite a unirse. Eso es lo que la hace de
-bajo riesgo. Para que conteste el número real de ANTE hay que darlo de alta en la plataforma de
-WhatsApp Business por Twilio (qué pasa entonces con ese número en la app del teléfono no lo verifiqué:
-se revisa antes): es la decisión 12.
+## Igual al pipeline de KokoroCo, y lo que difiere a propósito
+
+**Igual** (S474, S476 del plano de KokoroCo):
+- Meta **directa**, sin intermediario (S476 descartó uno tipo Twilio).
+- La ruta se autentica **sólo** por la firma HMAC-SHA256 de los **bytes crudos**, comprobada antes
+  de parsear; Meta no manda token de identidad.
+- **200 en el acto** e ingesta **idempotente** (deduplicación por el `id` del mensaje, el wamid).
+- **Una sola ruta** pública, por un **túnel de Cloudflare**, a un **proceso aparte** que sólo sirve
+  el webhook; nada en `0.0.0.0`, ni el módem ni Tailscale se tocan.
+- La regla de Cloudflare que sólo acepta esa ruta y sólo desde la red de Meta es **refuerzo, no
+  condición**: el candado es la firma.
+- El precio también es el mismo: **Cloudflare ve el contenido de los mensajes**, y el aviso de
+  privacidad tendrá que nombrar a Meta y a Cloudflare (decisión 4).
+
+**Difiere a propósito:**
+- **Nombre propio del túnel, `wa.ante.photo`.** En KokoroCo el webhook entra con el mismo nombre de
+  la tienda (V4). El sitio de ANTE es un Worker de Cloudflare, no un proceso en la máquina: no hay
+  un nombre de la máquina que compartir.
+- **Sin rol de base.** KokoroCo registra el mensaje con un rol de base propio que sólo puede
+  hacer eso; ANTE guarda JSON Lines en su dataset.
+- **Sin evento de la puerta única del log.** El nombre del hecho «llegó un mensaje de un cliente» es
+  ⛔SP145, de KokoroCo, y sigue abierta: ANTE no lo acuña.
+- **Aquí el mismo proceso contesta.** En KokoroCo la ruta sólo registra y devuelve 200 (S474); en el
+  piloto, el proceso que recibe también llama al modelo y responde por la Graph API.
+
+## Con quién habla, en dos pasos
+
+1. **Primero, el número de prueba** que da Meta for Developers al crear la app (pantalla
+   *WhatsApp → API Setup*). Sólo le puede escribir a los números que Pablo agregue como destinatarios
+   en esa pantalla. **Cuántos admite no lo encontré en la documentación oficial**: el resumen de un
+   buscador dice «up to 5», pero no está en el texto de las páginas de Meta que abrí.
+2. **Después, y es decisión aparte de Pablo:** el número real de ANTE en **coexistencia**, la app
+   WhatsApp Business y la Cloud API a la vez. Meta lo documenta
+   (https://developers.facebook.com/documentation/business-messaging/whatsapp/embedded-signup/onboarding-business-app-users):
+   «They can still send messages on a one-to-one basis using the WhatsApp Business app, and WhatsApp
+   keeps messaging history between both apps in sync», con límites: «business phone numbers that are
+   in use with both the WhatsApp Business app and Cloud API have a fixed throughput of 20 mps», y
+   funciones de la app que se desactivan.
 
 ## Verlo funcionar, en un minuto
 
 ```sh
 node agente/simular.ts
 ```
-Levanta un Twilio falso en `127.0.0.1`, arranca el agente con un token falso y le manda una
-conversación de cinco vueltas firmada como la firmaría Twilio, una petición con firma mala, un
-reintento de Twilio y, en modo sondeo, un segundo número que pregunta algo que el agente no sabe y
-luego escribe BAJA. Escribe la transcripción en
-[`ejemplos/transcripcion-simulada.md`](ejemplos/transcripcion-simulada.md). Sin
-`DEEPSEEK_API_KEY` usa el proveedor **simulado** (reglas fijas, sin red); con la llave, el modelo real.
+Levanta una Graph API falsa en `127.0.0.1` que **exige la ventana de 24 h** como Meta, arranca el
+agente con secretos falsos y le hace lo que haría Meta a través del túnel: la verificación GET
+(buena y mala), cinco vueltas firmadas, una firma mala, una firma sobre JSON re-serializado, el
+mismo wamid dos veces, un payload de `statuses`, un aviso a Pablo con su ventana cerrada (queda
+pendiente) y lo que pasa cuando Pablo escribe, y otro cliente que pregunta algo que el agente no
+sabe y luego escribe BAJA. Transcripción: [`ejemplos/transcripcion-simulada.md`](ejemplos/transcripcion-simulada.md).
+Sin `DEEPSEEK_API_KEY` usa el proveedor **simulado** (reglas fijas, sin red).
 
 Las pruebas:
 ```sh
 node --test 'agente/**/*.test.ts'
 ```
-(`node --test agente/` no sirve: Node 22 y 26 toman el directorio como un archivo y fallan; hay que
-darle el patrón.) No tocan la red: Twilio y DeepSeek son falsos, en `127.0.0.1`.
+(`node --test agente/` no sirve: Node 22 y 26 toman el directorio como un archivo.) No tocan la red.
 
 ## Cómo está hecho
 
-```
-WhatsApp del cliente ──► Twilio ──┬─ modo sondeo: el agente pregunta cada 5 s  GET …/Messages.json
-                                  └─ modo webhook: Twilio llama  POST https://<túnel>/twilio/whatsapp
-                                                      │
-                                   agente/src/agente.ts (el mismo núcleo para los dos)
-   duplicado → otro número → BAJA/ALTA → dado de baja → límites → sólo foto → tope de gasto
-            → modelo (DeepSeek o simulado) → validación de la salida → envío por la API REST
-            → avisos a Pablo (Twilio REST a ADMIN_WHATSAPP_TO, como src/lib/whatsapp.ts)
-```
-
 | Archivo | Qué hace |
 |---|---|
-| `src/main.ts` | Arranca: lee la configuración, elige el modo, poda los datos viejos cada 6 h. |
-| `src/config.ts` | Variables de entorno y secretos (`$CREDENTIALS_DIRECTORY` primero). |
-| `src/agente.ts` | El núcleo: las compuertas de arriba, en ese orden. |
-| `src/sondeo.ts` / `src/webhook.ts` | Los dos modos de entrada. |
-| `src/firma.ts` | `X-Twilio-Signature`, con el algoritmo de la documentación de Twilio. |
-| `src/twilio.ts` | Enviar y listar mensajes por la API REST. |
+| `src/main.ts` | Arranca: configuración, servidor en 127.0.0.1, poda de lo viejo cada 6 h. |
+| `src/webhook.ts` | La única ruta: GET de verificación, POST firmado, 404 a todo lo demás. |
+| `src/firma.ts` | `X-Hub-Signature-256` sobre los bytes crudos, en tiempo constante. |
+| `src/meta.ts` | Enviar texto y plantillas por la Graph API. |
+| `src/avisos.ts` | Avisos a Pablo con la regla de la ventana de 24 h (texto, plantilla o pendiente). |
+| `src/agente.ts` | El núcleo: las compuertas en orden. |
 | `src/modelo.ts` | Proveedores `deepseek` y `simulado`. |
 | `src/salida.ts` | Validación de lo que el modelo escribió, y los marcadores de acción. |
-| `src/historial.ts`, `src/estado.ts`, `src/gasto.ts` | Historial, deduplicación, bajas, límites y tope de gasto. |
+| `src/historial.ts`, `src/estado.ts`, `src/gasto.ts` | Historial, deduplicación, bajas, límites, tope de gasto. |
 | `conocimiento.md` | **Lo único que el agente sabe**, escrito desde el sitio con la ruta de cada dato. |
-| `despliegue/` | La unidad de systemd, la guía para root y la propuesta para la capa del servidor. |
+| `despliegue/` | Las dos unidades de systemd, el drop-in de ejemplo, la guía para root y dos propuestas de capa. |
 
 ### Qué garantiza el código (y no el modelo)
 
-- **No inventa cifras.** Toda cantidad en pesos y todo porcentaje de una respuesta tiene que estar
-  en `conocimiento.md`; si no, la respuesta no sale y la conversación pasa a Pablo. Una prueba
-  compara la tabla de paquetes con `src/lib/precios.ts`: si cambia un precio del sitio y no el
-  conocimiento, se pone en rojo.
-- **El modelo sólo escribe texto.** No tiene herramientas. Para agendar o pasar a Pablo escribe un
-  marcador (`[[AGENDAR|nombre=…|sesion=…|fecha=…]]`, `[[PASAR|motivo=…]]`); el código lo quita del
-  mensaje y manda el aviso, siempre al mismo destino. Un marcador ilegible se trata como «pasar a Pablo».
-- **Salida limpia:** formato de WhatsApp (`*negrita*`, `_cursiva_`), nunca Markdown; sólo enlaces de
-  `ante.photo`; tope de 1,600 caracteres, que es el de Twilio («Can be up to 1,600 characters in
-  length», https://www.twilio.com/docs/messaging/api/message-resource).
-- **Tope de gasto diario** (US$0.50 por omisión). Antes de cada llamada se reserva el peor caso; si
-  no cabe, no se llama al modelo: el cliente recibe un mensaje fijo y Pablo un aviso (una vez por
-  número y día). Se cobra siempre a tarifa pico, así el tope es una cota superior.
-- **Tiempo máximo por llamada** (20 s), `max_tokens` acotado (400) y un solo reintento corto.
-- **Deduplicación por `MessageSid`**, en disco: Twilio reintenta y el sondeo vuelve a ver lo mismo.
-- **Límites:** 20 mensajes por número por hora y 200 en total (en memoria: un reinicio los vacía).
-- **BAJA / STOP** (el mensaje entero): la baja se respeta siempre; confirma una sola vez (dentro del
-  límite por número, para que alternar BAJA/ALTA no dispare envíos pagados) y no vuelve a contestar
-  ni a guardar lo que escriba ese número. **ALTA** lo reactiva.
-- **Se presenta como asistente automático de ANTE** en el primer mensaje de cada conversación
-  (tras 12 h de silencio empieza otra). Es una frase fija que pone el código, no el modelo.
-- **Privacidad:** historial por número en JSON Lines, podado a las últimas 12 vueltas y 8,000
-  caracteres, y **30 días** de retención (lo más viejo se borra solo). Ficheros 0600. El registro
-  nunca lleva secretos, ni el texto de los mensajes, ni números completos (`whatsapp:+521…1234`).
+- **Sólo entra lo que firmó Meta:** HMAC-SHA256 con el App Secret sobre los bytes tal como llegan
+  (una re-serialización del JSON da 403), comparado en tiempo constante; sin firma → 403 y el
+  mensaje ni se apunta. Una sola ruta: lo demás, 404.
+- **No inventa cifras.** Toda cantidad en pesos y todo porcentaje tiene que estar en
+  `conocimiento.md`; si no, la respuesta no sale y pasa a Pablo. Una prueba compara la tabla de
+  paquetes con `src/lib/precios.ts`.
+- **El modelo sólo escribe texto.** Para agendar o pasar a Pablo escribe un marcador; el código lo
+  quita y manda el aviso, siempre al mismo destino.
+- **Salida limpia:** formato de WhatsApp, nunca Markdown; sólo enlaces de `ante.photo`; tope de
+  4096 caracteres (`text.body`: «Maximum 4096 characters»).
+- **Tope de gasto diario** (US$0.50), reservando el peor caso antes de cada llamada y a tarifa pico;
+  tiempo máximo por llamada (20 s), `max_tokens` 400, un reintento corto.
+- **Deduplicación por wamid**, en disco: Meta reintenta y avisa que eso puede duplicar.
+- **Límites:** 20 mensajes por número por hora y 200 en total. **BAJA/STOP** se respeta siempre;
+  **ALTA** reactiva. Los `statuses` (entregado, leído) se ignoran; lo que no es texto recibe una
+  respuesta fija (una reacción, nada).
+- **Se presenta como asistente automático de ANTE** en el primer mensaje de cada conversación.
+- **Privacidad:** historial por número podado (12 vueltas, 8000 caracteres) y **30 días** de
+  retención; ficheros 0600. El registro nunca lleva secretos, ni texto de mensajes, ni números completos.
 
-## Los dos modos
+### Avisos a Pablo: el hueco, con nombre
 
-- **`sondeo`** (por omisión, el de la prueba). El servicio no escucha nada: cada `AGENTE_SONDEO_MS`
-  lista los mensajes entrantes en la API de Twilio y contesta por la misma API. **Cero exposición
-  pública.** Al primer arranque no contesta lo que llegó antes; tras un reinicio, contesta lo que
-  llegó mientras estuvo apagado (hasta 60 min atrás).
-  *Qué dice la documentación:* los entrantes son recursos `Message` con `direction` = «inbound»
-  («Incoming messages»), y del `MessageSid` que llega al webhook dice «May be used to later retrieve
-  this message from the REST API» (https://www.twilio.com/docs/messaging/guides/webhook-request); la
-  lista se filtra por `DateSent` (días GMT: «YYYY-MM-DD», «>=YYYY-MM-DD») y viene «sorted by the
-  `DateSent` field, with the most recent messages appearing first»
-  (https://www.twilio.com/docs/messaging/api/message-resource). **Lo que no dice** en ningún lado
-  es, para el Sandbox en particular, que los entrantes queden listados sin un webhook útil. Por eso
-  la primera prueba real es la comprobación (`despliegue/PARA-ROOT.md`, paso 6).
-- **`webhook`**. Servidor en `127.0.0.1:9186` (nunca `0.0.0.0`: la configuración se niega). Verifica
-  `X-Twilio-Signature` como dice https://www.twilio.com/docs/usage/security (URL completa + parámetros
-  POST en orden alfabético, nombre y valor sin separadores, HMAC-SHA1 con el Auth Token, Base64) y
-  el ejemplo resuelto de esa página es una prueba. Compara en tiempo constante. La URL que se firma
-  es la **pública** (`AGENTE_URL_PUBLICA`), la del túnel, no la de 127.0.0.1. Contesta 200 con TwiML
-  vacío en el acto y la respuesta sale por la API REST; firma mala → 403 sin tocar el mensaje.
-  Necesita un túnel público que hoy no existe: ver `despliegue/PARA-ROOT.md` § «Para pasar a webhook».
+Con la Cloud API, un mensaje que **inicia el negocio** fuera de la ventana de 24 h del destinatario
+tiene que ser una **plantilla aprobada**; el error de Meta es el 131047: «More than 24 hours have
+passed since the recipient last replied to the sender number» → «Send the recipient a template
+message instead» (https://developers.facebook.com/docs/whatsapp/cloud-api/support/error-codes). El
+aviso a Pablo es justo eso. Así que el agente lleva la cuenta de la última vez que Pablo le escribió
+al número y:
+
+- **(a)** si su ventana está abierta (24 h menos 30 min de margen), el aviso va como **texto**;
+- **(b)** si no, y están puestas `AGENTE_PLANTILLA_AVISO` y `AGENTE_PLANTILLA_IDIOMA`, va como
+  **plantilla de utilidad**, con el aviso resumido en una línea como su único parámetro;
+- **(c)** si no hay ni ventana ni plantilla, **no llega**: queda en
+  `datos/agente/avisos-pendientes.jsonl`, el registro lo marca con nivel `error`
+  (`aviso_admin.NO_ENTREGADO`) y **sale en cuanto Pablo escriba cualquier cosa** al número.
+
+No hay correo ni otro canal de respaldo: **eso lo decide Pablo** (decisión 9). Plantilla sugerida,
+si la quiere (categoría *Utility*, idioma `es_MX`, nombre `aviso_asistente`):
+«Aviso del asistente de ANTE: {{1}}». Meta la tiene que aprobar.
 
 ## Variables
 
@@ -122,96 +143,166 @@ desarrollo, de variables de entorno:
 
 | Nombre | Qué es |
 |---|---|
-| `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` | La cuenta de Twilio (las mismas que usa `src/lib/whatsapp.ts`). |
-| `DEEPSEEK_API_KEY` | Llave de DeepSeek. Sin ella el proveedor es `simulado`, salvo que `AGENTE_PROVEEDOR=deepseek` la exija (así está la unidad). |
-| `ADMIN_WHATSAPP_TO` | El WhatsApp de Pablo, a donde llegan los avisos. Va como secreto porque el repo es público. |
+| `META_ACCESS_TOKEN` | token permanente de un System User de Meta |
+| `META_APP_SECRET` | App Secret de la app: con él se comprueba la firma |
+| `META_VERIFY_TOKEN` | lo genera root con `openssl rand -hex 32`; Pablo lo pega en Meta |
+| `DEEPSEEK_API_KEY` | llave de DeepSeek |
+| `ADMIN_WHATSAPP_TO` | el WhatsApp de Pablo en E.164 (`+52…`), a donde van los avisos. Va como secreto porque el repo es público |
 
-El resto (con su valor por omisión):
-
-| Variable | Por omisión | |
-|---|---|---|
-| `AGENTE_MODO` | `sondeo` | `sondeo` o `webhook` |
-| `TWILIO_WHATSAPP_FROM` | — (obligatoria) | nuestro número, `whatsapp:+…` (Sandbox: `whatsapp:+14155238886`) |
-| `AGENTE_DATOS` | `agente/.datos` | en el servidor, `/koko/srv/ante/datos/agente` |
-| `AGENTE_PROVEEDOR` | `deepseek` si hay llave, si no `simulado` | |
-| `AGENTE_MODELO` | `deepseek-flash` | ver «Lo verificado» |
-| `AGENTE_TOPE_DIARIO_USD` | `0.5` | día de la Ciudad de México |
-| `AGENTE_PRECIO_ENTRADA_USD_MTOK` / `…_ENTRADA_CACHE_…` / `…_SALIDA_…` | `0.3` / `0.006` / `1.2` | tarifa pico de `deepseek-flash` |
-| `AGENTE_MAX_TOKENS` | `400` (máximo 1000) | |
-| `AGENTE_TIEMPO_MODELO_MS` | `20000` | |
-| `AGENTE_SONDEO_MS` | `5000` | |
-| `AGENTE_SONDEO_ATRASO_MAX_MIN` | `60` | tras un apagón, hasta cuánto atrás contesta |
-| `AGENTE_HOST` / `AGENTE_PUERTO` | `127.0.0.1` / `9186` | sólo loopback |
-| `AGENTE_URL_PUBLICA` | — | obligatoria en webhook; idéntica a la de la consola de Twilio |
-| `AGENTE_PRESENTARSE` | `si` | `no` quita la presentación |
-| `AGENTE_PRESENTACION` | «Hola, soy el asistente automático de ANTE…» | `{humano}` se reemplaza |
-| `AGENTE_NOMBRE_HUMANO` | `Pablo` | cómo nombra el agente a quien confirma |
-| `AGENTE_CONVERSACION_HORAS` | `12` | silencio tras el que se vuelve a presentar |
-| `AGENTE_LIMITE_POR_NUMERO_HORA` / `AGENTE_LIMITE_GLOBAL_HORA` | `20` / `200` | |
-| `AGENTE_VUELTAS` / `AGENTE_HISTORIAL_CARACTERES` | `12` / `8000` | poda del historial |
-| `AGENTE_RETENCION_DIAS` | `30` | |
-| `AGENTE_ENVIO_INTERVALO_MS` | `3000` | el Sandbox manda «one message every three seconds» |
-| `TWILIO_API_BASE`, `DEEPSEEK_API_BASE`, `AGENTE_CONOCIMIENTO`, `AGENTE_ZONA_HORARIA` | | para pruebas |
-
-Para correrlo a mano en desarrollo (contra Twilio de verdad, con llaves en el entorno):
-`AGENTE_DATOS=/tmp/ante TWILIO_WHATSAPP_FROM=whatsapp:+14155238886 node agente/src/main.ts`.
+No secretos (por omisión entre paréntesis): `META_PHONE_NUMBER_ID` (obligatorio, en el drop-in),
+`META_GRAPH_VERSION` (`v26.0`), `AGENTE_RUTA` (`/webhook/meta`), `AGENTE_HOST`/`AGENTE_PUERTO`
+(`127.0.0.1`/`9186`, sólo loopback), `AGENTE_DATOS` (`agente/.datos`; en el servidor
+`/koko/srv/ante/datos/agente`), `AGENTE_PLANTILLA_AVISO` + `AGENTE_PLANTILLA_IDIOMA` (sin plantilla),
+`AGENTE_PROVEEDOR` (`deepseek` si hay llave, si no `simulado`), `AGENTE_MODELO` (`deepseek-flash`),
+`AGENTE_TOPE_DIARIO_USD` (`0.5`), `AGENTE_PRECIO_ENTRADA_USD_MTOK` / `…_ENTRADA_CACHE_…` /
+`…_SALIDA_…` (`0.3`/`0.006`/`1.2`, tarifa pico), `AGENTE_MAX_TOKENS` (`400`), `AGENTE_TIEMPO_MODELO_MS`
+(`20000`), `AGENTE_PRESENTARSE` (`si`), `AGENTE_PRESENTACION`, `AGENTE_NOMBRE_HUMANO` (`Pablo`),
+`AGENTE_CONVERSACION_HORAS` (`12`), `AGENTE_LIMITE_POR_NUMERO_HORA`/`AGENTE_LIMITE_GLOBAL_HORA`
+(`20`/`200`), `AGENTE_VUELTAS`/`AGENTE_HISTORIAL_CARACTERES` (`12`/`8000`), `AGENTE_RETENCION_DIAS`
+(`30`); y para pruebas `META_GRAPH_BASE`, `DEEPSEEK_API_BASE`, `AGENTE_CONOCIMIENTO`, `AGENTE_ZONA_HORARIA`.
 
 ## Lo verificado (12 sep 2026), con su fuente
 
-- **DeepSeek.** «DeepSeek V4 Flash» ya no existe como tal: «The legacy names `deepseek-v4-flash` and
-  `deepseek-v4-flash-vision-exp` are still accepted, but the corresponding models have been retired,
-  their requests are served by the DeepSeek-V4.1-Flash model and billed at the Flash price». El id
-  vigente es **`deepseek-flash`** (DeepSeek-V4.1-Flash, 1M de contexto). Precio por millón de tokens,
-  valle / pico: entrada con caché **US$0.003 / 0.006**, sin caché **US$0.15 / 0.30**, salida
-  **US$0.60 / 1.20**; pico = «01:00 - 04:00 and 06:00 - 10:00 UTC, Monday through Friday»
-  (https://api-docs.deepseek.com/quick_start/pricing/). API: `POST /chat/completions`, `thinking`
-  `enabled|disabled` — «Thinking mode is enabled by default» (https://api-docs.deepseek.com/guides/thinking_mode/),
-  así que el agente lo apaga. Datos: «we directly collect, process and store your Personal Data in
-  People's Republic of China» (https://cdn.deepseek.com/policies/en-US/deepseek-privacy-policy.html).
-- **Twilio, costo.** «Twilio's per-message fee for WhatsApp is $0.005, inbound or outbound» y
-  «During a customer service window, Meta does not charge for utility template messages or free-form
-  messages» (https://www.twilio.com/en-us/whatsapp/pricing). El Sandbox: «Sandbox messages are billed
-  at standard Twilio API for WhatsApp pricing» y «Twilio free trial accounts include 100 WhatsApp
-  messages as part of their trial free units» (https://www.twilio.com/docs/whatsapp/sandbox). No
-  encontré una tarifa distinta para México.
-- **Twilio, Sandbox.** Unirse: «send `join <your sandbox code>` to the Sandbox number»; caduca: «three
-  days after joining»; «You can only message end users who have joined your Sandbox»; «For
-  business-initiated messages from the Sandbox, you can use only pre-approved templates»; ventana:
-  «When a user sends your business a message, it opens a 24-hour customer service window»
-  (https://www.twilio.com/docs/whatsapp/sandbox).
-- **No confirmado:** cuánto espera Twilio la respuesta de un webhook de mensajería (la documentación
-  sólo da 15 s para llamadas de voz); por eso el agente contesta en el acto y procesa aparte.
+**Meta**
+- **Versión de la Graph API: v26.0**, la más reciente: «Introducing Graph API v26.0 and Marketing API
+  v26.0», 29 jul 2026 (https://developers.facebook.com/blog/post/2026/07/29/introducing-graph-api-v26-and-marketing-api-v26/). Configurable.
+- **Verificación (GET):** «Verify that the `hub.verify_token` value matches the string you set in the
+  Verify Token field … Respond with the `hub.challenge` value.» (https://developers.facebook.com/docs/graph-api/webhooks/getting-started)
+- **Firma (POST):** «We sign all Event Notification payloads with a SHA256 signature and include the
+  signature in the request's X-Hub-Signature-256 header, preceded with sha256=» y «Generate a SHA256
+  signature using the payload and your app's App Secret» (misma página). La página no habla de
+  escapes unicode; firmar los bytes crudos es lo único que no depende de cómo se re-serialice.
+- **Forma del payload:** `object: whatsapp_business_account`, `entry[].changes[].value` con
+  `metadata.phone_number_id`, `contacts[]`, `messages[]` (`from`, `id`, `timestamp`, `type`,
+  `text.body`) y `statuses[]` (https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/components).
+  «Webhook payloads can be up to 3 MB» (https://developers.facebook.com/documentation/business-messaging/whatsapp/webhooks/overview):
+  el agente acepta hasta 4 MB. Lotes: «a **maximum** of 1000 updates» (getting-started).
+- **Envío:** `POST https://graph.facebook.com/<API_VERSION>/<WHATSAPP_BUSINESS_PHONE_NUMBER_ID>/messages`
+  con `Authorization: Bearer`, `to` = «WhatsApp user phone number» (ejemplo `+16505551234`),
+  `text.body` «Maximum 4096 characters»
+  (https://developers.facebook.com/documentation/business-messaging/whatsapp/messages/text-messages).
+  Plantillas: `type: "template"`, `template: {name, language: {code}, components}`
+  (https://developers.facebook.com/docs/whatsapp/cloud-api/reference/messages).
+- **Reintentos — dos páginas de Meta dicen cosas distintas:** la genérica, «we will retry
+  immediately, then try a few more times with decreasing frequency over the next 36 hours»
+  (getting-started); la de WhatsApp, «Meta retries delivery with decreasing frequency until the
+  request succeeds, for up to 7 days» y «These retries can result in duplicate webhook notifications»
+  (webhooks/overview). Para el código da igual: deduplica por wamid (30 días).
+- **Cuánto espera Meta la respuesta:** **no confirmado**; ninguna de las dos páginas da un número.
+  Las dos piden responder 200 («Your endpoint should respond to all Event Notifications with
+  200 OK HTTPS»): el agente contesta 200 antes de procesar.
+- **México:** «For Brazil and Mexico, the extra added prefix of the phone number may be modified by
+  the Cloud API» (https://developers.facebook.com/docs/whatsapp/cloud-api/reference/phone-numbers/).
+  Por eso `521…` y `52…` cuentan como el mismo número al reconocer a Pablo.
+- **Red de Meta:** «You can get the IP addresses of Meta's webhook servers by running … `whois -h
+  whois.radb.net — '-i origin AS32934'`» (webhooks/overview). ASN 32934 = «Meta», «Also Known As
+  Facebook, Instagram, WhatsApp, Messenger» (https://www.peeringdb.com/net/979).
+- **Token de System User:** «access the Business settings panel and then click System Users» y
+  «click the Generate token button», con los permisos «business_management,
+  whatsapp_business_management, whatsapp_business_messaging»
+  (https://developers.facebook.com/documentation/business-messaging/whatsapp/access-tokens/).
+- **Destinatarios del número de prueba:** **no confirmado** (ver «Con quién habla»).
 
-## Costo esperado de la prueba
+**Cloudflare**
+- **Instalar:** `curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg | sudo tee
+  /usr/share/keyrings/cloudflare-main.gpg` y `deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg]
+  https://pkg.cloudflare.com/cloudflared any main` en `/etc/apt/sources.list.d/cloudflared.list`
+  (https://pkg.cloudflare.com/index.html; hay línea `any` y línea bookworm, no trixie).
+- **Token desde archivo:** `cloudflared tunnel run --token-file <PATH>`, «For remotely-managed tunnels
+  only. Requires `2025.4.0` or later»; también `--no-autoupdate`, `--loglevel`, `--metrics <IP:PORT>`
+  (https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/configure-tunnels/run-parameters/).
+  `cloudflared service install` deja el token en `ExecStart` (…/local-management/as-a-service/linux/): por eso no se usa.
+- **systemd:** `%d` = «Credentials directory … the value of the `$CREDENTIALS_DIRECTORY` environment
+  variable» (fuente de `systemd.unit(5)`, https://github.com/systemd/systemd/blob/main/man/systemd.unit.xml).
+- **Panel:** «Networking > Tunnels» → «Create a tunnel» → «Create Tunnel» → sistema operativo y
+  comando → «Continue»; y para publicar: «On the Routes tab, select Add route, then select Published
+  application», subdominio, «Domain», «Service URL», «Add route». Sobre la ruta: «Specifying a path
+  routes matching requests to the service URL, but does not strip or rewrite the path»
+  (https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/get-started/create-remote-tunnel/);
+  la ruta es una expresión regular de Go (configuration-file). El campo «Path» como casilla aparte en
+  esa pantalla **no lo vi citado**.
+- **Regla WAF:** «Security rules» → «Create rule» → «Custom rules», «Rule name», «Choose action»,
+  «Deploy» (https://developers.cloudflare.com/waf/custom-rules/create-dashboard/). Campo
+  `ip.src.asnum`: «The 16-bit or 32-bit integer representing the Autonomous System (AS) number
+  associated with the client IP address»; reemplaza a `ip.geoip.asnum`
+  (https://developers.cloudflare.com/ruleset-engine/rules-language/fields/reference/ip.src.asnum/).
+  Si el plan Free lo permite en reglas personalizadas **no lo confirmé**.
 
-Cada vuelta son dos mensajes de Twilio (entra y sale): **US$0.01**. El modelo: el mensaje de
-sistema ronda 7,200 caracteres (unos 2,000 tokens) y DeepSeek cobra la parte repetida como caché, así
-que una vuelta cuesta del orden de **US$0.001** (lo real queda en `gasto.json`). Twilio domina el costo.
+### La regla WAF (texto exacto para el panel)
 
-## Lo que tiene que decidir o hacer Pablo
+Nombre: `ANTE wa: solo webhook de Meta` · Acción: **Block** · Expresión (con *Edit expression*):
+```
+(http.host eq "wa.ante.photo" and not (http.request.uri.path eq "/webhook/meta" and ip.src.asnum eq 32934))
+```
+Bloquea en el borde todo lo que vaya a `wa.ante.photo` salvo la ruta del webhook desde la red de Meta.
 
-Cada una se contesta con una palabra:
+## Costo esperado
 
-1. **Twilio:** ¿usamos tu cuenta con el Sandbox para la prueba, uniéndote con «join <código>» desde tu teléfono y repitiéndolo cada 3 días? — *sí / no*
-2. **Llave:** ¿abres una llave de DeepSeek para el agente y la dejas en `/etc/ante/`? — *sí / no*
-3. **Modelo:** «V4 Flash» se retiró y su nombre lo atiende DeepSeek-V4.1-Flash (`deepseek-flash`) al mismo precio; ¿vale ése? — *sí / no*
-4. **Privacidad:** ¿pueden los mensajes de los clientes ir a proveedores fuera de México (DeepSeek procesa y guarda en China; Twilio es de EE. UU.)? El aviso de privacidad (`src/pages/aviso-privacidad.astro`, líneas 20, 25-30 y 46) sólo habla de teléfono y correo y de «proveedores de servicios técnicos (por ejemplo, proveedores de correo electrónico)»; no menciona WhatsApp, un asistente automático ni transferencias al extranjero. — *sí / no*
-5. **Presentación:** ¿se presenta como «asistente automático de ANTE» en el primer mensaje? (hoy: sí) — *sí / no*
-6. **Tope:** ¿US$0.50 al día de modelo? — *sí / otra cifra*
-7. **Tu nombre:** el sitio nunca te nombra; ¿el agente dice «Pablo» a los clientes? — *sí / no*
-8. **Horario:** el sitio dice «Lunes a sábado, 9:00 a 18:00» (`agendar.astro:73`, `fotografia-corporativa.astro:180`) y también «Contáctanos para verificar disponibilidad» (`contacto.astro:41`); ¿cuál vale? Mientras, el agente no da horario. — *el primero / el segundo*
-9. **Avisos:** en el Sandbox, un aviso a tu WhatsApp fuera de tu ventana de 24 h puede no llegar; ¿te basta escribirle al Sandbox una vez al día mientras dure la prueba? — *sí / no*
-10. **Encenderlo para siempre** (`systemctl enable`) después de la prueba. — *sí / no*
-11. **Webhook:** ¿túnel público en `wa.ante.photo` para el modo webhook? (hoy: no; sondeo) — *sí / no*
-12. **Número real:** ¿pasar el WhatsApp de ANTE a la plataforma de WhatsApp Business por Twilio para que lo atienda el agente (los avisos a Pablo necesitarían plantillas aprobadas, y hay que revisar antes qué pasa con ese número en la app del teléfono)? Hasta entonces sólo habla quien se une al Sandbox. — *sí / no*
+El modelo: el mensaje de sistema ronda 7,200 caracteres (unos 2,000 tokens) y DeepSeek cobra la parte
+repetida como caché, así que una vuelta cuesta del orden de US$0.001 (lo real queda en `gasto.json`).
+WhatsApp: no verifiqué la página de precios de Meta en esta vuelta; lo citado antes (de la página de
+Twilio) es que Meta no cobra los mensajes libres dentro de la ventana de servicio. Cloudflare Tunnel
+en el plan de Pablo: no verificado.
+
+## Lo que hace Pablo, paso por paso
+
+Los nombres entre comillas salen de la documentación; los marcados con † no los encontré citados
+textualmente y pueden llamarse un poco distinto en su pantalla.
+
+**Meta**
+1. En developers.facebook.com: «Create App», caso de uso «Connect with customers through WhatsApp».
+2. En la app, «WhatsApp» → «API Setup»: queda el número de prueba. Anotar el **Phone number ID** y,
+   en «To», agregar su propio teléfono y confirmarlo con el código que llega.
+3. En Business Settings (Meta Business Suite): «System Users» → crear uno, asignarle la app, y
+   «Generate token» con «business_management», «whatsapp_business_management» y
+   «whatsapp_business_messaging». Guardar el token en un archivo `META_ACCESS_TOKEN`.
+4. En la app, App settings → Basic† → **App Secret**: guardarlo en `META_APP_SECRET`.
+5. Su WhatsApp en E.164 (`+52…`) en `ADMIN_WHATSAPP_TO`, y la llave de DeepSeek en `DEEPSEEK_API_KEY`.
+
+**Cloudflare**
+6. «Networking» → «Tunnels» → «Create a tunnel» → nombre `ante-wa` → «Create Tunnel». En el paso del
+   sistema operativo, copiar **sólo el token** del comando que muestra (la cadena larga después de
+   `--token`) a un archivo `CLOUDFLARED_TOKEN`; no correr el comando. «Continue».
+7. En el túnel, pestaña «Routes» → «Add route» → «Published application»: subdominio `wa`,
+   «Domain» `ante.photo`, Path† `webhook/meta`, «Service URL» `http://127.0.0.1:9186` (127.0.0.1 y no
+   `localhost`: el agente escucha sólo en IPv4) → «Add route».
+8. Subir los seis archivos (ver `despliegue/PARA-ROOT.md` § 0) al servidor por `scp` y avisar a root.
+
+**Root hace los pasos 1–6 de `PARA-ROOT.md`.** Después, Pablo:
+
+9. En la app de Meta, «WhatsApp» → «Configuration»: Callback URL† `https://wa.ante.photo/webhook/meta`,
+   «Verify Token» = el que root le dejó en `~pablo-admin/META_VERIFY_TOKEN.txt`, «Verify and save»†;
+   luego, en los campos del webhook, suscribir «messages»†.
+10. En Cloudflare, «Security rules» → «Create rule» → «Custom rules»: la regla WAF de arriba, acción
+    Block, «Deploy».
+11. Desde su teléfono, escribir «Hola» al número de prueba. Si responde, el pipeline está completo.
+12. Si quiere los avisos fuera de su ventana de 24 h: crear la plantilla `aviso_asistente` (arriba) y,
+    cuando la aprueben, pasarle el nombre y el idioma a root para el drop-in.
+
+## Lo que decide Pablo (cada una se contesta con una palabra)
+
+1. **Llave de DeepSeek:** ¿la abre para el agente? — *sí / no*
+2. **Modelo:** «V4 Flash» se retiró y su nombre lo atiende DeepSeek-V4.1-Flash (`deepseek-flash`) al mismo precio; ¿vale ése? — *sí / no*
+3. **Presentación:** ¿se presenta como «asistente automático de ANTE» en el primer mensaje? (hoy: sí) — *sí / no*
+4. **Privacidad:** ¿pueden los mensajes de los clientes pasar por Meta y Cloudflare y procesarse en DeepSeek (China)? El aviso de privacidad (`src/pages/aviso-privacidad.astro`, líneas 20, 25-30 y 46) sólo habla de teléfono y correo y de «proveedores de servicios técnicos (por ejemplo, proveedores de correo electrónico)». No lo edité. — *sí / no*
+5. **Tope:** ¿US$0.50 al día de modelo? — *sí / otra cifra*
+6. **Su nombre:** el sitio nunca lo nombra; ¿el agente dice «Pablo» a los clientes? — *sí / no*
+7. **Horario:** el sitio dice «Lunes a sábado, 9:00 a 18:00» (`agendar.astro:73`) y también «Contáctanos para verificar disponibilidad» (`contacto.astro:41`); ¿cuál vale? Mientras, el agente no da horario. — *el primero / el segundo*
+8. **Plantilla de avisos:** ¿crea `aviso_asistente` para que los avisos le lleguen aunque no haya escrito en 24 h? Sin ella, esperan a que escriba. — *sí / no*
+9. **Otro canal para los avisos** (correo, por ejemplo) cuando no hay ventana ni plantilla. — *sí / no*
+10. **Regla WAF:** ¿la pone (refuerzo, no condición)? — *sí / no*
+11. **Encender para siempre** (`systemctl enable` de `svc-ante` y `cloudflared-ante`) después de la prueba. — *sí / no*
+12. **Número real en coexistencia** (paso 2 de «Con quién habla»), cuando el de prueba funcione. — *sí / no*
 
 ## Límites conocidos
 
-- El modo sondeo en el Sandbox está confirmado a nivel de API, no probado en vivo (ver arriba).
-- El filtro de llamadas al sistema de la unidad (`SystemCallFilter=`) no se pudo probar: en la Mac no
-  hay systemd. `PARA-ROOT.md` dice qué hacer si estorba.
-- Sólo texto: a una foto sin texto le contesta que por ahora sólo lee texto.
-- El proveedor simulado no conversa: sirve para ver el circuito. La calidad de las respuestas se ve
-  con el modelo real.
-- Para producción (número propio de WhatsApp Business, fuera del Sandbox) hacen falta plantillas
-  aprobadas para cualquier mensaje que inicie el negocio, como los avisos a Pablo.
+- No hay número de Meta ni túnel todavía: todo lo de Meta y Cloudflare está probado contra falsos.
+- La comparación en tiempo constante no la puede vigilar una prueba funcional (es una propiedad de
+  tiempos): la cuida la revisión del código.
+- `SystemCallFilter=` y `MemoryDenyWriteExecute=` (en cloudflared) no se pudieron probar: en la Mac no
+  hay systemd. `PARA-ROOT.md` dice qué hacer si estorban.
+- La regla WAF supone que Meta llama desde AS32934, como documenta; no lo he visto en vivo.
+- El proveedor simulado no conversa: la calidad se ve con el modelo real.
+- Los mensajes de Pablo al número también reciben respuesta del asistente y cuentan para los
+  límites y el gasto, a propósito: así prueba lo que vería un cliente (y de paso abre su ventana de 24 h).
+- A una reacción (👍) no le contesta nada; a cualquier otro mensaje que no sea texto, la respuesta fija.

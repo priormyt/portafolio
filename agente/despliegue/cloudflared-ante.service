@@ -1,0 +1,61 @@
+[Unit]
+Description=cloudflared-ante — túnel de Cloudflare de ANTE: https://wa.ante.photo/webhook/meta → 127.0.0.1:9186 (una sola ruta)
+Documentation=file:///koko/srv/ante/app/agente/despliegue/PARA-ROOT.md
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=600
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=cloudflared-ante
+Group=cloudflared-ante
+
+# El token del túnel NO va en este archivo ni en la línea de órdenes (ps la
+# muestra a cualquiera). Va cifrado como credencial de systemd y cloudflared lo
+# lee de un archivo con --token-file («For remotely-managed tunnels only.
+# Requires 2025.4.0 or later», https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/configure-tunnels/run-parameters/).
+# %d es el directorio de credenciales de esta unidad (el mismo $CREDENTIALS_DIRECTORY).
+# Por eso NO se usa `cloudflared service install <token>`: esa unidad deja el
+# token en ExecStart, a la vista de `ps`.
+LoadCredentialEncrypted=CLOUDFLARED_TOKEN:/etc/ante/credenciales/CLOUDFLARED_TOKEN.cred
+ExecStart=/usr/bin/cloudflared tunnel --no-autoupdate --loglevel info --metrics 127.0.0.1:9187 run --token-file %d/CLOUDFLARED_TOKEN
+# --no-autoupdate: lo actualiza apt con el resto de la máquina, no el binario solo.
+# --metrics en loopback, explícito (9187 está libre; ver la lista de puertos en PARA-ROOT.md).
+
+# ── Blindaje ────────────────────────────────────────────────────────────────
+# cloudflared no escribe nada en disco: todo el sistema de archivos queda de sólo lectura.
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+ProtectProc=invisible
+RestrictNamespaces=yes
+RestrictSUIDSGID=yes
+RestrictRealtime=yes
+LockPersonality=yes
+RemoveIPC=yes
+KeyringMode=private
+CapabilityBoundingSet=
+AmbientCapabilities=
+# AF_NETLINK: Go la usa para enumerar interfaces de red.
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX AF_NETLINK
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallFilter=~@privileged @mount @debug @cpu-emulation @obsolete @raw-io @reboot @swap @module @clock
+SystemCallErrorNumber=EPERM
+# Go no usa JIT: aquí sí se puede prohibir memoria escribible y ejecutable.
+MemoryDenyWriteExecute=yes
+UMask=0077
+MemoryMax=256M
+TasksMax=128
+
+Restart=on-failure
+RestartSec=10

@@ -2,41 +2,48 @@
 #
 # Cambio a la sección «ANTE» de `maquinas/kokoroco-central/capas/proyectos.yml` del repo
 # `priormyt/prior` (ese repo lo toca la Mac, por PR). Hoy esa sección dice «taller sin servicio» y
-# que `svc-ante.service` «existe por el patrón y no corre». Esto es lo que diría cuando el agente de
-# WhatsApp esté corriendo. Se escribió leyendo la capa actual (12 sep 2026) y siguiendo la forma de
-# la de Aristóteles: credenciales en un directorio vacío y cerrado, la unidad como fichero, y la
-# comprobación del blindaje sobre lo que systemd CARGÓ.
+# que `svc-ante.service` «existe por el patrón y no corre». Esto es lo que diría con el agente de
+# WhatsApp y su túnel corriendo. Sigue la forma de la de Aristóteles: credenciales en un directorio
+# vacío y cerrado, las unidades como ficheros, y la comprobación del blindaje sobre lo que systemd
+# CARGÓ.
 #
 # Qué cambia respecto de la capa actual:
-#   1. el comentario de cabecera (el servicio ya corre algo);
-#   2. el nombre del play («taller sin servicio» → «taller + agente de WhatsApp»);
-#   3. el comentario del usuario svc-ante («no corre nada hoy» → qué corre);
-#   4. cuatro tareas nuevas al final: /etc/ante/credenciales, /koko/srv/ante/datos/agente,
-#      la unidad copiada de ../ficheros/svc-ante.service y la comprobación del blindaje;
+#   1. el comentario de cabecera (el servicio ya corre algo, y hay un túnel);
+#   2. el nombre del play («taller sin servicio» → «taller + agente de WhatsApp + túnel»);
+#   3. el comentario del usuario svc-ante;
+#   4. tareas nuevas: /etc/ante/credenciales, /koko/srv/ante/datos/agente, el usuario
+#      cloudflared-ante, las dos unidades copiadas de ../ficheros/, el drop-in de svc-ante (sin
+#      contenido: lleva el Phone number ID y se re-siembra) y la comprobación del blindaje;
 #   5. un handler de daemon-reload.
+# El paquete `cloudflared` y su repositorio NO van aquí: van en la capa de máquina
+# (`capa-base-cloudflared.propuesta.yml`), porque KokoroCo usará el mismo binario.
 # Lo demás (grupo, uids, dataset, app/ y datos/) queda EXACTAMENTE como está.
 #
-# Para aplicarla, la Mac copia `agente/despliegue/svc-ante.service` de priormyt/portafolio a
-# `maquinas/kokoroco-central/ficheros/svc-ante.service` y marca con [MEDIDO <fecha>] lo que haya
-# comprobado en la máquina (hasta entonces, todo lo de abajo es [PROPUESTO]).
+# Para aplicarla, la Mac copia `agente/despliegue/svc-ante.service` y
+# `agente/despliegue/cloudflared-ante.service` de priormyt/portafolio a
+# `maquinas/kokoroco-central/ficheros/`, y marca con [MEDIDO <fecha>] lo que haya comprobado en la
+# máquina (hasta entonces, todo lo de abajo es [PROPUESTO]).
 
-# ── ANTE · el portafolio de fotografía de Pablo, y su agente de WhatsApp ────────
+# ── ANTE · el portafolio de fotografía de Pablo, su agente de WhatsApp y su túnel ─
 # [MEDIDO 7 sep 2026] Compartimento dado de alta con `kokoro-nuevo-proyecto ante --exec`
 # por orden textual de Pablo («crea el espacio para mi página de fotografía de ANTE dentro
 # del server»). El código es `priormyt/portafolio` (Astro 6 + adaptador de Cloudflare), y
 # **el sitio NO se sirve desde esta máquina**: lo despliega GitHub Actions en Cloudflare
 # Workers con cada push a `main`.
-# [PROPUESTO 12 sep 2026] `svc-ante.service` corre el AGENTE DE WHATSAPP de ANTE
-# (`agente/` del mismo repo; Node 24 sin dependencias, `node agente/src/main.ts`): piloto
-# pedido por Pablo («un agente de whats app que atienda ANTE»). Modo SONDEO: sólo sale a
-# api.twilio.com y api.deepseek.com, no escucha nada, no hay túnel. Sus datos
-# (conversaciones con 30 días de retención, gasto, bajas) viven en /koko/srv/ante/datos/agente
-# y entran al respaldo por el dataset. Cuatro credenciales cifradas en /etc/ante/credenciales.
-# `enable` o no es palabra de Pablo: esta capa describe la unidad, no la habilita.
+# [PROPUESTO 12 sep 2026] `svc-ante.service` corre el AGENTE DE WHATSAPP de ANTE (`agente/` del
+# mismo repo; Node 24 sin dependencias): el piloto del pipeline de KokoroCo (S474/S476), por
+# palabra de Pablo del 12 sep («sí vamos directo con meta… tiene que quedar el mismo pipeline para
+# probarlo»). Escucha en 127.0.0.1:9186 una sola ruta, /webhook/meta, y verifica la firma de Meta
+# sobre los bytes crudos. `cloudflared-ante.service` es el PRIMER TÚNEL de la máquina: publica
+# https://wa.ante.photo/webhook/meta → 127.0.0.1:9186 y nada más (túnel administrado desde el
+# panel, con token). El token del túnel y cinco secretos del agente van cifrados en
+# /etc/ante/credenciales. Datos (conversaciones con 30 días de retención, gasto, bajas, avisos
+# pendientes) en /koko/srv/ante/datos/agente: entran al respaldo por el dataset.
+# `enable` o no es palabra de Pablo: esta capa describe las unidades, no las habilita.
 # Esta capa DESCRIBE lo que el guion creó, con los ids fijos que salieron, para que una
 # resurrección los reproduzca iguales (los archivos restaurados de la bóveda vienen con
 # estos números). No lo aplica por primera vez: eso lo hace el guion.
-- name: "Capa 5 · proyectos — ANTE (taller + agente de WhatsApp)"
+- name: "Capa 5 · proyectos — ANTE (taller + agente de WhatsApp + túnel)"
   hosts: kokoroco
   become: true
 
@@ -60,20 +67,30 @@
     # … «Usuario de taller dev-ante», el dataset y «app/ del taller, datos/ del servicio, /etc/ante
     #   para llaves» sin cambios …
 
-    - name: "Directorio de credenciales del agente, vacío y cerrado"
+    - name: "Usuario del túnel cloudflared-ante (sin casa, sin login, sin grupos)"
+      ansible.builtin.user:
+        name: cloudflared-ante
+        group: cloudflared-ante
+        home: /nonexistent
+        shell: /usr/sbin/nologin
+        system: true
+        create_home: false
+      # uid NO fijo a propósito: no es dueño de ningún fichero (el token se lo entrega systemd
+      # como credencial), así que una restauración no deja nada huérfano.
+
+    - name: "Directorio de credenciales de ANTE, vacío y cerrado"
       ansible.builtin.file:
         path: /etc/ante/credenciales
         state: directory
         owner: root
         group: root
         mode: "0700"
-      # Se crea VACÍO a propósito, como el de Aristóteles. Los cuatro .cred
-      # (TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, DEEPSEEK_API_KEY, ADMIN_WHATSAPP_TO) están cifrados
-      # con la llave de ESTE anfitrión, que no tiene TPM: no se traen de ningún respaldo, se
-      # re-siembran con `systemd-creds encrypt` (agente/despliegue/PARA-ROOT.md, paso 2).
-      # ADMIN_WHATSAPP_TO es el teléfono de Pablo: va cifrado porque la unidad vive en un repo público.
+      # Se crea VACÍO a propósito, como el de Aristóteles. Los seis .cred (META_ACCESS_TOKEN,
+      # META_APP_SECRET, META_VERIFY_TOKEN, DEEPSEEK_API_KEY, ADMIN_WHATSAPP_TO y
+      # CLOUDFLARED_TOKEN) van cifrados con la llave de ESTE anfitrión, que no tiene TPM: no se
+      # traen de ningún respaldo, se re-siembran (agente/despliegue/PARA-ROOT.md, paso 2).
 
-    - name: "Datos del agente (conversaciones, gasto, bajas)"
+    - name: "Datos del agente (conversaciones, gasto, bajas, avisos pendientes)"
       ansible.builtin.file:
         path: /koko/srv/ante/datos/agente
         state: directory
@@ -81,31 +98,45 @@
         group: ante
         mode: "0700"
 
-    - name: "La unidad del agente, copiada exacta de la máquina"
+    - name: "Las dos unidades, copiadas exactas de la máquina"
       ansible.builtin.copy:
-        dest: /etc/systemd/system/svc-ante.service
+        dest: "/etc/systemd/system/{{ item }}"
         mode: "0644"
-        src: ../ficheros/svc-ante.service
+        src: "../ficheros/{{ item }}"
+      loop: [svc-ante.service, cloudflared-ante.service]
       notify: Recargar systemd
-      # Fichero y no YAML, por lo mismo que Aristóteles: cuatro LoadCredentialEncrypted y el
-      # blindaje entero; pegados aquí invitan a que alguien «arregle» uno al editar el playbook.
-      # Fuente: priormyt/portafolio, agente/despliegue/svc-ante.service.
+      # Ficheros y no YAML, por lo mismo que Aristóteles: credenciales y blindaje enteros; pegados
+      # aquí invitan a que alguien «arregle» una línea al editar el playbook.
+      # Fuente: priormyt/portafolio, agente/despliegue/.
 
-    - name: "Comprobar el blindaje del agente (lo que systemd CARGÓ)"
-      ansible.builtin.command: systemctl show svc-ante.service -p {{ item.prop }}  # noqa: command-instead-of-module
+    # HUECO a propósito · el drop-in /etc/systemd/system/svc-ante.service.d/meta.conf
+    # (META_PHONE_NUMBER_ID y, si existe, la plantilla de avisos) NO se escribe aquí: son de la
+    # cuenta de Pablo y este repositorio los vería. Se re-siembra como las credenciales, desde
+    # agente/despliegue/svc-ante.meta.conf.ejemplo. Sin él, svc-ante no arranca (código 78):
+    # falla cerrado, no a medias.
+
+    - name: "Comprobar el blindaje de las dos unidades (lo que systemd CARGÓ)"
+      ansible.builtin.command: systemctl show {{ item.unidad }} -p {{ item.prop }}  # noqa: command-instead-of-module
       register: blindaje_ante
       changed_when: false
       failed_when: blindaje_ante.stdout | trim != item.esperado
       loop:
-        - { prop: User, esperado: "User=svc-ante" }
-        - { prop: NoNewPrivileges, esperado: "NoNewPrivileges=yes" }
-        - { prop: ProtectSystem, esperado: "ProtectSystem=strict" }
-        - { prop: ProtectHome, esperado: "ProtectHome=yes" }
-        - { prop: PrivateDevices, esperado: "PrivateDevices=yes" }
-        - { prop: RestrictAddressFamilies, esperado: "RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6" }
-      # ⚠ El orden en que systemd imprime RestrictAddressFamilies se MIDE en la máquina antes de
-      # fusionar esta capa; si difiere, se corrige el `esperado`, no la unidad.
-      # No se comprueba ActiveState a propósito: si está encendido o no lo decide Pablo.
+        - { unidad: svc-ante.service, prop: User, esperado: "User=svc-ante" }
+        - { unidad: svc-ante.service, prop: NoNewPrivileges, esperado: "NoNewPrivileges=yes" }
+        - { unidad: svc-ante.service, prop: ProtectSystem, esperado: "ProtectSystem=strict" }
+        - { unidad: svc-ante.service, prop: PrivateDevices, esperado: "PrivateDevices=yes" }
+        - { unidad: cloudflared-ante.service, prop: User, esperado: "User=cloudflared-ante" }
+        - { unidad: cloudflared-ante.service, prop: NoNewPrivileges, esperado: "NoNewPrivileges=yes" }
+        - { unidad: cloudflared-ante.service, prop: ProtectSystem, esperado: "ProtectSystem=strict" }
+        - { unidad: cloudflared-ante.service, prop: MemoryDenyWriteExecute, esperado: "MemoryDenyWriteExecute=yes" }
+      # No se comprueba RestrictAddressFamilies: el orden en que systemd lo imprime se MIDE antes.
+      # No se comprueba ActiveState a propósito: si están encendidos o no lo decide Pablo.
+
+    - name: "El token del túnel NUNCA en la línea de órdenes"
+      ansible.builtin.command: systemctl show cloudflared-ante.service -p ExecStart  # noqa: command-instead-of-module
+      register: exec_tunel
+      changed_when: false
+      failed_when: "'--token-file' not in exec_tunel.stdout or ' --token ' in exec_tunel.stdout"
 
   handlers:
     - name: Recargar systemd
