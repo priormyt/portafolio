@@ -1,9 +1,10 @@
-// El núcleo: recibe un mensaje entrante (venga del webhook o del sondeo) y
-// decide qué contestar. Es el mismo para los dos modos.
+// El núcleo: recibe un mensaje entrante ya verificado (webhook de Meta) y
+// decide qué contestar.
 //
 // Orden de las compuertas, de la más barata a la más cara:
-//   duplicado → otro número → BAJA/ALTA → número dado de baja → límites →
-//   sólo medios → tope de gasto → modelo → validación → envío → avisos a Pablo.
+//   duplicado (wamid) → número ilegible → ventana de Pablo → BAJA → dado de
+//   baja → límites → ALTA → no es texto → tope de gasto → modelo → validación
+//   → envío por la Graph API → avisos a Pablo.
 
 import type { Config } from './config.ts';
 import type { Conocimiento } from './conocimiento.ts';
@@ -14,9 +15,10 @@ import type { Gasto } from './gasto.ts';
 import type { Entrada, Historial } from './historial.ts';
 import type { MensajeModelo, Proveedor, RespuestaModelo } from './modelo.ts';
 import { enmascarar, registrar } from './registro.ts';
+import type { Avisos } from './avisos.ts';
+import type { MensajeEntrante, Mensajeria } from './meta.ts';
 import type { Accion } from './salida.ts';
-import { extraerAcciones, LIMITE_TWILIO, validarSalida } from './salida.ts';
-import type { MensajeEntrante, Mensajeria } from './twilio.ts';
+import { extraerAcciones, LIMITE_TEXTO, validarSalida } from './salida.ts';
 
 export type Desenlace =
   | 'duplicado'
@@ -26,7 +28,7 @@ export type Desenlace =
   | 'silencio_baja'
   | 'limite_numero'
   | 'limite_global'
-  | 'solo_medios'
+  | 'no_es_texto'
   | 'tope'
   | 'fallo_modelo'
   | 'rechazado'
@@ -40,7 +42,8 @@ export interface Resultado {
 
 export interface Dependencias {
   config: Config;
-  twilio: Mensajeria;
+  whatsapp: Mensajeria;
+  avisos: Avisos;
   proveedor: Proveedor;
   conocimiento: Conocimiento;
   historial: Historial;
@@ -55,7 +58,7 @@ export function textos(humano: string) {
   return {
     baja: 'Listo: el asistente de ANTE ya no te escribirá a este número. Si cambias de opinión, escribe ALTA.',
     alta: 'Listo, el asistente de ANTE vuelve a contestar en este número.',
-    soloMedios: 'Por ahora sólo leo texto. Escríbeme lo que necesitas y te ayudo.',
+    soloTexto: 'Por ahora sólo leo texto. Escríbeme lo que necesitas y te ayudo.',
     tope: `Ahora mismo no puedo contestarte en automático. Ya le pasé tu mensaje a ${humano} y te escribe él por aquí.`,
     fallo: `Tuve un problema para contestarte. Ya le pasé tu mensaje a ${humano} y te escribe él por aquí.`,
     rechazo: `Eso prefiero que te lo confirme ${humano} directamente. Ya le pasé tu mensaje y te escribe por aquí.`,
@@ -85,12 +88,12 @@ export class Agente {
   }
 
   /**
-   * Punto de entrada de los dos modos. La deduplicación es SÍNCRONA y va
-   * primero: si el webhook reintentado y el sondeo traen el mismo MessageSid a la
-   * vez, sólo uno pasa. Luego, en fila por número (orden de la conversación).
+   * Punto de entrada. La deduplicación por wamid es SÍNCRONA y va primero:
+   * Meta reintenta y puede mandar el mismo mensaje dos veces; sólo uno pasa.
+   * Luego, en fila por número (orden de la conversación).
    */
   recibir(m: MensajeEntrante): Promise<Resultado> {
-    if (!m.sid || !this.d.vistos.marcar(m.sid, this.ahora())) {
+    if (!m.id || !this.d.vistos.marcar(m.id, this.ahora())) {
       return Promise.resolve({ desenlace: 'duplicado' });
     }
     const previa = this.colas.get(m.de) ?? Promise.resolve();
@@ -116,12 +119,17 @@ export class Agente {
     const { config, bajas, limites, historial } = this.d;
     const ahora = this.ahora();
     const de = m.de;
-    const log = { de: enmascarar(de), sid: m.sid };
+    const log = { de: enmascarar(de) };
 
-    if (m.para !== config.twilio.desde || de === config.twilio.desde || !de.startsWith('whatsapp:')) {
-      registrar('aviso', 'agente.ignorado', { ...log, motivo: 'no es un WhatsApp a nuestro número' });
+    if (!/^\d{8,15}$/.test(de)) {
+      registrar('aviso', 'agente.ignorado', { ...log, motivo: 'número ilegible' });
       return { desenlace: 'ignorado' };
     }
+
+    // Todo mensaje abre la ventana de 24 h de quien escribe. Si es Pablo, lo
+    // pendiente sale ya: ahora sí se le puede escribir.
+    this.d.avisos.registrarEntrante(de, ahora);
+    if (this.d.avisos.esAdmin(de)) await this.d.avisos.vaciarPendientes();
 
     const clave = palabraClave(m.cuerpo);
     if (clave === 'baja') {
@@ -135,7 +143,7 @@ export class Agente {
         return { desenlace: 'silencio_baja' };
       }
       const confirma = limites.permitir(de, ahora).ok;
-      if (confirma) await this.d.twilio.enviar(de, this.t.baja);
+      if (confirma) await this.d.whatsapp.enviarTexto(de, this.t.baja);
       registrar('info', 'agente.baja', { ...log, confirmada: confirma });
       return { desenlace: 'baja', respuesta: confirma ? this.t.baja : undefined };
     }
@@ -161,23 +169,24 @@ export class Agente {
 
     if (clave === 'alta' && bajas.es(de)) {
       bajas.darDeAlta(de);
-      await this.d.twilio.enviar(de, this.t.alta);
+      await this.d.whatsapp.enviarTexto(de, this.t.alta);
       registrar('info', 'agente.alta', log);
       return { desenlace: 'alta', respuesta: this.t.alta };
     }
 
-    if (!m.cuerpo.trim()) {
-      if (m.medios > 0) {
-        await this.d.twilio.enviar(de, this.t.soloMedios);
-        return { desenlace: 'solo_medios', respuesta: this.t.soloMedios };
-      }
-      return { desenlace: 'ignorado' };
+    if (m.tipo !== 'text') {
+      // Una reacción (👍 a un mensaje) no pide respuesta; lo demás (foto, audio,
+      // ubicación…) recibe la respuesta fija.
+      if (m.tipo === 'reaction') return { desenlace: 'ignorado' };
+      await this.d.whatsapp.enviarTexto(de, this.t.soloTexto);
+      return { desenlace: 'no_es_texto', respuesta: this.t.soloTexto };
     }
+    if (!m.cuerpo.trim()) return { desenlace: 'ignorado' };
 
-    const cuerpo = m.cuerpo.slice(0, LIMITE_TWILIO);
+    const cuerpo = m.cuerpo.slice(0, LIMITE_TEXTO);
     const ultima = historial.ultimaActividad(de);
     const primerMensaje = !ultima || ahora.getTime() - ultima.getTime() > config.conversacionHoras * 3_600_000;
-    historial.anexar(de, { t: ahora.toISOString(), rol: 'cliente', texto: cuerpo, sid: m.sid });
+    historial.anexar(de, { t: ahora.toISOString(), rol: 'cliente', texto: cuerpo, sid: m.id });
 
     const mensajes = this.armarMensajes(historial.leer(de, ahora), primerMensaje, ahora);
     const caracteres = mensajes.reduce((s, x) => s + x.content.length, 0);
@@ -195,7 +204,7 @@ export class Agente {
             primeraVezHoy
               ? `⚠️ Asistente de ANTE: se alcanzó el tope de gasto de hoy (US$${this.d.gasto.tope}). Ya no llama al modelo hasta mañana.`
               : '⚠️ Asistente de ANTE, tope de gasto: otro cliente escribió.',
-            `Cliente: ${de}`,
+            `Cliente: +${de}`,
             `Mensaje: «${cita(cuerpo)}»`,
           ].join('\n'),
         );
@@ -210,7 +219,7 @@ export class Agente {
       this.d.gasto.liquidar(reserva, undefined, ahora);
       registrar('error', 'agente.modelo', { ...log, error: String((e as Error)?.message ?? e) });
       await this.avisarAdmin(
-        [`⚠️ El asistente de ANTE no pudo contestar (falló el modelo).`, `Cliente: ${de}`, `Mensaje: «${cita(cuerpo)}»`].join('\n'),
+        [`⚠️ El asistente de ANTE no pudo contestar (falló el modelo).`, `Cliente: +${de}`, `Mensaje: «${cita(cuerpo)}»`].join('\n'),
       );
       return this.contestar(de, this.t.fallo, 'fallo_modelo', []);
     }
@@ -219,7 +228,7 @@ export class Agente {
 
     const { texto, acciones } = extraerAcciones(respuesta.texto);
     const intro = primerMensaje && config.presentarse ? config.textoPresentacion : '';
-    const limite = LIMITE_TWILIO - (intro ? intro.length + 2 : 0);
+    const limite = LIMITE_TEXTO - (intro ? intro.length + 2 : 0);
     const v = validarSalida(texto, this.d.conocimiento.permitidos, limite);
     if (v.problemas.length) registrar('aviso', 'agente.salida', { ...log, problemas: v.problemas });
 
@@ -251,7 +260,7 @@ export class Agente {
   }
 
   private async contestar(de: string, texto: string, desenlace: Desenlace, acciones: Accion[]): Promise<Resultado> {
-    const envio = await this.d.twilio.enviar(de, texto);
+    const envio = await this.d.whatsapp.enviarTexto(de, texto);
     this.d.historial.anexar(de, { t: this.ahora().toISOString(), rol: 'agente', texto });
     registrar(envio.ok ? 'info' : 'error', 'agente.respuesta', {
       de: enmascarar(de),
@@ -269,7 +278,7 @@ export class Agente {
         await this.avisarAdmin(
           [
             '📅 Solicitud de sesión (asistente de ANTE)',
-            `Cliente: ${de}`,
+            `Cliente: +${de}`,
             `Nombre: ${a.nombre}`,
             `Sesión: ${a.sesion}`,
             `Fecha preferida: ${a.fecha}`,
@@ -279,24 +288,14 @@ export class Agente {
         );
       } else {
         await this.avisarAdmin(
-          ['🙋 El asistente de ANTE te pasa una conversación', `Cliente: ${de}`, `Motivo: ${a.motivo}`, `Último mensaje: «${cita(ultimo)}»`].join('\n'),
+          ['🙋 El asistente de ANTE te pasa una conversación', `Cliente: +${de}`, `Motivo: ${a.motivo}`, `Último mensaje: «${cita(ultimo)}»`].join('\n'),
         );
       }
     }
   }
 
-  /**
-   * Aviso a Pablo por la misma vía que src/lib/whatsapp.ts (Twilio REST a
-   * ADMIN_WHATSAPP_TO). Nunca tumba la conversación: en el Sandbox, fuera de la
-   * ventana de 24 h de Pablo, un mensaje iniciado por el negocio puede rebotar.
-   */
+  /** Aviso a Pablo: texto si su ventana está abierta, plantilla si la hay, pendiente si no (avisos.ts). */
   private async avisarAdmin(texto: string): Promise<void> {
-    const admin = this.d.config.twilio.admin;
-    if (!admin) {
-      registrar('aviso', 'agente.aviso_admin.sin_destino', { caracteres: texto.length });
-      return;
-    }
-    const r = await this.d.twilio.enviar(admin, texto.slice(0, LIMITE_TWILIO));
-    registrar(r.ok ? 'info' : 'error', 'agente.aviso_admin', { enviado: r.ok, estado: r.estado, codigo: r.codigo });
+    await this.d.avisos.avisar(texto.slice(0, LIMITE_TEXTO));
   }
 }

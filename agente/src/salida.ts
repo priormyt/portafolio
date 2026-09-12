@@ -4,14 +4,14 @@
 //   3. se quitan los enlaces y correos que no sean de ante.photo;
 //   4. se revisa que toda cifra en pesos y todo porcentaje estén en el conocimiento
 //      (un precio que no está ahí es un precio inventado: la respuesta no sale);
-//   5. se recorta al tope de un mensaje de Twilio.
+//   5. se recorta al tope de un mensaje de texto de WhatsApp.
 //
-// Tope: «The text content of the outgoing message. Can be up to 1,600 characters
-// in length.» — https://www.twilio.com/docs/messaging/api/message-resource
-// Se cuenta en unidades UTF-16 (String.length), que nunca es menos que lo que
-// cuenta Twilio: un emoji pesa 2 aquí.
+// Tope: `text.body`, «Maximum 4096 characters» —
+// https://developers.facebook.com/documentation/business-messaging/whatsapp/messages/text-messages
+// Se cuenta en unidades UTF-16 (String.length), que nunca es menos que los
+// caracteres: un emoji pesa 2 aquí.
 
-export const LIMITE_TWILIO = 1600;
+export const LIMITE_TEXTO = 4096;
 
 // ── Marcadores de acción ──────────────────────────────────────────────────────
 
@@ -175,7 +175,7 @@ const INVISIBLES = new RegExp(
   'g',
 );
 
-export function validarSalida(crudo: string, permitidos: Permitidos, limite: number = LIMITE_TWILIO): Validacion {
+export function validarSalida(crudo: string, permitidos: Permitidos, limite: number = LIMITE_TEXTO): Validacion {
   const problemas: string[] = [];
   // Caracteres de control e invisibles (salvo el salto de línea).
   let t = crudo.replace(INVISIBLES, '');

@@ -5,47 +5,45 @@ import http from 'node:http';
 import path from 'node:path';
 import { Agente } from './agente.ts';
 import { asegurarDir } from './almacen.ts';
+import { Avisos } from './avisos.ts';
 import type { Config } from './config.ts';
 import { cargarConfig, resumenConfig } from './config.ts';
 import { cargarConocimiento } from './conocimiento.ts';
 import { Bajas, Limites, Vistos } from './estado.ts';
 import { Gasto } from './gasto.ts';
 import { Historial } from './historial.ts';
+import type { Mensajeria } from './meta.ts';
+import { ClienteMeta } from './meta.ts';
 import type { Proveedor } from './modelo.ts';
 import { crearDeepSeek, crearSimulado } from './modelo.ts';
 import { registrar } from './registro.ts';
-import { Sondeo } from './sondeo.ts';
-import type { Mensajeria } from './twilio.ts';
-import { ClienteTwilio } from './twilio.ts';
 import { crearServidorWebhook, escuchar } from './webhook.ts';
 
 export interface Instancia {
   agente: Agente;
   config: Config;
-  servidor?: http.Server;
-  puerto?: number;
-  sondeo?: Sondeo;
+  servidor: http.Server;
+  puerto: number;
   detener(): Promise<void>;
 }
 
 export interface OpcionesInicio {
   /** Sustituye al proveedor que diga la configuración (pruebas). */
   proveedor?: Proveedor;
-  twilio?: Mensajeria;
+  whatsapp?: Mensajeria;
   reloj?: () => Date;
 }
 
 export async function iniciar(config: Config, opciones: OpcionesInicio = {}): Promise<Instancia> {
   asegurarDir(config.datos);
   const conocimiento = cargarConocimiento(config.conocimiento);
-  const twilio =
-    opciones.twilio ??
-    new ClienteTwilio({
-      base: config.twilio.base,
-      sid: config.twilio.sid,
-      token: config.twilio.token,
-      desde: config.twilio.desde,
-      intervaloEnvioMs: config.twilio.intervaloEnvioMs,
+  const whatsapp =
+    opciones.whatsapp ??
+    new ClienteMeta({
+      base: config.meta.base,
+      version: config.meta.version,
+      phoneNumberId: config.meta.phoneNumberId,
+      token: config.meta.token,
     });
   const proveedor =
     opciones.proveedor ??
@@ -65,9 +63,14 @@ export async function iniciar(config: Config, opciones: OpcionesInicio = {}): Pr
     retencionDias: config.retencionDias,
   });
   const vistos = new Vistos(config.datos, config.retencionDias);
+  const avisos = new Avisos(
+    { datos: config.datos, admin: config.meta.admin, plantilla: config.meta.plantilla, retencionDias: config.retencionDias, reloj: opciones.reloj },
+    whatsapp,
+  );
   const agente = new Agente({
     config,
-    twilio,
+    whatsapp,
+    avisos,
     proveedor,
     conocimiento,
     historial,
@@ -78,36 +81,41 @@ export async function iniciar(config: Config, opciones: OpcionesInicio = {}): Pr
     reloj: opciones.reloj,
   });
 
-  // Retención de 30 días (o lo configurado): al arrancar y cada 6 horas.
+  // Retención (30 días por omisión): al arrancar y cada 6 horas.
   const podar = () => {
     const borradas = historial.aplicarRetencion();
     vistos.compactar();
+    avisos.aplicarRetencion();
     if (borradas) registrar('info', 'retencion', { entradasBorradas: borradas });
   };
   podar();
   const temporizadorPoda = setInterval(podar, 6 * 3_600_000);
   temporizadorPoda.unref();
 
-  const instancia: Instancia = {
+  const servidor = crearServidorWebhook(agente, config);
+  const puerto = await escuchar(servidor, config);
+  const pendientes = avisos.pendientes().length;
+  registrar(pendientes ? 'error' : 'info', 'arranque', {
+    ...resumenConfig(config),
+    proveedorActivo: proveedor.nombre,
+    puerto,
+    avisosPendientes: pendientes,
+  });
+
+  return {
     agente,
     config,
+    servidor,
+    puerto,
     async detener() {
       clearInterval(temporizadorPoda);
-      await instancia.sondeo?.detener();
-      if (instancia.servidor) await new Promise<void>((r) => instancia.servidor!.close(() => r()));
+      await new Promise<void>((r) => {
+        servidor.closeAllConnections();
+        servidor.close(() => r());
+      });
       await agente.esperarInactividad();
     },
   };
-
-  if (config.modo === 'webhook') {
-    instancia.servidor = crearServidorWebhook(agente, config);
-    instancia.puerto = await escuchar(instancia.servidor, config);
-  } else {
-    instancia.sondeo = new Sondeo(agente, twilio, config, opciones.reloj);
-    instancia.sondeo.iniciar();
-  }
-  registrar('info', 'arranque', { ...resumenConfig(config), proveedorActivo: proveedor.nombre, puerto: instancia.puerto });
-  return instancia;
 }
 
 async function principal(): Promise<void> {
@@ -116,7 +124,7 @@ async function principal(): Promise<void> {
     config = cargarConfig();
   } catch (e) {
     registrar('error', 'config', { error: String((e as Error).message) });
-    process.exit(78); // EX_CONFIG: systemd no lo reintenta en bucle con StartLimit*
+    process.exit(78); // EX_CONFIG: la unidad no lo reintenta (RestartPreventExitStatus=78)
   }
   const instancia = await iniciar(config);
   let apagando = false;

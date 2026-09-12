@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { aWhatsApp, extraerAcciones, filtrarEnlaces, LIMITE_TWILIO, montos, validarSalida } from '../src/salida.ts';
+import { aWhatsApp, extraerAcciones, filtrarEnlaces, LIMITE_TEXTO, montos, validarSalida } from '../src/salida.ts';
 
 const PERMITIDOS = { montos: new Set([1800, 2400, 3000, 900, 1200, 1500]), porcentajes: new Set([50]) };
 
@@ -54,11 +54,11 @@ test('salida: una cifra fuera del conocimiento descarta la respuesta entera', ()
   assert.equal(bien.ok, true);
 });
 
-test('salida: se recorta al tope de Twilio (1600) sin cortar a media palabra si se puede', () => {
+test('salida: se recorta al tope de un texto de WhatsApp (4096) sin cortar a media palabra si se puede', () => {
   const largo = Array.from({ length: 400 }, (_, i) => `Frase número ${i}.`).join(' ');
   const v = validarSalida(largo, PERMITIDOS);
   assert.equal(v.ok, true);
-  assert.ok(v.texto.length <= LIMITE_TWILIO, `${v.texto.length}`);
+  assert.ok(v.texto.length <= LIMITE_TEXTO, `${v.texto.length}`);
   assert.ok(v.texto.endsWith('.…') || v.texto.endsWith('…'));
   const conTope = validarSalida(largo, PERMITIDOS, 300);
   assert.ok(conTope.texto.length <= 300);

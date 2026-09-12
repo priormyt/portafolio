@@ -45,22 +45,22 @@ test('historial: retención de 30 días — lo más viejo se borra, y el archivo
   const ahora = new Date('2026-09-12T12:00:00Z');
   h.anexar(CLIENTE, e('viejo', 'cliente', '2026-08-01T12:00:00Z'));
   h.anexar(CLIENTE, e('reciente', 'cliente', '2026-09-10T12:00:00Z'));
-  h.anexar('whatsapp:+5215500000003', e('muy viejo', 'cliente', '2026-07-01T00:00:00Z'));
+  h.anexar('5215500000003', e('muy viejo', 'cliente', '2026-07-01T00:00:00Z'));
   assert.equal(h.aplicarRetencion(ahora), 2);
   assert.deepEqual(h.leer(CLIENTE, ahora).map((x) => x.texto), ['reciente']);
-  assert.equal(fs.existsSync(h.archivo('whatsapp:+5215500000003')), false);
+  assert.equal(fs.existsSync(h.archivo('5215500000003')), false);
 });
 
-test('deduplicación: el mismo MessageSid sólo pasa una vez, también tras reiniciar', () => {
+test('deduplicación: el mismo wamid sólo pasa una vez, también tras reiniciar', () => {
   const dir = dirTemporal();
   const v = new Vistos(dir, 30);
-  assert.equal(v.marcar('SM1'), true);
-  assert.equal(v.marcar('SM1'), false);
+  assert.equal(v.marcar('wamid.A'), true);
+  assert.equal(v.marcar('wamid.A'), false);
   const v2 = new Vistos(dir, 30);
-  assert.equal(v2.marcar('SM1'), false);
-  assert.equal(v2.marcar('SM2'), true);
+  assert.equal(v2.marcar('wamid.A'), false);
+  assert.equal(v2.marcar('wamid.B'), true);
   v2.compactar(new Date(Date.now() + 31 * 86_400_000));
-  assert.equal(new Vistos(dir, 30).ya('SM1'), false);
+  assert.equal(new Vistos(dir, 30).ya('wamid.A'), false);
 });
 
 test('BAJA/STOP: sólo si el mensaje entero es la palabra', () => {

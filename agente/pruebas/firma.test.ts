@@ -1,65 +1,55 @@
+// La firma de Meta: HMAC-SHA256 de los BYTES CRUDOS con el App Secret,
+// en `X-Hub-Signature-256: sha256=<hex>`.
+
 import assert from 'node:assert/strict';
+import crypto from 'node:crypto';
 import { test } from 'node:test';
-import { cadenaAFirmar, calcularFirma, verificarFirma } from '../src/firma.ts';
+import { calcularFirma, igualesSeguro, verificarFirma } from '../src/firma.ts';
 
-// El ejemplo resuelto de https://www.twilio.com/docs/usage/security (12 sep 2026).
-const URL_DOC = 'https://example.com/myapp.php?foo=1&bar=2';
-const PARAMS_DOC = {
-  CallSid: 'CA1234567890ABCDE',
-  Caller: '+14158675310',
-  Digits: '1234',
-  From: '+14158675310',
-  To: '+18005551212',
-};
-const TOKEN_DOC = '12345';
-const FIRMA_DOC = 'L/OH5YylLD5NRKLltdqwSvS0BnU=';
+const SECRETO = 'app-secret-de-prueba';
+const CRUDO = Buffer.from('{"object":"whatsapp_business_account","entry":[{"id":"1","changes":[]}]}', 'utf8');
 
-test('firma: reproduce el ejemplo oficial de Twilio', () => {
-  assert.equal(
-    cadenaAFirmar(URL_DOC, PARAMS_DOC),
-    'https://example.com/myapp.php?foo=1&bar=2CallSidCA1234567890ABCDECaller+14158675310Digits1234From+14158675310To+18005551212',
-  );
-  assert.equal(calcularFirma(TOKEN_DOC, URL_DOC, PARAMS_DOC), FIRMA_DOC);
+test('firma: formato sha256=<64 hex> y coincide con un HMAC-SHA256 independiente', () => {
+  const f = calcularFirma(SECRETO, CRUDO);
+  assert.match(f, /^sha256=[0-9a-f]{64}$/);
+  // Vector fijo: si alguien cambia el algoritmo (SHA1, otra llave, base64…), esto se rompe.
+  assert.equal(f, 'sha256=' + crypto.createHmac('sha256', SECRETO).update(CRUDO).digest('hex'));
+  assert.equal(verificarFirma(SECRETO, CRUDO, f), true);
+  assert.equal(verificarFirma(SECRETO, CRUDO, f.toUpperCase().replace('SHA256=', 'sha256=')), true, 'hex en mayúsculas');
 });
 
-test('firma buena: se acepta, sin importar el orden en que lleguen los parámetros', () => {
-  const desordenados = new URLSearchParams([
-    ['To', '+18005551212'],
-    ['Digits', '1234'],
-    ['From', '+14158675310'],
-    ['Caller', '+14158675310'],
-    ['CallSid', 'CA1234567890ABCDE'],
-  ]);
-  assert.equal(verificarFirma(TOKEN_DOC, URL_DOC, desordenados, FIRMA_DOC), true);
+test('firma mala: otro secreto, un byte cambiado, sin prefijo, basura, ausente → falso', () => {
+  const f = calcularFirma(SECRETO, CRUDO);
+  assert.equal(verificarFirma('otro-secreto', CRUDO, f), false);
+  const alterado = Buffer.from(CRUDO);
+  alterado[10] ^= 1;
+  assert.equal(verificarFirma(SECRETO, alterado, f), false);
+  assert.equal(verificarFirma(SECRETO, CRUDO, f.slice('sha256='.length)), false, 'sin «sha256=»');
+  assert.equal(verificarFirma(SECRETO, CRUDO, 'sha1=' + f.slice(7)), false);
+  assert.equal(verificarFirma(SECRETO, CRUDO, 'sha256=abc'), false);
+  assert.equal(verificarFirma(SECRETO, CRUDO, 'sha256=' + 'z'.repeat(64)), false);
+  assert.equal(verificarFirma(SECRETO, CRUDO, undefined), false);
+  assert.equal(verificarFirma('', CRUDO, f), false);
 });
 
-test('firma mala: token distinto, parámetro alterado, firma basura o ausente → se rechaza', () => {
-  assert.equal(verificarFirma('otro-token', URL_DOC, PARAMS_DOC, FIRMA_DOC), false);
-  assert.equal(verificarFirma(TOKEN_DOC, URL_DOC, { ...PARAMS_DOC, Digits: '9999' }, FIRMA_DOC), false);
-  assert.equal(verificarFirma(TOKEN_DOC, URL_DOC, { ...PARAMS_DOC, Extra: 'x' }, FIRMA_DOC), false);
-  assert.equal(verificarFirma(TOKEN_DOC, URL_DOC, PARAMS_DOC, 'AAAAAAAAAAAAAAAAAAAAAAAAAAA='), false);
-  assert.equal(verificarFirma(TOKEN_DOC, URL_DOC, PARAMS_DOC, 'corta'), false);
-  assert.equal(verificarFirma(TOKEN_DOC, URL_DOC, PARAMS_DOC, undefined), false);
-  assert.equal(verificarFirma('', URL_DOC, PARAMS_DOC, FIRMA_DOC), false);
+test('firma sobre JSON re-serializado (otros espacios, otro orden, otro escape) → falso', () => {
+  const payload = JSON.parse(CRUDO.toString('utf8'));
+  const f = calcularFirma(SECRETO, CRUDO);
+  const bonito = Buffer.from(JSON.stringify(payload, null, 2));
+  const reordenado = Buffer.from(JSON.stringify({ entry: payload.entry, object: payload.object }));
+  assert.equal(verificarFirma(SECRETO, bonito, f), false);
+  assert.equal(verificarFirma(SECRETO, reordenado, f), false);
+  // Mismo JSON lógico, «á» literal frente a su escape: bytes distintos, firma distinta.
+  const barra = String.fromCharCode(92);
+  const conAcento = Buffer.from('{"t":"á"}');
+  const escapado = Buffer.from(`{"t":"${barra}u00e1"}`);
+  assert.deepEqual(JSON.parse(escapado.toString()), JSON.parse(conAcento.toString()));
+  assert.equal(verificarFirma(SECRETO, escapado, calcularFirma(SECRETO, conAcento)), false);
 });
 
-test('firma con URL distinta: la de 127.0.0.1, otra query, http en vez de https o sin query → se rechaza', () => {
-  for (const url of [
-    'http://127.0.0.1:9186/myapp.php?foo=1&bar=2',
-    'https://example.com/myapp.php?foo=1&bar=3',
-    'http://example.com/myapp.php?foo=1&bar=2',
-    'https://example.com/myapp.php',
-    'https://example.com:8443/myapp.php?foo=1&bar=2',
-  ]) {
-    assert.equal(verificarFirma(TOKEN_DOC, url, PARAMS_DOC, FIRMA_DOC), false, url);
-  }
-});
-
-test('firma: el signo + del cuerpo urlencoded se firma ya decodificado', () => {
-  // Twilio manda From=whatsapp%3A%2B5215500000001; URLSearchParams lo decodifica a «whatsapp:+…».
-  const p = new URLSearchParams('From=whatsapp%3A%2B5215500000001&Body=Hola+ANTE');
-  assert.equal(p.get('From'), 'whatsapp:+5215500000001');
-  assert.equal(p.get('Body'), 'Hola ANTE');
-  const firma = calcularFirma('t0k3n-de-prueba', 'https://wa.ejemplo.test/w', { From: 'whatsapp:+5215500000001', Body: 'Hola ANTE' });
-  assert.equal(verificarFirma('t0k3n-de-prueba', 'https://wa.ejemplo.test/w', p, firma), true);
+test('verify token: comparación que no depende del largo común', () => {
+  assert.equal(igualesSeguro('abc123', 'abc123'), true);
+  assert.equal(igualesSeguro('abc123', 'abc124'), false);
+  assert.equal(igualesSeguro('abc', 'abc123'), false);
+  assert.equal(igualesSeguro('', ''), true);
 });

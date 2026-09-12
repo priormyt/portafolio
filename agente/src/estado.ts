@@ -1,6 +1,7 @@
 // Estado pequeño y persistente del agente:
-//   - Vistos: MessageSid ya procesados. Twilio reintenta el webhook y el sondeo
-//     vuelve a ver los mismos mensajes; sin esto se contestaría dos veces.
+//   - Vistos: `id` (wamid) de los mensajes ya procesados. Meta reintenta el
+//     webhook y avisa que eso puede duplicar notificaciones; sin esto se
+//     contestaría dos veces.
 //   - Bajas: números que escribieron BAJA/STOP. No se les vuelve a contestar.
 //   - Límites: cuántos mensajes por número y en total por hora (en memoria).
 

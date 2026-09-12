@@ -6,15 +6,21 @@ import os from 'node:os';
 import path from 'node:path';
 import type { Config } from '../src/config.ts';
 import { cargarConfig } from '../src/config.ts';
+import { calcularFirma } from '../src/firma.ts';
 import { configurarRegistro } from '../src/registro.ts';
+import { nuevoWamid } from './meta-falso.ts';
 
-export const SID_FALSO = 'AC' + '0'.repeat(32);
-export const TOKEN_FALSO = 'token-falso-solo-para-pruebas';
-export const NUESTRO = 'whatsapp:+5215500000000';
-export const CLIENTE = 'whatsapp:+5215500000001';
-export const OTRO_CLIENTE = 'whatsapp:+5215500000002';
-export const ADMIN = 'whatsapp:+5215500000009';
-export const URL_PUBLICA = 'https://wa.ejemplo.test/twilio/whatsapp';
+export const VERSION = 'v26.0';
+export const PHONE_ID = '100000000000001';
+export const TOKEN_FALSO = 'token-de-meta-falso-solo-para-pruebas';
+export const APP_SECRET = 'app-secret-falso-solo-para-pruebas';
+export const VERIFY_TOKEN = 'verify-token-falso-de-32-caracteres-xx';
+/** Números en dígitos, como los manda Meta en `from` (wa_id). */
+export const CLIENTE = '5215500000001';
+export const OTRO_CLIENTE = '5215500000002';
+/** El de Pablo, en E.164 como se configura. */
+export const ADMIN = '+5215500000009';
+export const ADMIN_WA_ID = '5215500000009';
 
 export function dirTemporal(): string {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'ante-agente-'));
@@ -22,13 +28,14 @@ export function dirTemporal(): string {
 
 export function entornoBase(extra: Record<string, string | undefined> = {}): Record<string, string | undefined> {
   return {
-    TWILIO_ACCOUNT_SID: SID_FALSO,
-    TWILIO_AUTH_TOKEN: TOKEN_FALSO,
-    TWILIO_WHATSAPP_FROM: NUESTRO,
+    META_ACCESS_TOKEN: TOKEN_FALSO,
+    META_APP_SECRET: APP_SECRET,
+    META_VERIFY_TOKEN: VERIFY_TOKEN,
+    META_PHONE_NUMBER_ID: PHONE_ID,
+    META_GRAPH_VERSION: VERSION,
     ADMIN_WHATSAPP_TO: ADMIN,
     AGENTE_PROVEEDOR: 'simulado',
     AGENTE_DATOS: dirTemporal(),
-    AGENTE_ENVIO_INTERVALO_MS: '0',
     AGENTE_PUERTO: '0',
     ...extra,
   };
@@ -39,25 +46,68 @@ export function configPrueba(extra: Record<string, string | undefined> = {}): Co
 }
 
 /**
- * Los campos que Twilio manda al webhook de un WhatsApp entrante
- * (https://www.twilio.com/docs/messaging/guides/webhook-request), con datos de mentira.
+ * Un payload de mensaje de texto entrante con la forma de la Cloud API
+ * (https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/components).
  */
-export function paramsTwilio(cuerpo: string, de: string, sid: string): Record<string, string> {
+export function payloadTexto(de: string, texto: string, id = nuevoWamid(), phoneId = PHONE_ID, tipo = 'text'): Record<string, unknown> {
+  const mensaje: Record<string, unknown> = { from: de, id, timestamp: String(Math.floor(Date.now() / 1000)), type: tipo };
+  if (tipo === 'text') mensaje.text = { body: texto };
+  else if (tipo === 'image') mensaje.image = { mime_type: 'image/jpeg', sha256: 'x', id: '1' };
   return {
-    AccountSid: SID_FALSO,
-    ApiVersion: '2010-04-01',
-    Body: cuerpo,
-    From: de,
-    MessageSid: sid,
-    NumMedia: '0',
-    NumSegments: '1',
-    ProfileName: 'Cliente de prueba',
-    SmsMessageSid: sid,
-    SmsSid: sid,
-    SmsStatus: 'received',
-    To: NUESTRO,
-    WaId: de.replace('whatsapp:+', ''),
+    object: 'whatsapp_business_account',
+    entry: [
+      {
+        id: '100000000000009',
+        changes: [
+          {
+            value: {
+              messaging_product: 'whatsapp',
+              metadata: { display_phone_number: '15550000000', phone_number_id: phoneId },
+              contacts: [{ profile: { name: 'Cliente de prueba' }, wa_id: de }],
+              messages: [mensaje],
+            },
+            field: 'messages',
+          },
+        ],
+      },
+    ],
   };
+}
+
+/** Un payload de `statuses` (entregado/leído): el agente lo ignora. */
+export function payloadEstado(para: string, estado = 'delivered'): Record<string, unknown> {
+  return {
+    object: 'whatsapp_business_account',
+    entry: [
+      {
+        id: '100000000000009',
+        changes: [
+          {
+            value: {
+              messaging_product: 'whatsapp',
+              metadata: { display_phone_number: '15550000000', phone_number_id: PHONE_ID },
+              statuses: [{ id: nuevoWamid(), status: estado, timestamp: String(Math.floor(Date.now() / 1000)), recipient_id: para }],
+            },
+            field: 'messages',
+          },
+        ],
+      },
+    ],
+  };
+}
+
+/** POST al webhook con los bytes EXACTOS de `crudo` y la cabecera que se dé. */
+export async function postear(puerto: number, crudo: string | Buffer, firma: string | undefined, ruta = '/webhook/meta') {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (firma !== undefined) headers['X-Hub-Signature-256'] = firma;
+  const res = await fetch(`http://127.0.0.1:${puerto}${ruta}`, { method: 'POST', headers, body: crudo });
+  return { estado: res.status, cuerpo: await res.text() };
+}
+
+/** Firma y manda un payload como lo haría Meta. */
+export async function postearFirmado(puerto: number, payload: unknown) {
+  const crudo = JSON.stringify(payload);
+  return postear(puerto, crudo, calcularFirma(APP_SECRET, crudo));
 }
 
 /** Captura el registro (y lo silencia) mientras dura una prueba. */

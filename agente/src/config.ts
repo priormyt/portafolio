@@ -10,7 +10,6 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ocultarSecretos } from './registro.ts';
 
-export type Modo = 'sondeo' | 'webhook';
 export type NombreProveedor = 'deepseek' | 'simulado';
 
 /** Dólares por millón de tokens. */
@@ -21,25 +20,25 @@ export interface Precios {
 }
 
 export interface Config {
-  modo: Modo;
   host: string;
   puerto: number;
-  /** La URL que llama Twilio (detrás del túnel). Es la que se firma. */
-  urlPublica: string | undefined;
+  /** La única ruta que se sirve (la que manda el túnel). */
   rutaWebhook: string;
   datos: string;
   conocimiento: string;
 
-  twilio: {
+  meta: {
     base: string;
-    sid: string;
+    /** Versión de la Graph API, p. ej. v26.0. */
+    version: string;
+    phoneNumberId: string;
     token: string;
-    /** Nuestro número: whatsapp:+… (en el Sandbox, el número compartido de Twilio). */
-    desde: string;
-    /** A quién se avisa (Pablo). Si falta, los avisos se registran y no se mandan. */
+    appSecret: string;
+    verifyToken: string;
+    /** El WhatsApp de Pablo, en dígitos (E.164 sin «+»). Si falta, los avisos se registran y no se mandan. */
     admin: string | undefined;
-    /** Espacio mínimo entre envíos. El Sandbox manda uno cada 3 s como mucho. */
-    intervaloEnvioMs: number;
+    /** Plantilla de utilidad para avisar a Pablo fuera de su ventana de 24 h. */
+    plantilla: { nombre: string; idioma: string } | undefined;
   };
 
   proveedor: NombreProveedor;
@@ -49,10 +48,6 @@ export interface Config {
   topeDiarioUsd: number;
   maxTokens: number;
   tiempoModeloMs: number;
-
-  sondeoMs: number;
-  /** Tras un apagón, hasta cuántos minutos atrás se contesta lo que llegó. */
-  sondeoAtrasoMaxMin: number;
 
   presentarse: boolean;
   textoPresentacion: string;
@@ -70,8 +65,7 @@ export interface Config {
   zonaHoraria: string;
 }
 
-export const SECRETOS = ['TWILIO_ACCOUNT_SID', 'TWILIO_AUTH_TOKEN', 'DEEPSEEK_API_KEY', 'ADMIN_WHATSAPP_TO'] as const;
-export type NombreSecreto = (typeof SECRETOS)[number];
+export const SECRETOS = ['META_ACCESS_TOKEN', 'META_APP_SECRET', 'META_VERIFY_TOKEN', 'DEEPSEEK_API_KEY', 'ADMIN_WHATSAPP_TO'] as const;
 
 type Entorno = Record<string, string | undefined>;
 
@@ -121,49 +115,49 @@ const LOOPBACK = new Set(['127.0.0.1', '::1', 'localhost']);
 // la tarifa pico: así el tope diario es una cota superior y nunca se queda corto.
 export const PRECIOS_DEEPSEEK_FLASH_PICO: Precios = { entradaCache: 0.006, entrada: 0.3, salida: 1.2 };
 
+// Graph API: la más reciente el 12 sep 2026 es la v26.0 («Introducing Graph API
+// v26.0», 29 jul 2026: https://developers.facebook.com/blog/post/2026/07/29/introducing-graph-api-v26-and-marketing-api-v26/).
+export const VERSION_GRAPH_POR_OMISION = 'v26.0';
+
 export const PRESENTACION_POR_OMISION =
   'Hola, soy el asistente automático de ANTE. Te ayudo con paquetes, precios y para apartar tu sesión; lo que yo no sepa, se lo paso a {humano}.';
 
 export function cargarConfig(entorno: Entorno = process.env): Config {
   const faltas: string[] = [];
 
-  const modoCrudo = (entorno.AGENTE_MODO ?? 'sondeo').trim();
-  if (modoCrudo !== 'sondeo' && modoCrudo !== 'webhook') faltas.push('AGENTE_MODO debe ser «sondeo» o «webhook»');
-  const modo: Modo = modoCrudo === 'webhook' ? 'webhook' : 'sondeo';
-
   const host = (entorno.AGENTE_HOST ?? '127.0.0.1').trim();
   if (!LOOPBACK.has(host)) {
     faltas.push('AGENTE_HOST sólo puede ser 127.0.0.1, ::1 o localhost: nada se publica en 0.0.0.0');
   }
   const puerto = numero(entorno, 'AGENTE_PUERTO', 9186, faltas);
+  const rutaWebhook = (entorno.AGENTE_RUTA?.trim() || '/webhook/meta').replace(/\/+$/, '') || '/';
+  if (!/^\/[\w\-/]*$/.test(rutaWebhook)) faltas.push('AGENTE_RUTA debe ser una ruta como /webhook/meta');
 
-  const urlPublica = entorno.AGENTE_URL_PUBLICA?.trim() || undefined;
-  let rutaWebhook = '/twilio/whatsapp';
-  if (urlPublica) {
-    try {
-      const u = new URL(urlPublica);
-      if (u.protocol !== 'https:' && u.protocol !== 'http:') throw new Error('protocolo');
-      rutaWebhook = u.pathname || '/';
-    } catch {
-      faltas.push('AGENTE_URL_PUBLICA no es una URL válida');
-    }
-  }
-  if (modo === 'webhook' && !urlPublica) {
-    faltas.push('AGENTE_URL_PUBLICA (en modo webhook la firma se calcula sobre la URL pública que llama Twilio)');
-  }
-
-  const sid = leerSecreto('TWILIO_ACCOUNT_SID', entorno);
-  const token = leerSecreto('TWILIO_AUTH_TOKEN', entorno);
-  const admin = leerSecreto('ADMIN_WHATSAPP_TO', entorno);
+  const token = leerSecreto('META_ACCESS_TOKEN', entorno);
+  const appSecret = leerSecreto('META_APP_SECRET', entorno);
+  const verifyToken = leerSecreto('META_VERIFY_TOKEN', entorno);
+  const adminCrudo = leerSecreto('ADMIN_WHATSAPP_TO', entorno);
   const llave = leerSecreto('DEEPSEEK_API_KEY', entorno);
-  ocultarSecretos([sid, token, llave, admin]);
+  ocultarSecretos([token, appSecret, verifyToken, llave, adminCrudo, adminCrudo?.replace(/\D/g, '')]);
 
-  if (!sid) faltas.push('TWILIO_ACCOUNT_SID');
-  if (!token) faltas.push('TWILIO_AUTH_TOKEN');
-  const desde = entorno.TWILIO_WHATSAPP_FROM?.trim();
-  if (!desde) faltas.push('TWILIO_WHATSAPP_FROM (nuestro número, whatsapp:+…)');
-  else if (!/^whatsapp:\+\d{8,15}$/.test(desde)) faltas.push('TWILIO_WHATSAPP_FROM debe verse como whatsapp:+<dígitos>');
-  if (admin && !/^whatsapp:\+\d{8,15}$/.test(admin)) faltas.push('ADMIN_WHATSAPP_TO debe verse como whatsapp:+<dígitos>');
+  if (!token) faltas.push('META_ACCESS_TOKEN');
+  if (!appSecret) faltas.push('META_APP_SECRET (sin él no se puede comprobar la firma)');
+  if (!verifyToken) faltas.push('META_VERIFY_TOKEN');
+  else if (verifyToken.length < 16) faltas.push('META_VERIFY_TOKEN demasiado corto (usa openssl rand -hex 32)');
+  const phoneNumberId = entorno.META_PHONE_NUMBER_ID?.trim();
+  if (!phoneNumberId) faltas.push('META_PHONE_NUMBER_ID');
+  else if (!/^\d{5,30}$/.test(phoneNumberId)) faltas.push('META_PHONE_NUMBER_ID debe ser sólo dígitos');
+  const version = entorno.META_GRAPH_VERSION?.trim() || VERSION_GRAPH_POR_OMISION;
+  if (!/^v\d{1,3}\.\d$/.test(version)) faltas.push('META_GRAPH_VERSION debe verse como v26.0');
+  if (adminCrudo && !/^\+?\d{8,15}$/.test(adminCrudo)) faltas.push('ADMIN_WHATSAPP_TO debe ir en E.164, p. ej. +5215500000000');
+
+  const plantillaNombre = entorno.AGENTE_PLANTILLA_AVISO?.trim();
+  const plantillaIdioma = entorno.AGENTE_PLANTILLA_IDIOMA?.trim();
+  if (Boolean(plantillaNombre) !== Boolean(plantillaIdioma)) {
+    faltas.push('AGENTE_PLANTILLA_AVISO y AGENTE_PLANTILLA_IDIOMA van juntas (o ninguna)');
+  }
+  if (plantillaNombre && !/^[a-z0-9_]{1,512}$/.test(plantillaNombre)) faltas.push('AGENTE_PLANTILLA_AVISO: minúsculas, dígitos y «_»');
+  if (plantillaIdioma && !/^[a-z]{2,3}(_[A-Z]{2})?$/.test(plantillaIdioma)) faltas.push('AGENTE_PLANTILLA_IDIOMA como es_MX');
 
   const provCrudo = entorno.AGENTE_PROVEEDOR?.trim();
   let proveedor: NombreProveedor;
@@ -184,20 +178,20 @@ export function cargarConfig(entorno: Entorno = process.env): Config {
   const humano = entorno.AGENTE_NOMBRE_HUMANO?.trim() || 'Pablo';
 
   const config: Config = {
-    modo,
     host,
     puerto,
-    urlPublica,
     rutaWebhook,
     datos: path.resolve(entorno.AGENTE_DATOS?.trim() || path.join(RAIZ_AGENTE, '.datos')),
     conocimiento: path.resolve(entorno.AGENTE_CONOCIMIENTO?.trim() || path.join(RAIZ_AGENTE, 'conocimiento.md')),
-    twilio: {
-      base: (entorno.TWILIO_API_BASE?.trim() || 'https://api.twilio.com').replace(/\/$/, ''),
-      sid: sid ?? '',
+    meta: {
+      base: (entorno.META_GRAPH_BASE?.trim() || 'https://graph.facebook.com').replace(/\/$/, ''),
+      version,
+      phoneNumberId: phoneNumberId ?? '',
       token: token ?? '',
-      desde: desde ?? '',
-      admin,
-      intervaloEnvioMs: numero(entorno, 'AGENTE_ENVIO_INTERVALO_MS', 3000, faltas),
+      appSecret: appSecret ?? '',
+      verifyToken: verifyToken ?? '',
+      admin: adminCrudo ? adminCrudo.replace(/\D/g, '') : undefined,
+      plantilla: plantillaNombre && plantillaIdioma ? { nombre: plantillaNombre, idioma: plantillaIdioma } : undefined,
     },
     proveedor,
     modelo: entorno.AGENTE_MODELO?.trim() || 'deepseek-flash',
@@ -206,8 +200,6 @@ export function cargarConfig(entorno: Entorno = process.env): Config {
     topeDiarioUsd: numero(entorno, 'AGENTE_TOPE_DIARIO_USD', 0.5, faltas),
     maxTokens: Math.min(numero(entorno, 'AGENTE_MAX_TOKENS', 400, faltas, 16), 1000),
     tiempoModeloMs: numero(entorno, 'AGENTE_TIEMPO_MODELO_MS', 20000, faltas, 1000),
-    sondeoMs: numero(entorno, 'AGENTE_SONDEO_MS', 5000, faltas, 50),
-    sondeoAtrasoMaxMin: numero(entorno, 'AGENTE_SONDEO_ATRASO_MAX_MIN', 60, faltas, 1),
     presentarse: siNo(entorno.AGENTE_PRESENTARSE, true),
     textoPresentacion: (entorno.AGENTE_PRESENTACION?.trim() || PRESENTACION_POR_OMISION).replaceAll('{humano}', humano),
     humano,
@@ -229,16 +221,15 @@ export function cargarConfig(entorno: Entorno = process.env): Config {
 /** Lo que se puede imprimir al arrancar: nada secreto, ningún número completo. */
 export function resumenConfig(c: Config): Record<string, unknown> {
   return {
-    modo: c.modo,
-    escucha: c.modo === 'webhook' ? `${c.host}:${c.puerto}${c.rutaWebhook}` : '(no escucha: sondeo)',
-    urlPublica: c.urlPublica ?? '(no aplica)',
+    escucha: `${c.host}:${c.puerto}${c.rutaWebhook}`,
+    graph: `${c.meta.version} · phone_number_id …${c.meta.phoneNumberId.slice(-4)}`,
     proveedor: c.proveedor,
     modelo: c.proveedor === 'deepseek' ? c.modelo : '(simulado)',
     topeDiarioUsd: c.topeDiarioUsd,
     maxTokens: c.maxTokens,
     datos: c.datos,
-    avisosAlAdmin: c.twilio.admin ? 'sí' : 'no (falta ADMIN_WHATSAPP_TO)',
+    avisosAlAdmin: c.meta.admin ? 'sí' : 'no (falta ADMIN_WHATSAPP_TO)',
+    plantillaAviso: c.meta.plantilla ? `${c.meta.plantilla.nombre}/${c.meta.plantilla.idioma}` : 'no (fuera de la ventana de 24 h los avisos quedan pendientes)',
     presentarse: c.presentarse,
-    sondeoMs: c.modo === 'sondeo' ? c.sondeoMs : undefined,
   };
 }

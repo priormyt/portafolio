@@ -1,4 +1,4 @@
-// El núcleo del agente contra el Twilio falso, con proveedores de modelo de
+// El núcleo del agente contra la Graph API falsa, con proveedores de modelo de
 // prueba (cuentan llamadas, fallan a propósito, inventan precios…).
 
 import assert from 'node:assert/strict';
@@ -6,14 +6,14 @@ import { after, test } from 'node:test';
 import type { Instancia } from '../src/main.ts';
 import { iniciar } from '../src/main.ts';
 import type { MensajeModelo, Proveedor } from '../src/modelo.ts';
-import type { MensajeEntrante } from '../src/twilio.ts';
-import type { TwilioFalso } from './twilio-falso.ts';
-import { crearTwilioFalso, nuevoSid } from './twilio-falso.ts';
-import { ADMIN, capturarRegistro, CLIENTE, configPrueba, NUESTRO, SID_FALSO, TOKEN_FALSO } from './utiles.ts';
+import type { MensajeEntrante } from '../src/meta.ts';
+import type { MetaFalso } from './meta-falso.ts';
+import { crearMetaFalso, nuevoWamid } from './meta-falso.ts';
+import { ADMIN, ADMIN_WA_ID, capturarRegistro, CLIENTE, configPrueba, PHONE_ID, TOKEN_FALSO, VERSION } from './utiles.ts';
 
 capturarRegistro();
 
-const abiertos: Array<{ i: Instancia; t: TwilioFalso }> = [];
+const abiertos: Array<{ i: Instancia; t: MetaFalso }> = [];
 after(async () => {
   for (const { i, t } of abiertos) {
     await i.detener();
@@ -35,15 +35,18 @@ function proveedorFijo(respuestas: string[] | ((m: MensajeModelo[]) => string)):
 }
 
 async function montar(proveedor?: Proveedor, extra: Record<string, string> = {}) {
-  const t = await crearTwilioFalso({ sid: SID_FALSO, token: TOKEN_FALSO });
-  const config = configPrueba({ TWILIO_API_BASE: t.url, AGENTE_MODO: 'webhook', AGENTE_URL_PUBLICA: 'https://wa.ejemplo.test/w', ...extra });
+  const t = await crearMetaFalso({ version: VERSION, phoneNumberId: PHONE_ID, token: TOKEN_FALSO });
+  const config = configPrueba({ META_GRAPH_BASE: t.url, ...extra });
   const i = await iniciar(config, { proveedor });
   abiertos.push({ i, t });
+  // Pablo escribió hace poco: su ventana de 24 h está abierta y los avisos le llegan
+  // como texto (el caso de la ventana cerrada está en avisos.test.ts).
+  i.agente.d.avisos.registrarEntrante(ADMIN_WA_ID);
   return { i, t, agente: i.agente };
 }
 
-function msj(cuerpo: string, de = CLIENTE, sid = nuevoSid()): MensajeEntrante {
-  return { sid, de, para: NUESTRO, cuerpo, fecha: new Date(), medios: 0 };
+function msj(cuerpo: string, de = CLIENTE, id = nuevoWamid(), tipo = 'text'): MensajeEntrante {
+  return { id, de, tipo, cuerpo, fecha: new Date() };
 }
 
 test('agente: se presenta como asistente automático sólo en el primer mensaje de la conversación', async () => {
@@ -66,7 +69,7 @@ test('agente: con AGENTE_PRESENTARSE=no no antepone la presentación', async () 
   assert.equal((await agente.recibir(msj('hola'))).respuesta, 'Hola, ¿en qué te ayudo?');
 });
 
-test('deduplicación: el mismo MessageSid dos veces → una sola respuesta y una sola llamada al modelo', async () => {
+test('deduplicación: el mismo wamid dos veces → una sola respuesta y una sola llamada al modelo', async () => {
   const p = proveedorFijo(['Va.']);
   const { t, agente } = await montar(p);
   const m = msj('hola');
@@ -80,7 +83,7 @@ test('BAJA: confirma una vez y deja de contestar; ALTA lo reactiva', async () =>
   const p = proveedorFijo(['Va.']);
   const { t, agente } = await montar(p);
   assert.equal((await agente.recibir(msj('BAJA'))).desenlace, 'baja');
-  assert.match(t.enviados(CLIENTE)[0].body, /ya no te escribirá/);
+  assert.match(t.enviados(CLIENTE)[0].cuerpo, /ya no te escribirá/);
   assert.equal((await agente.recibir(msj('¿sigues ahí?'))).desenlace, 'silencio_baja');
   assert.equal((await agente.recibir(msj('STOP'))).desenlace, 'silencio_baja', 'ya estaba de baja: no se vuelve a confirmar');
   assert.equal(t.enviados(CLIENTE).length, 1);
@@ -105,11 +108,11 @@ test('tope de gasto: pasado el tope no se llama al modelo; mensaje fijo al clien
   const r = await agente.recibir(msj('¿Cuánto cuesta?'));
   assert.equal(r.desenlace, 'tope');
   assert.equal(p.llamadas.length, 0);
-  assert.match(t.enviados(CLIENTE)[0].body, /no puedo contestarte en automático/);
+  assert.match(t.enviados(CLIENTE)[0].cuerpo, /no puedo contestarte en automático/);
   const avisos = t.enviados(ADMIN);
   assert.equal(avisos.length, 1);
-  assert.match(avisos[0].body, /tope de gasto/);
-  assert.match(avisos[0].body, /¿Cuánto cuesta\?/);
+  assert.match(avisos[0].cuerpo, /tope de gasto/);
+  assert.match(avisos[0].cuerpo, /¿Cuánto cuesta\?/);
   // Un segundo mensaje del mismo número el mismo día: respuesta fija, sin repetir el aviso.
   await agente.recibir(msj('¿Hola?'));
   assert.equal(t.enviados(ADMIN).length, 1);
@@ -131,31 +134,31 @@ test('fallo del modelo: mensaje fijo al cliente y aviso a Pablo', async () => {
   const roto: Proveedor = { nombre: 'roto', responder: async () => { throw new Error('se cayó'); } };
   const { t, agente } = await montar(roto);
   assert.equal((await agente.recibir(msj('hola'))).desenlace, 'fallo_modelo');
-  assert.match(t.enviados(CLIENTE)[0].body, /Tuve un problema/);
-  assert.match(t.enviados(ADMIN)[0].body, /no pudo contestar/);
+  assert.match(t.enviados(CLIENTE)[0].cuerpo, /Tuve un problema/);
+  assert.match(t.enviados(ADMIN)[0].cuerpo, /no pudo contestar/);
 });
 
 test('validación: una respuesta con un precio inventado no sale; pasa a Pablo', async () => {
   const { t, agente } = await montar(proveedorFijo(['El paquete Premium cuesta $4,500 MXN.']));
   const r = await agente.recibir(msj('¿Tienen algo más caro?'));
   assert.equal(r.desenlace, 'rechazado');
-  assert.doesNotMatch(t.enviados(CLIENTE)[0].body, /4,500/);
-  assert.match(t.enviados(CLIENTE)[0].body, /te lo confirme Pablo/);
-  assert.match(t.enviados(ADMIN)[0].body, /descartada/);
+  assert.doesNotMatch(t.enviados(CLIENTE)[0].cuerpo, /4,500/);
+  assert.match(t.enviados(CLIENTE)[0].cuerpo, /te lo confirme Pablo/);
+  assert.match(t.enviados(ADMIN)[0].cuerpo, /descartada/);
 });
 
 test('validación: Markdown y enlaces ajenos se limpian antes de mandar', async () => {
   const { t, agente } = await montar(proveedorFijo(['**Básico**: $1,800 MXN. Mira [aquí](https://evil.example.com) o https://www.ante.photo/#precios']), { AGENTE_PRESENTARSE: 'no' });
   await agente.recibir(msj('precios'));
-  assert.equal(t.enviados(CLIENTE)[0].body, '*Básico*: $1,800 MXN. Mira aquí: o https://www.ante.photo/#precios');
+  assert.equal(t.enviados(CLIENTE)[0].cuerpo, '*Básico*: $1,800 MXN. Mira aquí: o https://www.ante.photo/#precios');
 });
 
 test('agendar: el marcador avisa a Pablo con los tres datos y el cliente no lo ve', async () => {
   const { t, agente } = await montar(proveedorFijo(['Listo, le paso tu solicitud a Pablo.\n[[AGENDAR|nombre=Laura Prueba|sesion=Estándar|fecha=sábado 19 de septiembre]]']));
   const r = await agente.recibir(msj('Quiero agendar'));
   assert.equal(r.desenlace, 'respondido');
-  assert.doesNotMatch(t.enviados(CLIENTE)[0].body, /\[\[|AGENDAR/);
-  const aviso = t.enviados(ADMIN)[0].body;
+  assert.doesNotMatch(t.enviados(CLIENTE)[0].cuerpo, /\[\[|AGENDAR/);
+  const aviso = t.enviados(ADMIN)[0].cuerpo;
   assert.match(aviso, /Solicitud de sesión/);
   assert.match(aviso, /Nombre: Laura Prueba/);
   assert.match(aviso, /Sesión: Estándar/);
@@ -175,28 +178,44 @@ test('límite por número por hora: pasado el límite, silencio', async () => {
 test('límite global por hora: silencio para todos y un aviso a Pablo', async () => {
   const { t, agente } = await montar(proveedorFijo(['Va.']), { AGENTE_LIMITE_GLOBAL_HORA: '1' });
   await agente.recibir(msj('hola'));
-  assert.equal((await agente.recibir(msj('hola', 'whatsapp:+5215500000005'))).desenlace, 'limite_global');
-  assert.equal((await agente.recibir(msj('hola', 'whatsapp:+5215500000006'))).desenlace, 'limite_global');
+  assert.equal((await agente.recibir(msj('hola', '5215500000005'))).desenlace, 'limite_global');
+  assert.equal((await agente.recibir(msj('hola', '5215500000006'))).desenlace, 'limite_global');
   assert.equal(t.enviados(ADMIN).length, 1);
 });
 
-test('mensajes a otro número o de otro canal se ignoran', async () => {
+test('número ilegible se ignora', async () => {
   const p = proveedorFijo(['Va.']);
   const { agente } = await montar(p);
-  assert.equal((await agente.recibir({ ...msj('hola'), para: 'whatsapp:+5215500000077' })).desenlace, 'ignorado');
-  assert.equal((await agente.recibir({ ...msj('hola'), de: '+5215500000001' })).desenlace, 'ignorado');
+  assert.equal((await agente.recibir(msj('hola', 'abc'))).desenlace, 'ignorado');
+  assert.equal((await agente.recibir(msj('hola', '12'))).desenlace, 'ignorado');
   assert.equal(p.llamadas.length, 0);
 });
 
-test('sólo medios (foto sin texto): respuesta fija, sin modelo', async () => {
+test('no es texto: foto o audio → respuesta fija sin modelo; una reacción → nada', async () => {
   const p = proveedorFijo(['Va.']);
-  const { agente } = await montar(p);
-  const r = await agente.recibir({ ...msj(''), medios: 1 });
-  assert.equal(r.desenlace, 'solo_medios');
+  const { t, agente } = await montar(p);
+  assert.equal((await agente.recibir(msj('', CLIENTE, nuevoWamid(), 'image'))).desenlace, 'no_es_texto');
+  assert.equal((await agente.recibir(msj('', CLIENTE, nuevoWamid(), 'audio'))).desenlace, 'no_es_texto');
+  assert.equal((await agente.recibir(msj('', CLIENTE, nuevoWamid(), 'reaction'))).desenlace, 'ignorado');
   assert.equal(p.llamadas.length, 0);
+  assert.equal(t.enviados(CLIENTE).length, 2);
 });
 
-test('Twilio falla al enviar: se reintenta una vez', async () => {
+test('Pablo escribe con avisos pendientes → salen antes que su respuesta', async () => {
+  const { t, agente } = await montar(proveedorFijo(['Va.']));
+  // Se cierra su ventana a mano y se genera un aviso: queda pendiente.
+  (agente.d.avisos as unknown as { ventanas: Record<string, string> }).ventanas.admin = '2000-01-01T00:00:00Z';
+  await agente.d.avisos.avisar('aviso de prueba');
+  assert.equal(agente.d.avisos.pendientes().length, 1);
+  assert.equal(t.enviados(ADMIN).length, 0);
+  await agente.recibir(msj('hola', ADMIN_WA_ID));
+  const a = t.enviados(ADMIN);
+  assert.match(a[0].cuerpo, /aviso pendiente[\s\S]*aviso de prueba/);
+  assert.match(a[1].cuerpo, /asistente automático/);
+  assert.equal(agente.d.avisos.pendientes().length, 0);
+});
+
+test('Meta falla al enviar: se reintenta una vez', async () => {
   const { t, agente } = await montar(proveedorFijo(['Va.']), { AGENTE_PRESENTARSE: 'no' });
   t.fallarEnvios(1, 500);
   await agente.recibir(msj('hola'));

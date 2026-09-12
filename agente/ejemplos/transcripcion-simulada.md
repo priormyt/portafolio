@@ -1,11 +1,20 @@
-# Transcripción simulada · agente de WhatsApp de ANTE
+# Transcripción simulada · agente de WhatsApp de ANTE (Meta Cloud API)
 
-Generada con `node agente/simular.ts`. Proveedor: **simulado** (determinista, sin red: no es el modelo real).
-Twilio es un Twilio falso en 127.0.0.1; los números son de mentira. Nada salió a internet.
+Generada con `node agente/simular.ts`. Proveedor del modelo: **simulado** (determinista, sin red: no es el modelo real).
+La Graph API es una falsa en 127.0.0.1 que **exige la ventana de 24 h** como Meta (texto libre fuera de ella → error 131047). Los números y los secretos son de mentira. Nada salió a internet.
 
-## 1 · Modo webhook: conversación de cinco vueltas
+Todo entra por UNA ruta: `/webhook/meta` en `127.0.0.1`, que es lo que el túnel de Cloudflare manda desde `https://wa.ante.photo/webhook/meta`.
 
-Cada mensaje llega como lo manda Twilio (POST `application/x-www-form-urlencoded` a `https://wa.ejemplo.test/twilio/whatsapp`, que el túnel entrega en `127.0.0.1:PUERTO/twilio/whatsapp`) y firmado con `X-Twilio-Signature`. El agente contesta 200 con TwiML vacío en el acto y la respuesta sale por la API REST.
+## 1 · Verificación de la suscripción (GET)
+
+- `hub.mode=subscribe`, `hub.verify_token` correcto, `hub.challenge=1158201444` → **HTTP 200**, cuerpo `1158201444` (texto plano).
+- Mismo GET con otro token → **HTTP 403**.
+
+## 2 · Conversación de cinco vueltas (POST firmados)
+
+Cada mensaje llega con la forma de la Cloud API (`entry[].changes[].value.messages[]`) y con `X-Hub-Signature-256: sha256=<hex>` calculada sobre los bytes exactos del cuerpo. El agente contesta 200 en el acto y la respuesta sale por `POST /v26.0/<PHONE_NUMBER_ID>/messages`.
+
+**Pablo no le ha escrito al número de ANTE en las últimas 24 h y no hay plantilla configurada**: el aviso de la vuelta 4 no puede salir y queda pendiente.
 
 ### Vuelta 1
 
@@ -56,15 +65,11 @@ Cada mensaje llega como lo manda Twilio (POST `application/x-www-form-urlencoded
 > Listo, Laura Prueba. Ya le pasé a Pablo tu solicitud: paquete *Estándar*, sábado 19 de septiembre en la mañana.
 > Él te confirma la disponibilidad y el anticipo por este mismo WhatsApp.
 
-**Aviso a Pablo (a ADMIN_WHATSAPP_TO):**
+_Aviso a Pablo: **no se mandó**. Su ventana de 24 h está cerrada y no hay `AGENTE_PLANTILLA_AVISO`, así que quedó en `avisos-pendientes.jsonl` (1 pendiente) y el registro lo marca con nivel `error`:_
 
-> 📅 Solicitud de sesión (asistente de ANTE)
-> Cliente: whatsapp:+5215500000001
-> Nombre: Laura Prueba
-> Sesión: Estándar
-> Fecha preferida: sábado 19 de septiembre en la mañana
->
-> El asistente le dijo que tú confirmas disponibilidad y anticipo.
+```
+{"nivel":"error","evento":"aviso_admin.NO_ENTREGADO","motivo":"ventana de 24 h cerrada y sin AGENTE_PLANTILLA_AVISO","pendientes":1,"queHacer":"que Pablo escriba cualquier cosa al número de ANTE: se manda al instante"}
+```
 
 ### Vuelta 5
 
@@ -76,22 +81,51 @@ Cada mensaje llega como lo manda Twilio (POST `application/x-www-form-urlencoded
 
 > Gracias a ti. Pablo te escribe por aquí para confirmar. Que estés muy bien.
 
-## 2 · Firma mala y reintento de Twilio
+## 3 · Firma, re-serialización, reintentos y statuses
 
-- POST con `X-Twilio-Signature` inventada → **HTTP 403**, no se procesa.
-- POST firmado sobre `http://127.0.0.1:…` (la URL local, no la pública) → **HTTP 403**.
-- Twilio reintenta el webhook del último mensaje (mismo `MessageSid`) → **HTTP 200**, y no sale una segunda respuesta.
+- Firma inventada → **HTTP 403**; sin cabecera → **HTTP 403**. No se procesa nada.
+- El mismo mensaje con **otros espacios** (JSON re-serializado) y la firma del original → **HTTP 403**: la firma se comprueba sobre los bytes que llegan, no sobre el JSON reconstruido.
+- POST bien firmado a `/otra/ruta` → **HTTP 404**: hay una sola ruta.
+- Meta reintenta el mensaje de la vuelta 5 (mismo `id`, el wamid) → **HTTP 200** y no sale una segunda respuesta.
+- Un payload de `statuses` (el cliente leyó) → **HTTP 200** y se ignora.
 
-Lo que quedó en el registro (sin fecha): el número va enmascarado y el texto del mensaje no aparece.
+Lo que quedó en el registro (sin fecha): ni el texto, ni números completos, ni secretos.
 
 ```
-{"nivel":"aviso","evento":"webhook.firma_invalida","de":"whatsapp:+521…0001","conFirma":true}
-{"nivel":"aviso","evento":"webhook.firma_invalida","de":"whatsapp:+521…0001","conFirma":true}
+{"nivel":"aviso","evento":"webhook.firma_invalida","conFirma":true,"bytes":492}
+{"nivel":"aviso","evento":"webhook.firma_invalida","conFirma":false,"bytes":492}
+{"nivel":"aviso","evento":"webhook.firma_invalida","conFirma":true,"bytes":953}
+{"nivel":"info","evento":"webhook.ignorados","estados":1,"ajenos":0}
 ```
 
-## 3 · Modo sondeo: otro número
+## 4 · Pablo le escribe al número de ANTE
 
-El agente no escucha nada: cada pocos segundos lista los mensajes entrantes en la API de Twilio (`GET …/Messages.json`) y contesta por la misma API.
+Eso abre su ventana de 24 h: el aviso pendiente sale en ese momento, y después su propio mensaje recibe respuesta como el de cualquiera.
+
+**Pablo:**
+
+> Hola, soy Pablo, probando
+
+**Aviso a Pablo (el que estaba pendiente):**
+
+> (aviso pendiente del 2026-09-12 15:31 UTC)
+> 📅 Solicitud de sesión (asistente de ANTE)
+> Cliente: +5215500000001
+> Nombre: Laura Prueba
+> Sesión: Estándar
+> Fecha preferida: sábado 19 de septiembre en la mañana
+>
+> El asistente le dijo que tú confirmas disponibilidad y anticipo.
+
+**ANTE (asistente automático):**
+
+> Hola, soy el asistente automático de ANTE. Te ayudo con paquetes, precios y para apartar tu sesión; lo que yo no sepa, se lo paso a Pablo.
+>
+> ¿En qué te ayudo? Te puedo contar de los paquetes y precios, o pasar tu solicitud para apartar una sesión.
+
+## 5 · Otro cliente: una pregunta que el agente no sabe, y BAJA
+
+Ahora la ventana de Pablo está abierta: el aviso le llega como texto.
 
 **Cliente 2:**
 
@@ -103,10 +137,10 @@ El agente no escucha nada: cada pocos segundos lista los mensajes entrantes en l
 >
 > Eso no lo tengo a la mano. Se lo paso a Pablo y él te escribe por aquí.
 
-**Aviso a Pablo (a ADMIN_WHATSAPP_TO):**
+**Aviso a Pablo:**
 
 > 🙋 El asistente de ANTE te pasa una conversación
-> Cliente: whatsapp:+5215500000002
+> Cliente: +5215500000002
 > Motivo: ¿Hacen fotos de boda a domicilio?
 > Último mensaje: «¿Hacen fotos de boda a domicilio?»
 
@@ -124,30 +158,37 @@ El agente no escucha nada: cada pocos segundos lista los mensajes entrantes en l
 
 _(sin respuesta: el número se dio de baja)_
 
-## 4 · Gasto
+## 6 · Gasto del modelo
 
-6 llamadas al modelo · 11620 tokens de entrada · 321 de salida.
-Con la tarifa pico de `deepseek-flash` (US$0.3 por millón de entrada sin caché, US$1.2 de salida) serían **US$0.0039** — el proveedor simulado no cobra: sus tokens son una estimación (uno cada 4 caracteres) para ejercitar el tope. Tope diario configurado: US$0.5.
+7 llamadas · 13425 tokens de entrada · 348 de salida. A tarifa pico de `deepseek-flash` serían **US$0.0044** — el proveedor simulado no cobra: sus tokens son una estimación (uno cada 4 caracteres) para ejercitar el tope. Tope diario: US$0.5.
 
-## 5 · Comprobaciones
+## 7 · Comprobaciones
 
-- ✔ vuelta 1: webhook firmado → HTTP 200
-- ✔ vuelta 1: el agente contestó por la API REST
-- ✔ vuelta 2: webhook firmado → HTTP 200
-- ✔ vuelta 2: el agente contestó por la API REST
-- ✔ vuelta 3: webhook firmado → HTTP 200
-- ✔ vuelta 3: el agente contestó por la API REST
-- ✔ vuelta 4: webhook firmado → HTTP 200
-- ✔ vuelta 4: el agente contestó por la API REST
-- ✔ vuelta 5: webhook firmado → HTTP 200
-- ✔ vuelta 5: el agente contestó por la API REST
+- ✔ verificación GET con el token bueno → HTTP 200, devuelve el challenge
+- ✔ verificación GET con otro token → HTTP 403
+- ✔ vuelta 1: POST firmado → HTTP 200
+- ✔ vuelta 1: el agente contestó por la Graph API
+- ✔ vuelta 2: POST firmado → HTTP 200
+- ✔ vuelta 2: el agente contestó por la Graph API
+- ✔ vuelta 3: POST firmado → HTTP 200
+- ✔ vuelta 3: el agente contestó por la Graph API
+- ✔ vuelta 4: POST firmado → HTTP 200
+- ✔ vuelta 4: el agente contestó por la Graph API
+- ✔ vuelta 5: POST firmado → HTTP 200
+- ✔ vuelta 5: el agente contestó por la Graph API
 - ✔ se presentó como asistente automático en el primer mensaje
 - ✔ no se volvió a presentar en la misma conversación
-- ✔ la solicitud de agendar llegó a Pablo
 - ✔ ningún marcador llegó al cliente
-- ✔ petición con firma mala → HTTP 403
-- ✔ petición firmada sobre la URL local en vez de la pública → HTTP 403
-- ✔ ninguna de las dos se procesó (cero envíos)
-- ✔ Twilio reintenta el último MessageSid → HTTP 200 y no se contesta dos veces
+- ✔ con la ventana de Pablo cerrada no se intentó texto libre (cero rechazos 131047)
+- ✔ el aviso de la solicitud quedó en pendientes
+- ✔ POST con firma inventada → HTTP 403
+- ✔ POST sin X-Hub-Signature-256 → HTTP 403
+- ✔ POST con los bytes re-serializados (otros espacios) y la firma del original → HTTP 403
+- ✔ POST bien firmado a otra ruta → HTTP 404
+- ✔ ninguno de los cuatro se procesó (cero envíos)
+- ✔ Meta reintenta el último mensaje (mismo wamid) → HTTP 200 y no se contesta dos veces
+- ✔ payload de statuses («read») → HTTP 200 y se ignora
+- ✔ al escribir Pablo, salió el aviso pendiente con la solicitud
+- ✔ no quedan avisos pendientes
 - ✔ tras BAJA ya no contesta (silencio)
-- ✔ lo que no sabe se lo pasó a Pablo
+- ✔ lo que no sabe se lo pasó a Pablo, como texto (ventana abierta)
