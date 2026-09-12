@@ -1,7 +1,7 @@
 # PARA ROOT · el agente de WhatsApp de ANTE y el primer túnel de `kokoroco-central`
 
 Escrito el 12 sep 2026 desde la Mac, **sin ssh**. Cada paso trae su comprobación y su vuelta atrás.
-Se corre como root (`ssh root@100.93.106.86`), en orden.
+Se corre como root en el servidor (por Tailscale), en orden.
 
 **Qué se monta.** El pipeline que después usará KokoroCo:
 
