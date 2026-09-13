@@ -26,7 +26,7 @@ Herramientas que **no** consumen créditos: `whoami`, `list_projects`, `get_sear
 ## Alcance del sitio
 
 - **Dominio principal:** `https://www.ante.photo`
-- **Stack:** Astro estático, adapter Cloudflare, `build.format: 'file'`. Repo: `priormyt/portafolio`.
+- **Stack:** Astro estático, adapter Cloudflare, `build.format: 'file'`. Repo: `priormyt/ante`.
 - **Sitemap:** `/sitemap-index.xml` (generado por `@astrojs/sitemap`, filtrado a las públicas).
   El viejo `/sitemap.xml` da 301 vía `public/_redirects`.
 - **Idioma/mercado:** español, Ciudad de México.

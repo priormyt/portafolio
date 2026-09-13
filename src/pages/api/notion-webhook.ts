@@ -9,7 +9,7 @@ import { archivarSesion } from '../../lib/archivado';
 
 const NOTION_VERSION = '2022-06-28';
 
-// Bot ID de la integración "ante-portafolio". Si un evento es causado por
+// Bot ID de la integración de Notion de ANTE. Si un evento es causado por
 // este actor, lo disparamos nosotros mismos (push back) → ignorar para no loop.
 const BOT_ID = '357aa7a3-5835-8106-840c-0027d8a80463';
 
