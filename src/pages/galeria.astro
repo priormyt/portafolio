@@ -1,12 +1,75 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { PRECIO_DESDE, formatMXN } from '../lib/precios';
+import type { ImageGallery, WithContext } from 'schema-dts';
 
 const desde = formatMXN(PRECIO_DESDE);
+
+// `label` es el texto que aparece al pasar el cursor (no cambia lo visual);
+// `alt` es la descripción para Google Imágenes y lectores de pantalla.
+const tipos: Record<string, string> = {
+  profesional: 'Retrato profesional',
+  corporativo: 'Retrato corporativo',
+  editorial: 'Retrato editorial',
+  personal: 'Retrato personal',
+  artistico: 'Retrato artístico',
+};
+const fotos = [
+  ['profesional', 'ricardo', 'Ricardo', 533],
+  ['editorial', 'ricardo', 'Ricardo', 529],
+  ['profesional', 'jonathan', 'Jonathan', 522],
+  ['corporativo', 'jonathan', 'Jonathan', 528],
+  ['profesional', 'valeria', 'Valeria', 639],
+  ['personal', 'mafer-2', 'Mafer', 508],
+  ['corporativo', 'carlos', 'Carlos', 642],
+  ['profesional', 'carlos', 'Carlos', 641],
+  ['editorial', 'carlos', 'Carlos', 532],
+  ['artistico', 'michelle', 'Michelle', 533],
+  ['personal', 'michelle', 'Michelle', 664],
+  ['profesional', 'christian', 'Christian', 640],
+  ['editorial', 'christian', 'Christian', 533],
+  ['profesional', 'javier', 'Javier', 640],
+  ['editorial', 'javier', 'Javier', 563],
+  ['profesional', 'eli', 'Eli', 640],
+  ['profesional', 'eli-2', 'Eli', 640],
+] as const;
+const images = fotos.map(([tipo, archivo, nombre, width]) => ({
+  src: `/img/thumb/retrato-${tipo}-${archivo}.webp`,
+  label: `${tipos[tipo]} · ${nombre}`,
+  alt: `${tipos[tipo]} de ${nombre} en el estudio de ANTE en Coyoacán, CDMX`,
+  width,
+  height: 800,
+}));
+
+const siteUrl = 'https://www.ante.photo';
+const ante = { '@id': `${siteUrl}/#ante` } as const;
+const gallerySchema: WithContext<ImageGallery> = {
+  '@context': 'https://schema.org',
+  '@type': 'ImageGallery',
+  name: 'Retrato profesional para abogados y profesionistas · ANTE',
+  description: 'Retratos profesionales, corporativos y editoriales hechos por ANTE Retrato Profesional en su estudio de Coyoacán, Ciudad de México.',
+  url: `${siteUrl}/galeria`,
+  inLanguage: 'es-MX',
+  about: { '@type': 'Service', name: 'Retrato profesional', serviceType: 'Retrato profesional' },
+  author: ante,
+  image: images.map((img) => ({
+    '@type': 'ImageObject',
+    contentUrl: siteUrl + img.src,
+    name: img.label,
+    caption: img.alt,
+    width: { '@type': 'QuantitativeValue', value: img.width, unitCode: 'E37' },
+    height: { '@type': 'QuantitativeValue', value: img.height, unitCode: 'E37' },
+    creator: ante,
+    copyrightHolder: ante,
+    creditText: 'ANTE Retrato Profesional',
+    copyrightNotice: '© ANTE Retrato Profesional',
+    contentLocation: { '@type': 'Place', name: 'Coyoacán, Ciudad de México' },
+  })),
+};
 ---
 <Layout
-  title="Galería de Retratos y Books | ANTE Estudio Coyoacán CDMX"
-  description={`Retratos profesionales hechos en nuestro estudio fotográfico en Coyoacán, CDMX: corporativos, books personales y editoriales. Mira el trabajo y agenda desde ${desde} MXN.`}
+  title="Galería de Retrato Profesional · Abogados y Profesionistas en CDMX | ANTE"
+  description={`Retrato profesional para abogados, ejecutivos y profesionistas, hecho en nuestro estudio de Coyoacán, CDMX. Corporativos, books y editoriales. Agenda desde ${desde} MXN.`}
 >
 <!-- PAGE HEADER -->
 <div class="page-header">
@@ -18,8 +81,15 @@ const desde = formatMXN(PRECIO_DESDE);
 </div>
 
 <!-- GALLERY -->
-<section class="gallery-section" aria-label="Galería de retratos profesionales ANTE">
-  <div class="gallery-grid" id="gallery"></div>
+<section class="gallery-section" aria-label="Galería de retrato profesional ANTE">
+  <div class="gallery-grid" id="gallery">
+    {images.map((img) => (
+      <div class="gallery-item">
+        <img src={img.src} alt={img.alt} width={img.width} height={img.height} loading="lazy" decoding="async">
+        <div class="gallery-item-overlay"><span class="gallery-item-label">{img.label}</span></div>
+      </div>
+    ))}
+  </div>
 </section>
 
 <!-- CTA -->
@@ -36,33 +106,7 @@ const desde = formatMXN(PRECIO_DESDE);
   <span class="lightbox-nav lightbox-next" id="lightboxNext">›</span>
 </div>
 
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "ImageGallery",
-  "name": "Galería de retratos · ANTE Estudio de Fotografía",
-  "description": "Colección de retratos profesionales, corporativos y personales realizados por ANTE Estudio de Fotografía en Coyoacán, Ciudad de México.",
-  "url": "https://www.ante.photo/galeria",
-  "author": {
-    "@type": "PhotographyBusiness",
-    "name": "ANTE Estudio de Fotografía",
-    "url": "https://www.ante.photo"
-  },
-  "image": [
-    { "@type": "ImageObject", "contentUrl": "https://www.ante.photo/img/thumb/retrato-profesional-ricardo.webp", "name": "Retrato profesional · Ricardo", "description": "Retrato profesional para perfil corporativo" },
-    { "@type": "ImageObject", "contentUrl": "https://www.ante.photo/img/thumb/retrato-profesional-jonathan.webp", "name": "Retrato profesional · Jonathan", "description": "Retrato para perfil ejecutivo" },
-    { "@type": "ImageObject", "contentUrl": "https://www.ante.photo/img/thumb/retrato-profesional-valeria.webp", "name": "Retrato profesional · Valeria", "description": "Retrato personal y editorial" },
-    { "@type": "ImageObject", "contentUrl": "https://www.ante.photo/img/thumb/retrato-artistico-michelle.webp", "name": "Retrato artístico · Michelle", "description": "Retrato artístico con iluminación de estudio" },
-    { "@type": "ImageObject", "contentUrl": "https://www.ante.photo/img/thumb/retrato-corporativo-carlos.webp", "name": "Retrato corporativo · Carlos", "description": "Retrato corporativo para presentaciones" },
-    { "@type": "ImageObject", "contentUrl": "https://www.ante.photo/img/thumb/retrato-personal-mafer-2.webp", "name": "Retrato personal · Mafer", "description": "Retrato personal minimalista" },
-    { "@type": "ImageObject", "contentUrl": "https://www.ante.photo/img/thumb/retrato-profesional-christian.webp", "name": "Retrato profesional · Christian", "description": "Retrato profesional para emprendedor" },
-    { "@type": "ImageObject", "contentUrl": "https://www.ante.photo/img/thumb/retrato-profesional-javier.webp", "name": "Retrato profesional · Javier", "description": "Retrato profesional para perfil ejecutivo" },
-    { "@type": "ImageObject", "contentUrl": "https://www.ante.photo/img/thumb/retrato-editorial-javier.webp", "name": "Retrato editorial · Javier", "description": "Retrato editorial con iluminación de estudio" },
-    { "@type": "ImageObject", "contentUrl": "https://www.ante.photo/img/thumb/retrato-profesional-eli.webp", "name": "Retrato profesional · Eli", "description": "Retrato profesional con saco sobre fondo oscuro" },
-    { "@type": "ImageObject", "contentUrl": "https://www.ante.photo/img/thumb/retrato-profesional-eli-2.webp", "name": "Retrato profesional · Eli", "description": "Retrato profesional con saco sobre fondo oscuro" }
-  ]
-}
-</script>
+<script type="application/ld+json" set:html={JSON.stringify(gallerySchema)} />
 
 <style is:global>
 
@@ -393,60 +437,22 @@ const desde = formatMXN(PRECIO_DESDE);
     });
   });
 
-  // Gallery images
-  const images = [
-    { src: 'img/thumb/retrato-profesional-ricardo.webp', alt: 'Retrato profesional · Ricardo' },
-    { src: 'img/thumb/retrato-editorial-ricardo.webp', alt: 'Retrato editorial · Ricardo' },
-    { src: 'img/thumb/retrato-profesional-jonathan.webp',    alt: 'Retrato profesional · Jonathan' },
-    { src: 'img/thumb/retrato-corporativo-jonathan.webp',    alt: 'Retrato corporativo · Jonathan' },
-    { src: 'img/thumb/retrato-profesional-valeria.webp', alt: 'Retrato profesional · Valeria' },
-    { src: 'img/thumb/retrato-personal-mafer-2.webp',   alt: 'Retrato personal · Mafer' },
-    { src: 'img/thumb/retrato-corporativo-carlos.webp',  alt: 'Retrato corporativo · Carlos' },
-    { src: 'img/thumb/retrato-profesional-carlos.webp',  alt: 'Retrato profesional · Carlos' },
-    { src: 'img/thumb/retrato-editorial-carlos.webp',  alt: 'Retrato editorial · Carlos' },
-    { src: 'img/thumb/retrato-artistico-michelle.webp',    alt: 'Retrato artístico · Michelle' },
-    { src: 'img/thumb/retrato-personal-michelle.webp',    alt: 'Retrato personal · Michelle' },
-    { src: 'img/thumb/retrato-profesional-christian.webp', alt: 'Retrato profesional · Christian' },
-    { src: 'img/thumb/retrato-editorial-christian.webp', alt: 'Retrato editorial · Christian' },
-    { src: 'img/thumb/retrato-profesional-javier.webp',   alt: 'Retrato profesional · Javier' },
-    { src: 'img/thumb/retrato-editorial-javier.webp',  alt: 'Retrato editorial · Javier' },
-    { src: 'img/thumb/retrato-profesional-eli.webp', alt: 'Retrato profesional · Eli' },
-    { src: 'img/thumb/retrato-profesional-eli-2.webp', alt: 'Retrato profesional · Eli' },
-  ];
-
-  // Shuffle
-  for (let i = images.length - 1; i > 0; i--) {
+  // Las fotos vienen en el HTML (para que Google las lea); aquí solo se
+  // baraja el orden en pantalla, como antes.
+  const gallery = document.getElementById('gallery');
+  const items = [...gallery.children];
+  for (let i = items.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [images[i], images[j]] = [images[j], images[i]];
+    [items[i], items[j]] = [items[j], items[i]];
   }
+  items.forEach(item => gallery.appendChild(item));
 
-const gallery = document.getElementById('gallery');
-  const thumbPath = p => p;
-  let currentIndex = 0;
-
-  images.forEach((img, i) => {
-    const item = document.createElement('div');
-    item.className = 'gallery-item';
-
-    const el = document.createElement('img');
-    el.src = thumbPath(img.src);
-    el.onerror = () => { el.src = img.src; };
-    el.alt = img.alt;
-    el.loading = 'lazy';
-
-    const overlay = document.createElement('div');
-    overlay.className = 'gallery-item-overlay';
-    const label = document.createElement('span');
-    label.className = 'gallery-item-label';
-    label.textContent = img.alt;
-    overlay.appendChild(label);
-
-    item.appendChild(el);
-    item.appendChild(overlay);
-    gallery.appendChild(item);
-
-    item.addEventListener('click', () => openLightbox(i));
+  const images = items.map(item => {
+    const el = item.querySelector('img');
+    return { src: el.getAttribute('src'), alt: el.alt };
   });
+  let currentIndex = 0;
+  items.forEach((item, i) => item.addEventListener('click', () => openLightbox(i)));
 
   // Lightbox
   const lightbox = document.getElementById('lightbox');

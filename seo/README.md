@@ -238,3 +238,17 @@ Notas sobre estos datos:
   **Sin verificar todavía:** si ANTE hace sesiones en la oficina del cliente. La
   página describe todo en el estudio de Coyoacán. Si también van a domicilio,
   falta cubrir "fotógrafo corporativo a domicilio", que es una búsqueda aparte.
+
+- **2026-10-01** — Reposicionamiento a **"retrato profesional"** (transición híbrida).
+  - Marca en schema, footer y titles: "ANTE Retrato Profesional". `alternateName` conserva
+    "ANTE | Estudio Fotográfico" (nombre de la ficha de Google). El title de `/contacto` conserva
+    "Estudio Fotográfico en Coyoacán" como ancla local.
+  - `/galeria` es la página de "retrato para profesionales" (abogados, sobre todo). Visual intacto;
+    las fotos ahora vienen en el HTML (antes las inyectaba JS), con alt descriptivo, `width/height`
+    y schema `ImageGallery` tipado con `schema-dts`, ligado al negocio por `@id` `/#ante`.
+  - Home: variantes `-800w.webp` + `srcset` en las 4 fotos grandes; preload del hero solo en `/`.
+  - Herramientas: plugin `claude-seo` (scope proyecto) y skills de `coreyhaines31/marketingskills`
+    (seo-audit, schema, ai-seo, site-architecture, copywriting).
+  - Baseline unlighthouse (producción, antes de estos cambios, móvil): performance home 72
+    (LCP 7.2 s; el elemento LCP es `.hero-eyebrow`, retrasado por su animación de entrada),
+    contacto 80, corporativo 80, galería 90; SEO 100 en todas las indexables.

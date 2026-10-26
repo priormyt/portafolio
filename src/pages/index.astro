@@ -27,17 +27,17 @@ const respuestaPrecios =
   `requiere anticipo del 50% para reservar la fecha.`;
 ---
 <Layout
-  title={`Estudio Fotográfico en Coyoacán CDMX · Desde ${desde} | ANTE`}
-  description={`Estudio fotográfico de retrato en Coyoacán, Ciudad de México: corporativo, personal y books profesionales. Paquetes de ${desde} a ${formatMXN(PRECIO_HASTA)} MXN, edición incluida y entrega en 3–5 días.`}
+  title={`Retrato Profesional en Coyoacán, CDMX · Desde ${desde} | ANTE`}
+  description={`Retrato profesional para abogados, ejecutivos y profesionistas en nuestro estudio de Coyoacán, CDMX. Paquetes de ${desde} a ${formatMXN(PRECIO_HASTA)} MXN, edición incluida y entrega en 3–5 días.`}
 >
 <!-- HERO -->
-<section class="hero" aria-label="Presentación de ANTE Estudio de Fotografía">
+<section class="hero" aria-label="Presentación de ANTE Retrato Profesional">
   <div class="hero-bg"></div>
   <div class="hero-overlay"></div>
   <div class="hero-content">
-    <p class="hero-eyebrow">Estudio de retrato · Coyoacán, Ciudad de México</p>
+    <p class="hero-eyebrow">Retrato profesional · Coyoacán, Ciudad de México</p>
     <h1 class="hero-title">La imagen<br><em>honesta.</em></h1>
-    <p class="hero-sub">Retratos que reflejan el carácter único de cada persona. Luz cuidada, dirección suave, resultado que perdura.</p>
+    <p class="hero-sub">Retratos para profesionales que reflejan el carácter de cada persona. Luz cuidada, dirección suave, resultado que perdura.</p>
     <div class="hero-cta">
       <button class="btn-ghost schedule-trigger" type="button" data-schedule-trigger aria-haspopup="dialog">
         Agendar sesión
@@ -115,7 +115,7 @@ const respuestaPrecios =
     </div>
   </div>
   <div class="filosofia-img reveal" style="transition-delay: 0.2s">
-    <img src="img/retrato-profesional-valeria.webp" alt="Retrato ANTE · Valeria" loading="lazy" width="1401" height="1752">
+    <img src="img/retrato-profesional-valeria.webp" srcset="/img/retrato-profesional-valeria-800w.webp 800w, /img/retrato-profesional-valeria.webp 1401w" sizes="(max-width: 768px) 90vw, 50vw" alt="Retrato ANTE · Valeria" loading="lazy" width="1401" height="1752">
     <div class="filosofia-img-tag">Retrato · Valeria</div>
   </div>
 </section>
@@ -136,7 +136,7 @@ const respuestaPrecios =
       <div class="galeria-slide" data-index="0">
         <div class="galeria-slide-image">
           <div class="galeria-inner-image">
-            <img src="img/retrato-profesional-ricardo.webp" alt="Retrato Ricardo" loading="eager" width="1401" height="2102">
+            <img src="img/retrato-profesional-ricardo.webp" srcset="/img/retrato-profesional-ricardo-800w.webp 800w, /img/retrato-profesional-ricardo.webp 1401w" sizes="(max-width: 768px) 90vw, 50vw" alt="Retrato Ricardo" loading="eager" width="1401" height="2102">
           </div>
         </div>
         <div class="galeria-slide-content">
@@ -148,7 +148,7 @@ const respuestaPrecios =
       <div class="galeria-slide" data-index="1">
         <div class="galeria-slide-image">
           <div class="galeria-inner-image">
-            <img src="img/retrato-artistico-michelle.webp" alt="Retrato Michelle" loading="lazy" width="1400" height="2100">
+            <img src="img/retrato-artistico-michelle.webp" srcset="/img/retrato-artistico-michelle-800w.webp 800w, /img/retrato-artistico-michelle.webp 1400w" sizes="(max-width: 768px) 90vw, 50vw" alt="Retrato Michelle" loading="lazy" width="1400" height="2100">
           </div>
         </div>
         <div class="galeria-slide-content">
@@ -160,7 +160,7 @@ const respuestaPrecios =
       <div class="galeria-slide" data-index="2">
         <div class="galeria-slide-image">
           <div class="galeria-inner-image">
-            <img src="img/retrato-profesional-valeria.webp" alt="Retrato Valeria" loading="lazy" width="1401" height="1752">
+            <img src="img/retrato-profesional-valeria.webp" srcset="/img/retrato-profesional-valeria-800w.webp 800w, /img/retrato-profesional-valeria.webp 1401w" sizes="(max-width: 768px) 90vw, 50vw" alt="Retrato Valeria" loading="lazy" width="1401" height="1752">
           </div>
         </div>
         <div class="galeria-slide-content">
@@ -172,7 +172,7 @@ const respuestaPrecios =
       <div class="galeria-slide" data-index="3">
         <div class="galeria-slide-image">
           <div class="galeria-inner-image">
-            <img src="img/retrato-profesional-jonathan.webp" alt="Retrato Jonathan" loading="lazy" width="1264" height="1937">
+            <img src="img/retrato-profesional-jonathan.webp" srcset="/img/retrato-profesional-jonathan-800w.webp 800w, /img/retrato-profesional-jonathan.webp 1264w" sizes="(max-width: 768px) 90vw, 50vw" alt="Retrato Jonathan" loading="lazy" width="1264" height="1937">
           </div>
         </div>
         <div class="galeria-slide-content">
@@ -376,7 +376,7 @@ const respuestaPrecios =
 </section>
 
 <!-- AEO ACCORDION -->
-<section class="faq-acc-section" aria-label="Preguntas frecuentes sobre ANTE Estudio de Fotografía">
+<section class="faq-acc-section" aria-label="Preguntas frecuentes sobre ANTE Retrato Profesional">
   <div class="faq-acc-header reveal">
     <div class="section-tag">Frecuentes</div>
   </div>
@@ -390,7 +390,7 @@ const respuestaPrecios =
       </button>
       <div class="faq-acc-body" aria-hidden="true">
         <div class="faq-acc-body-inner">
-          <p class="faq-acc-answer">ANTE Estudio de Fotografía se especializa en retrato profesional en Coyoacán, Ciudad de México: <a href="/fotografia-corporativa">fotografía corporativa</a> para LinkedIn y presentaciones, retrato personal editorial y fotografía para artistas y emprendedores. Cada sesión incluye dirección de pose, iluminación de estudio controlada y edición profesional. Paquetes desde {desde} MXN, <a href="#precios">lista completa aquí</a>.</p>
+          <p class="faq-acc-answer">ANTE se especializa en retrato profesional en su estudio de Coyoacán, Ciudad de México: <a href="/galeria">retrato para abogados y profesionistas</a>, <a href="/fotografia-corporativa">fotografía corporativa</a> para LinkedIn y presentaciones, retrato personal editorial y fotografía para artistas y emprendedores. Cada sesión incluye dirección de pose, iluminación de estudio controlada y edición profesional. Paquetes desde {desde} MXN, <a href="#precios">lista completa aquí</a>.</p>
         </div>
       </div>
     </div>
@@ -448,7 +448,7 @@ const respuestaPrecios =
       name: '¿Qué tipo de fotografía hace ANTE?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: `ANTE Estudio de Fotografía se especializa en retrato profesional en Coyoacán, Ciudad de México: corporativo para LinkedIn y presentaciones, retrato personal editorial y fotografía para artistas y emprendedores. Cada sesión incluye dirección de pose, iluminación de estudio controlada y edición profesional. Paquetes desde ${desde} MXN.`,
+        text: `ANTE se especializa en retrato profesional en su estudio de Coyoacán, Ciudad de México: retrato para abogados y profesionistas, corporativo para LinkedIn y presentaciones, retrato personal editorial y fotografía para artistas y emprendedores. Cada sesión incluye dirección de pose, iluminación de estudio controlada y edición profesional. Paquetes desde ${desde} MXN.`,
       },
     },
     {
@@ -478,8 +478,8 @@ const respuestaPrecios =
 <script type="application/ld+json" set:html={JSON.stringify({
   '@context': 'https://schema.org',
   '@type': 'Service',
-  serviceType: 'Fotografía profesional',
-  provider: { '@type': 'PhotographyBusiness', name: 'ANTE Estudio de Fotografía', url: 'https://www.ante.photo' },
+  serviceType: 'Retrato profesional',
+  provider: { '@type': 'PhotographyBusiness', name: 'ANTE Retrato Profesional', url: 'https://www.ante.photo' },
   areaServed: { '@type': 'City', name: 'Ciudad de México' },
   hasOfferCatalog: {
     '@type': 'OfferCatalog',

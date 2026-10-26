@@ -1,6 +1,12 @@
 {
   "version": 1,
   "skills": {
+    "ai-seo": {
+      "source": "coreyhaines31/marketingskills",
+      "sourceType": "github",
+      "skillPath": "skills/ai-seo/SKILL.md",
+      "computedHash": "2b2dc6fe6156b9338e1b181670b1c3e2b215d980327f3bbd5aff9d069decd56d"
+    },
     "competitive-landscape": {
       "source": "every-app/open-seo",
       "sourceType": "github",
@@ -12,6 +18,12 @@
       "sourceType": "github",
       "skillPath": ".agents/skills/competitor-analysis/SKILL.md",
       "computedHash": "9645a4829de2bedaa2b91418ddd877eab8ea1d2e9da9683c660d47d033428244"
+    },
+    "copywriting": {
+      "source": "coreyhaines31/marketingskills",
+      "sourceType": "github",
+      "skillPath": "skills/copywriting/SKILL.md",
+      "computedHash": "779f05c8be67da475e6a7af78de3e0400b0038e371ce898dd6ff9d3331aab7db"
     },
     "deslop": {
       "source": "every-app/open-seo",
@@ -67,6 +79,18 @@
       "skillPath": ".agents/skills/papercuts/SKILL.md",
       "computedHash": "be6eaddfebdf0935c2ad43aed5bfe739e1b31ba01671c295f911e9c358419ec2"
     },
+    "schema": {
+      "source": "coreyhaines31/marketingskills",
+      "sourceType": "github",
+      "skillPath": "skills/schema/SKILL.md",
+      "computedHash": "2f4807070c77b5c52af3a7e56d2ca5ee12ae2fd8b749d76ab68d3de40f323e78"
+    },
+    "seo-audit": {
+      "source": "coreyhaines31/marketingskills",
+      "sourceType": "github",
+      "skillPath": "skills/seo-audit/SKILL.md",
+      "computedHash": "01f9f8a3feb3ea69c6c212d61189c610f96ef2cc363adc27fd314d78254bf6ae"
+    },
     "seo-coach": {
       "source": "every-app/open-seo",
       "sourceType": "github",
@@ -78,6 +102,12 @@
       "sourceType": "github",
       "skillPath": ".agents/skills/seo-project-setup/SKILL.md",
       "computedHash": "5872bc785e0ab88674a5787f70da513ecf487b6778acbbf99c35f6a8ff59fc99"
+    },
+    "site-architecture": {
+      "source": "coreyhaines31/marketingskills",
+      "sourceType": "github",
+      "skillPath": "skills/site-architecture/SKILL.md",
+      "computedHash": "48a38c5e2b000d134c3db282364b1014bad362fa91d4618ad8c2eb7cee991208"
     }
   }
 }
