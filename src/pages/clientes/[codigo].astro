@@ -474,8 +474,8 @@ const mailArchivadaUrl = `mailto:contacto@ante.photo?subject=${encodeURIComponen
       gap: 0.8rem;
       margin-bottom: 1.8rem;
     }
-    /* Encuadre tipo foto de perfil: el círculo recorta y la imagen se acerca
-       a la cara (tercio superior del retrato vertical) para no mostrar el pecho. */
+    /* Encuadre tipo foto de perfil, sin zoom: en un retrato vertical la cara
+       está en el tercio superior, así que se sube el recorte para centrarla. */
     .perfil-muestra-circulo {
       width: 140px;
       height: 140px;
@@ -489,9 +489,7 @@ const mailArchivadaUrl = `mailto:contacto@ante.photo?subject=${encodeURIComponen
       width: 100%;
       height: 100%;
       object-fit: cover;
-      object-position: 50% 20%;
-      transform: scale(1.4);
-      transform-origin: 50% 42%;
+      object-position: 50% 6%;
     }
     .perfil-muestra-texto {
       font-family: var(--f-mono);
