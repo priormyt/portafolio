@@ -1250,7 +1250,7 @@ const mailArchivadaUrl = `mailto:contacto@ante.photo?subject=${encodeURIComponen
         // Trampa de foco: es un diálogo modal, tabular fuera te dejaba
         // recorriendo la galería de atrás sin poder ver dónde estabas.
         const focusables = [lbClose, lbSelectBtn, lbDownload, lbPrev, lbNext].filter(
-          (el): el is HTMLButtonElement | HTMLAnchorElement => !!el && el.offsetParent !== null,
+          (el): el is HTMLButtonElement | HTMLAnchorElement => !!el && !el.hidden && el.getClientRects().length > 0,
         );
         if (focusables.length === 0) return;
         const first = focusables[0];

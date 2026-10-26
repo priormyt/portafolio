@@ -189,7 +189,7 @@ async function put(s3: S3Client, bucket: string, key: string, body: Buffer, publ
       Key: key,
       Body: body,
       ContentType: 'image/jpeg',
-      ...(publico ? { CacheControl: 'public, max-age=31536000, immutable' } : {}),
+      ...(publico ? { CacheControl: 'public, max-age=86400' } : {}),
     }),
   );
 }
