@@ -2,7 +2,7 @@
 export const prerender = false;
 
 import Layout from '../../../layouts/Layout.astro';
-import { getSesionByCodigo, fotoUrl, readEnv } from '../../../lib/sesiones';
+import { getSesionByCodigo, fotoUrl, readEnv, esAmigos } from '../../../lib/sesiones';
 import { requireAdmin } from '../../../lib/admin-auth';
 import { runDueArchives, diasParaArchivar } from '../../../lib/archivado';
 import '../../../styles/admin.css';
@@ -18,7 +18,8 @@ const codigoNorm = (codigo ?? '').toUpperCase();
 const data = codigoNorm ? await getSesionByCodigo(env, codigoNorm) : null;
 if (!data) return Astro.redirect('/admin?err=no-encontrado', 302);
 
-const { sesion, paquete, fotosFinales, fotosPreview, selecciones } = data;
+const { sesion, paquete, fotosFinales, fotosPreview, fotosFavoritas, selecciones } = data;
+const amigos = esAmigos(sesion);
 const seleccionadas = new Set(selecciones.map((s) => s.foto_id));
 const limite = sesion.limite_fotos ?? paquete?.fotos_incluidas ?? 0;
 
@@ -32,6 +33,7 @@ const diasRestantes = sesion.estado === 'entregada' ? diasParaArchivar(sesion.fe
 // Las preview nuevas continúan la numeración en vez de reiniciar en 1: si
 // reiniciaran, chocarían con las que el cliente ya está viendo y le
 // reordenarían la galería a media selección.
+const maxOrdenFavoritas = fotosFavoritas.reduce((m, f) => Math.max(m, f.orden ?? 0), 0);
 const maxOrdenPreview = fotosPreview.reduce((m, f) => Math.max(m, f.orden ?? 0), 0);
 
 const precioCalculado =
@@ -56,7 +58,9 @@ const estadoLabel: Record<string, string> = {
         <h1 class="admin-h1">{sesion.nombre_cliente}</h1>
         <p class="admin-sub">
           Código <span class="mono">{sesion.codigo}</span>
-          {paquete && ` · Paquete ${paquete.nombre} · ${limite} fotos`}
+          {amigos && ' · '}
+          {amigos && <span class="badge badge-amigos">Amigos y familia</span>}
+          {!amigos && paquete && ` · Paquete ${paquete.nombre} · ${limite} fotos`}
         </p>
       </div>
       <div class="admin-actions">
@@ -72,14 +76,18 @@ const estadoLabel: Record<string, string> = {
       <div class="estado-controls">
         <select id="estadoSelect">
           <option value="seleccion" selected={sesion.estado === 'seleccion'}>Seleccionando</option>
-          <option value="pago_pendiente" selected={sesion.estado === 'pago_pendiente'}>Pago pendiente</option>
+          {(!amigos || sesion.estado === 'pago_pendiente') && (
+            <option value="pago_pendiente" selected={sesion.estado === 'pago_pendiente'}>Pago pendiente</option>
+          )}
           <option value="editando" selected={sesion.estado === 'editando'}>Editando</option>
           <option value="entregada" selected={sesion.estado === 'entregada'}>Entregada</option>
         </select>
         <button id="btnCambiarEstado" type="button" class="btn-ghost">Cambiar estado</button>
       </div>
       <p class="form-hint">
-        Recuerda: la página del cliente cambia según este estado. Pasa a "Editando" cuando recibas el pago de extras (si los hay), y a "Entregada" cuando subas las fotos finales.
+        {amigos
+          ? 'Recuerda: la página del cliente cambia según este estado. Pasa a "Entregada" cuando subas las fotos finales.'
+          : 'Recuerda: la página del cliente cambia según este estado. Pasa a "Editando" cuando recibas el pago de extras (si los hay), y a "Entregada" cuando subas las fotos finales.'}
       </p>
 
       {sesion.estado === 'entregada' && diasRestantes !== null && (
@@ -97,6 +105,7 @@ const estadoLabel: Record<string, string> = {
       )}
     </section>
 
+    {!amigos && (
     <section class="admin-block">
       <h2 class="admin-h2">Pago y precio</h2>
       <div class="precio-row">
@@ -164,14 +173,19 @@ const estadoLabel: Record<string, string> = {
         <p id="comprobanteMsg" class="form-msg" aria-live="polite"></p>
       </details>
     </section>
+    )}
 
     <section class="admin-block">
       <h2 class="admin-h2">Fotos preview ({fotosPreview.length})</h2>
-      <p class="form-hint">Las que el cliente ve para seleccionar. Con marca de agua, baja resolución.</p>
+      <p class="form-hint">
+        {amigos
+          ? 'Las que el cliente ve para seleccionar. 2000px sin marca de agua.'
+          : 'Las que el cliente ve para seleccionar. Con marca de agua, baja resolución.'}
+      </p>
 
       <div id="previewDropzone" class="dropzone" data-orden-base={maxOrdenPreview}>
         <p class="dropzone-text">Arrastra aquí más fotos para seleccionar</p>
-        <p class="dropzone-sub">Se procesan a 800px con marca de agua · se añaden al final de la galería</p>
+        <p class="dropzone-sub">{amigos ? 'Se procesan a 2000px sin marca de agua' : 'Se procesan a 800px con marca de agua'} · se añaden al final de la galería</p>
         <input id="previewFileInput" type="file" accept="image/jpeg,image/png" multiple hidden />
       </div>
       <ul id="previewFileList" class="file-list"></ul>
@@ -254,6 +268,34 @@ const estadoLabel: Record<string, string> = {
     </section>
 
     <section class="admin-block">
+      <h2 class="admin-h2">Favoritas de Pablo ({fotosFavoritas.length})</h2>
+      <p class="form-hint">Regalo para el cliente: no cuentan para su selección ni para el límite. Se muestran en su galería y se pueden descargar en alta.</p>
+
+      <div id="favDropzone" class="dropzone" data-orden-base={maxOrdenFavoritas}>
+        <p class="dropzone-text">Arrastra aquí las favoritas</p>
+        <p class="dropzone-sub">Web 1800px + original JPG para descarga (hasta 30 MB)</p>
+        <input id="favFileInput" type="file" accept="image/jpeg,image/png" multiple hidden />
+      </div>
+      <ul id="favFileList" class="file-list"></ul>
+      <button id="btnSubirFavoritas" type="button" class="btn-primary" style="margin-top:1rem;display:none">Subir favoritas</button>
+      <p id="favMsg" class="form-msg" aria-live="polite"></p>
+
+      {fotosFavoritas.length > 0 && (
+        <div class="thumb-grid" style="margin-top: 1.5rem">
+          {fotosFavoritas.map((foto) => (
+            <figure class="thumb">
+              <img src={fotoUrl(env, foto.r2_key)} alt={foto.original_filename ?? ''} loading="lazy" />
+              <figcaption>{foto.original_filename}</figcaption>
+              <div class="alt-controls">
+                <button type="button" class="btn-alt-upload btn-quitar-fav" data-foto-id={foto.id}>Quitar</button>
+              </div>
+            </figure>
+          ))}
+        </div>
+      )}
+    </section>
+
+    <section class="admin-block">
       <h2 class="admin-h2">Selección del cliente</h2>
       {selecciones.length === 0 ? (
         <p class="empty-block">El cliente aún no ha seleccionado fotos.</p>
@@ -271,7 +313,7 @@ const estadoLabel: Record<string, string> = {
         </ul>
       )}
 
-      {selecciones.length > limite && limite > 0 && (
+      {!amigos && selecciones.length > limite && limite > 0 && (
         <p class="extras-info">
           {selecciones.length - limite} foto{selecciones.length - limite !== 1 ? 's' : ''} extra ·
           <strong> ${(selecciones.length - limite) * Number(sesion.precio_extra)} MXN</strong>
@@ -282,7 +324,7 @@ const estadoLabel: Record<string, string> = {
   </main>
 
   <script src="/js/image-processor.js" is:inline></script>
-  <script define:vars={{ codigo: sesion.codigo }}>
+  <script define:vars={{ codigo: sesion.codigo, esAmigos: amigos }}>
     // Precio final manual
     const precioFinalInput = document.getElementById('precioFinalInput');
     const btnPrecioFinal = document.getElementById('btnPrecioFinal');
@@ -597,7 +639,7 @@ const estadoLabel: Record<string, string> = {
           const file = cola[i];
           try {
             estado(i, 'Procesando...');
-            const blob = await window.imageProcessor.generaPreview(file);
+            const blob = await (esAmigos ? window.imageProcessor.generaPreviewHD(file) : window.imageProcessor.generaPreview(file));
             estado(i, 'Subiendo...');
             const fd = new FormData();
             fd.set('codigo', codigo);
@@ -624,6 +666,125 @@ const estadoLabel: Record<string, string> = {
         boton.disabled = false;
         boton.textContent = 'Subir fotos preview';
         if (fail === 0) setTimeout(() => window.location.reload(), 1200);
+      });
+    })();
+
+    // ─── Favoritas de Pablo ───────────────────────────────────
+    (() => {
+      const dropzone = document.getElementById('favDropzone');
+      const input = document.getElementById('favFileInput');
+      const lista = document.getElementById('favFileList');
+      const boton = document.getElementById('btnSubirFavoritas');
+      const aviso = document.getElementById('favMsg');
+      if (!dropzone || !input || !lista || !boton || !aviso) return;
+      const ordenBase = parseInt(dropzone.dataset.ordenBase ?? '0', 10) || 0;
+      const cola = [];
+
+      const pintar = () => {
+        lista.innerHTML = '';
+        cola.forEach((f, i) => {
+          const li = document.createElement('li');
+          li.id = `fav-file-${i}`;
+          li.innerHTML = `<span>${f.name} · ${(f.size / 1024 / 1024).toFixed(1)} MB</span><span class="file-status">Pendiente</span>`;
+          lista.appendChild(li);
+        });
+        boton.style.display = cola.length > 0 ? '' : 'none';
+      };
+
+      const estado = (i, txt, cls = '') => {
+        const el = document.querySelector(`#fav-file-${i} .file-status`);
+        if (el) { el.textContent = txt; el.className = `file-status ${cls}`; }
+      };
+
+      const agregar = (files) => {
+        for (const f of files) {
+          if (!f.type.startsWith('image/')) continue;
+          if (cola.some((a) => a.name === f.name && a.size === f.size)) continue;
+          cola.push(f);
+        }
+        pintar();
+      };
+
+      dropzone.addEventListener('click', () => input.click());
+      dropzone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropzone.classList.add('drag-over');
+      });
+      dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
+      dropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('drag-over');
+        agregar(e.dataTransfer?.files ?? []);
+      });
+      input.addEventListener('change', () => agregar(input.files ?? []));
+
+      boton.addEventListener('click', async () => {
+        boton.disabled = true;
+        boton.textContent = 'Subiendo...';
+        aviso.textContent = '';
+        aviso.className = 'form-msg';
+        let ok = 0, fail = 0;
+
+        for (let i = 0; i < cola.length; i++) {
+          const file = cola[i];
+          try {
+            estado(i, 'Procesando...');
+            const web = await window.imageProcessor.generaFavoritaWeb(file);
+            const original = await window.imageProcessor.generaFavoritaOriginal(file);
+            const { width, height } = await window.imageProcessor.medir(web);
+            estado(i, 'Subiendo...');
+            const nombre = file.name.replace(/\.[^.]+$/, '') + '.jpg';
+            const fd = new FormData();
+            fd.set('codigo', codigo);
+            fd.set('tipo', 'favorita');
+            fd.set('orden', String(ordenBase + i + 1));
+            fd.set('width', String(width));
+            fd.set('height', String(height));
+            fd.set('file_web', new File([web], nombre, { type: 'image/jpeg' }));
+            fd.set('file_original', new File([original], nombre, { type: 'image/jpeg' }));
+            const res = await fetch('/admin/api/upload', { method: 'POST', body: fd });
+            if (!res.ok) {
+              const j = await res.json().catch(() => ({}));
+              throw new Error(j.error || `HTTP ${res.status}`);
+            }
+            estado(i, 'Listo', 'ok');
+            ok++;
+          } catch (err) {
+            estado(i, 'Error', 'error');
+            console.error(err);
+            fail++;
+          }
+        }
+
+        aviso.textContent = `${ok} subidas${fail ? `, ${fail} fallidas` : ''}.`;
+        aviso.className = `form-msg ${fail ? 'error' : 'ok'}`;
+        boton.disabled = false;
+        boton.textContent = 'Subir favoritas';
+        if (fail === 0) setTimeout(() => window.location.reload(), 1200);
+      });
+
+      document.querySelectorAll('.btn-quitar-fav').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          if (!confirm('¿Quitar esta favorita? Se borra también el original.')) return;
+          btn.disabled = true;
+          try {
+            const res = await fetch('/admin/api/borrar-favorita', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ codigo, fotoId: btn.dataset.fotoId }),
+            });
+            if (!res.ok) {
+              const j = await res.json().catch(() => ({}));
+              alert(j.error || 'Error quitando favorita');
+              btn.disabled = false;
+              return;
+            }
+            window.location.reload();
+          } catch (e) {
+            alert(String(e));
+            btn.disabled = false;
+          }
+        });
       });
     })();
 

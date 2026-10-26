@@ -29,7 +29,7 @@ const { data: leads } = await sb
 
 const { data: sesiones } = await sb
   .from('sesiones')
-  .select('codigo, nombre_cliente, email_cliente, estado, fecha_sesion, fecha_entrega, fecha_archivado, created_at, paquete:paquetes(nombre, fotos_incluidas)')
+  .select('codigo, nombre_cliente, email_cliente, estado, tipo_perfil, fecha_sesion, fecha_entrega, fecha_archivado, created_at, paquete:paquetes(nombre, fotos_incluidas)')
   .neq('estado', 'lead')
   .order('created_at', { ascending: false });
 
@@ -138,7 +138,7 @@ const estadoLabel: Record<string, string> = {
               <tr data-search={`${s.codigo ?? ''} ${s.nombre_cliente} ${s.email_cliente ?? ''}`.toLowerCase()}>
                 <td class="mono">{s.codigo}</td>
                 <td>{s.nombre_cliente}</td>
-                <td>{s.paquete ? `${s.paquete.nombre} · ${s.paquete.fotos_incluidas}` : '—'}</td>
+                <td>{s.tipo_perfil === 'amigos' ? <span class="badge badge-amigos">Amigos</span> : (s.paquete ? `${s.paquete.nombre} · ${s.paquete.fotos_incluidas}` : '—')}</td>
                 <td>
                   <span class={`badge badge-${s.estado}`}>{estadoLabel[s.estado] ?? s.estado}</span>
                   {dias !== null && dias > 0 && <span class="dim mono" style="margin-left:.5rem;font-size:var(--fs-micro)">archiva en {dias}d</span>}

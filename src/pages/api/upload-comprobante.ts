@@ -3,7 +3,7 @@ export const prerender = false;
 import type { APIRoute } from 'astro';
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '../../lib/database.types';
-import { readEnv, fotoUrl } from '../../lib/sesiones';
+import { readEnv, fotoUrl, esAmigos } from '../../lib/sesiones';
 import { r2Put, tipoPermitido, TIPOS_COMPROBANTE } from '../../lib/r2';
 import { syncSesionToNotionBackground } from '../../lib/notion';
 import { notifyAdminComprobante } from '../../lib/mail';
@@ -46,10 +46,11 @@ export const POST: APIRoute = async ({ request }) => {
 
   const { data: sesion } = await sb
     .from('sesiones')
-    .select('id, codigo, nombre_cliente, email_cliente, estado, monto_extras')
+    .select('id, codigo, nombre_cliente, email_cliente, estado, monto_extras, tipo_perfil')
     .eq('codigo', codigo)
     .maybeSingle();
   if (!sesion) return json({ error: 'sesion no existe' }, 404);
+  if (esAmigos(sesion)) return json({ error: 'este perfil no usa comprobante' }, 403);
   if (sesion.estado !== 'pago_pendiente') {
     return json({ error: 'esta sesión no espera comprobante' }, 409);
   }

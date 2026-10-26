@@ -46,6 +46,11 @@ export async function r2Put(
   }
 }
 
+export async function r2Get(env: R2Env, key: string): Promise<Response> {
+  const { aws, bucket, endpoint } = r2Client(env);
+  return aws.fetch(`${endpoint}/${bucket}/${key}`, { method: 'GET' });
+}
+
 export async function r2Delete(env: R2Env, key: string): Promise<void> {
   const { aws, bucket, endpoint } = r2Client(env);
   const url = `${endpoint}/${bucket}/${key}`;
@@ -88,6 +93,25 @@ export const TIPOS_FOTO = {
   png: 'image/png',
   webp: 'image/webp',
 } as const;
+
+/** Original de alta resolución de las favoritas: solo JPEG. */
+export const TIPOS_FOTO_ORIGINAL = {
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+} as const;
+
+/** Nombre seguro para Content-Disposition: sin acentos, espacios ni caracteres raros. */
+export function nombreDescarga(base: string): string {
+  const limpio = base
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\.[a-zA-Z0-9]+$/, '')
+    .replace(/[^a-zA-Z0-9._-]/g, '_')
+    .replace(/_+/g, '_')
+    .replace(/^[_.]+|[_.]+$/g, '')
+    .slice(0, 80);
+  return `${limpio || 'foto'}.jpg`;
+}
 
 export function contentTypeFor(filename: string): string {
   const ext = filename.toLowerCase().split('.').pop();

@@ -3,7 +3,7 @@ export const prerender = false;
 import type { APIRoute } from 'astro';
 import { createClient } from '@supabase/supabase-js';
 import type { Database, SesionEstado } from '../../../lib/database.types';
-import { readEnv } from '../../../lib/sesiones';
+import { readEnv, esAmigos } from '../../../lib/sesiones';
 import { requireAdmin } from '../../../lib/admin-auth';
 import { syncSesionToNotionBackground } from '../../../lib/notion';
 import { notifyClienteEntregada, notifyClienteCambioEstado } from '../../../lib/mail';
@@ -35,10 +35,14 @@ export const POST: APIRoute = async ({ request }) => {
 
   const { data: prev } = await sb
     .from('sesiones')
-    .select('estado')
+    .select('estado, tipo_perfil')
     .eq('codigo', codigo)
     .maybeSingle();
   const estadoAnterior = prev?.estado ?? null;
+  const perfil = esAmigos(prev) ? 'amigos' : 'cliente';
+  if (perfil === 'amigos' && estado === 'pago_pendiente') {
+    return json({ error: 'estado no aplica a este perfil' }, 400);
+  }
 
   const { data: updated, error } = await sb
     .from('sesiones')
@@ -65,6 +69,7 @@ export const POST: APIRoute = async ({ request }) => {
           nombre: updated.nombre_cliente,
           codigo: updated.codigo ?? '',
           estado,
+          perfil,
         });
       }
     }

@@ -3,7 +3,7 @@ export const prerender = false;
 import type { APIRoute } from 'astro';
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '../../../lib/database.types';
-import { readEnv, fotoUrl } from '../../../lib/sesiones';
+import { readEnv, fotoUrl, esAmigos } from '../../../lib/sesiones';
 import { requireAdmin } from '../../../lib/admin-auth';
 import { r2Put, tipoPermitido, TIPOS_COMPROBANTE } from '../../../lib/r2';
 import { syncSesionToNotionBackground } from '../../../lib/notion';
@@ -35,8 +35,9 @@ export const POST: APIRoute = async ({ request }) => {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
-  const { data: sesion } = await sb.from('sesiones').select('id').eq('codigo', codigo).maybeSingle();
+  const { data: sesion } = await sb.from('sesiones').select('id, tipo_perfil').eq('codigo', codigo).maybeSingle();
   if (!sesion) return json({ error: 'sesion no existe' }, 404);
+  if (esAmigos(sesion)) return json({ error: 'este perfil no usa comprobante' }, 403);
 
   if (remove) {
     const { error } = await sb.from('sesiones').update({ comprobante_50_url: null }).eq('id', sesion.id);

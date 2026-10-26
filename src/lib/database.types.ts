@@ -5,7 +5,7 @@ export type SesionEstado =
   | 'editando'
   | 'entregada'
   | 'archivada';
-export type FotoTipo = 'preview' | 'final';
+export type FotoTipo = 'preview' | 'final' | 'favorita';
 export type SesionOrigen = 'instagram' | 'referido' | 'web' | 'google' | 'tiktok' | 'otro';
 
 export interface Paquete {
@@ -19,6 +19,8 @@ export interface Paquete {
   orden: number;
   created_at: string;
 }
+
+export type TipoPerfil = 'cliente' | 'amigos';
 
 export interface Sesion {
   id: string;
@@ -35,6 +37,7 @@ export interface Sesion {
   limite_fotos: number | null;
   precio_extra: number;
   estado: SesionEstado;
+  tipo_perfil: TipoPerfil;
   fecha_sesion: string | null;
   fecha_confirmacion: string | null;
   fecha_pago: string | null;
@@ -57,6 +60,7 @@ export interface Foto {
   id: string;
   sesion_id: string;
   r2_key: string;
+  r2_key_original: string | null;
   tipo: FotoTipo;
   orden: number;
   original_filename: string | null;

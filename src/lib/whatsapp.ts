@@ -1,4 +1,5 @@
 import type { Env } from './sesiones';
+import type { TipoPerfil } from './database.types';
 
 /**
  * Manda un WhatsApp al admin vía Twilio Sandbox (gratis) o número aprobado.
@@ -88,18 +89,21 @@ export async function notifyAdminWALeadNuevo(
 
 export async function notifyAdminWAConfirmacion(
   env: Env,
-  args: { codigo: string; nombre: string; seleccionadas: number; extras: number; monto: number },
+  args: { codigo: string; nombre: string; seleccionadas: number; extras: number; monto: number; perfil?: TipoPerfil },
 ): Promise<void> {
+  const amigos = args.perfil === 'amigos';
   const conExtras = args.extras > 0;
   const lines = [
     `✅ ${args.nombre} (${args.codigo}) confirmó selección`,
     `Fotos: ${args.seleccionadas}`,
-    conExtras
-      ? `Extras: ${args.extras} · A cobrar $${args.monto} MXN`
-      : `Sin extras — pasa a "Editando" cuando empieces.`,
+    amigos
+      ? null
+      : conExtras
+        ? `Extras: ${args.extras} · A cobrar $${args.monto} MXN`
+        : `Sin extras — pasa a "Editando" cuando empieces.`,
     ``,
     `Admin → ${adminLink(env, `/admin/clientes/${args.codigo}`)}`,
-  ].join('\n');
+  ].filter((l) => l !== null).join('\n');
   return sendWhatsAppBackground(env, { body: lines });
 }
 

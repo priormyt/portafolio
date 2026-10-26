@@ -212,6 +212,7 @@
 .badge-pago_pendiente { color: #e09e6f; border-color: rgba(224,158,111,0.4); }
 .badge-editando       { color: #88b3c4; border-color: rgba(136,179,196,0.4); }
 .badge-entregada      { color: #a4c486; border-color: rgba(164,196,134,0.4); }
+.badge-amigos        { color: #c8a8e0; border-color: rgba(200,168,224,0.4); }
 .badge-archivada      { color: var(--ash); border-color: rgba(154,150,144,0.4); }
 
 /* ─── Forms ─────────────────────────────────────────────────── */
