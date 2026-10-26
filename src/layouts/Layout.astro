@@ -15,8 +15,8 @@ export interface Props {
 }
 
 const {
-  title = "ANTE | Estudio de Fotografía Profesional",
-  description = "ANTE Estudio de Fotografía: retratos minimalistas, profesionales y con personalidad para personas y empresas en CDMX. Fotografía honesta que refleja tu esencia.",
+  title = "ANTE | Retrato Profesional en CDMX",
+  description = "ANTE Retrato Profesional: retratos para profesionistas y empresas en Coyoacán, CDMX. Abogados, ejecutivos y equipos con una imagen sobria y honesta.",
   canonical: canonicalProp,
   ogImage = "https://www.ante.photo/img/estudio-fotografico-ante-coyoacan.jpg",
   noindex = false,
@@ -72,24 +72,25 @@ const schemaGraph = {
   "@graph": [
     {
       "@type": "WebSite",
-      "name": "ANTE Estudio de Fotografía",
+      "name": "ANTE Retrato Profesional",
       "url": siteUrl + "/",
       "sameAs": ["https://www.instagram.com/ante.estudio"],
       "publisher": {
         "@type": "Organization",
-        "name": "ANTE Estudio de Fotografía",
+        "name": "ANTE Retrato Profesional",
         "logo": { "@type": "ImageObject", "url": siteUrl + "/favicon-512.png" },
       },
     },
     {
       "@type": "PhotographyBusiness",
-      "name": "ANTE Estudio de Fotografía",
+      "@id": siteUrl + "/#ante",
+      "name": "ANTE Retrato Profesional",
       "url": siteUrl,
       "logo": { "@type": "ImageObject", "url": siteUrl + "/favicon-512.png" },
       "image": siteUrl + "/img/estudio-fotografico-ante-coyoacan.jpg",
       "telephone": "+52-55-1238-8782",
       "email": "contacto@ante.photo",
-      "alternateName": "ANTE | Estudio Fotográfico",
+      "alternateName": ["ANTE | Estudio Fotográfico", "ANTE Estudio de Fotografía"],
       "address": {
         "@type": "PostalAddress",
         "streetAddress": "Av. del Convento 34, San Diego Churubusco",
@@ -109,7 +110,8 @@ const schemaGraph = {
         "closes": "18:00",
       }],
       "sameAs": ["https://www.instagram.com/ante.estudio"],
-      "description": `Estudio de fotografía profesional en Ciudad de México especializado en retratos minimalistas, corporativos y artísticos. Sesiones desde ${formatMXN(PRECIO_DESDE)} MXN.`,
+      "description": `Retrato profesional en Coyoacán, Ciudad de México, para profesionistas, abogados, ejecutivos y equipos de empresa. Estudio propio, edición incluida. Sesiones desde ${formatMXN(PRECIO_DESDE)} MXN.`,
+      "knowsAbout": ["Retrato profesional", "Retrato corporativo", "Retrato para abogados", "Headshots para LinkedIn"],
     },
     {
       "@type": "BreadcrumbList",
@@ -129,11 +131,13 @@ const schemaGraph = {
   <link rel="icon" href="/favicon.ico" sizes="any">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-  <link rel="preload" href="/img/estudio-fotografico-ante-coyoacan.webp" as="image">
+  {rawPath === '/' && (
+    <link rel="preload" href="/img/estudio-fotografico-ante-coyoacan.webp" as="image" fetchpriority="high">
+  )}
 
   <meta name="description" content={description}>
-  <meta name="keywords" content="fotografía profesional, retratos minimalistas, estudio fotográfico CDMX, retratos corporativos, fotografía artística, sesión de fotos profesional">
-  <meta name="author" content="ANTE Estudio Fotográfico">
+  <meta name="keywords" content="retrato profesional, retrato para profesionales, retrato para abogados, retrato corporativo CDMX, estudio fotográfico Coyoacán, headshots LinkedIn">
+  <meta name="author" content="ANTE Retrato Profesional">
   <meta name="geo.region" content="MX-CMX">
   <meta name="geo.placename" content="Coyoacán, Ciudad de México">
   <meta name="geo.position" content="19.3530727;-99.1488112">
@@ -212,7 +216,7 @@ const schemaGraph = {
   </main>
 
   <footer itemscope itemtype="https://schema.org/Organization">
-    <div class="footer-logo" itemprop="name">A N T E · Estudio de Fotografía</div>
+    <div class="footer-logo" itemprop="name">A N T E · Retrato Profesional</div>
     <address class="footer-info">
       <a href="mailto:contacto@ante.photo" itemprop="email">contacto@ante.photo</a><br>
       <a href="tel:+525512388782" itemprop="telephone" class="footer-tel">+52 55 1238 8782</a><br>
