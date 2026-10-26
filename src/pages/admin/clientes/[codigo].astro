@@ -18,7 +18,7 @@ const codigoNorm = (codigo ?? '').toUpperCase();
 const data = codigoNorm ? await getSesionByCodigo(env, codigoNorm) : null;
 if (!data) return Astro.redirect('/admin?err=no-encontrado', 302);
 
-const { sesion, paquete, fotosFinales, fotosPreview, selecciones } = data;
+const { sesion, paquete, fotosFinales, fotosPreview, fotosFavoritas, selecciones } = data;
 const amigos = esAmigos(sesion);
 const seleccionadas = new Set(selecciones.map((s) => s.foto_id));
 const limite = sesion.limite_fotos ?? paquete?.fotos_incluidas ?? 0;
@@ -33,6 +33,7 @@ const diasRestantes = sesion.estado === 'entregada' ? diasParaArchivar(sesion.fe
 // Las preview nuevas continúan la numeración en vez de reiniciar en 1: si
 // reiniciaran, chocarían con las que el cliente ya está viendo y le
 // reordenarían la galería a media selección.
+const maxOrdenFavoritas = fotosFavoritas.reduce((m, f) => Math.max(m, f.orden ?? 0), 0);
 const maxOrdenPreview = fotosPreview.reduce((m, f) => Math.max(m, f.orden ?? 0), 0);
 
 const precioCalculado =
@@ -264,6 +265,34 @@ const estadoLabel: Record<string, string> = {
       )}
       <input id="altFileInput" type="file" accept="image/jpeg,image/png" hidden />
       <p id="altMsg" class="form-msg" aria-live="polite"></p>
+    </section>
+
+    <section class="admin-block">
+      <h2 class="admin-h2">Favoritas de Pablo ({fotosFavoritas.length})</h2>
+      <p class="form-hint">Regalo para el cliente: no cuentan para su selección ni para el límite. Se muestran en su galería y se pueden descargar en alta.</p>
+
+      <div id="favDropzone" class="dropzone" data-orden-base={maxOrdenFavoritas}>
+        <p class="dropzone-text">Arrastra aquí las favoritas</p>
+        <p class="dropzone-sub">Web 1800px + original JPG para descarga (hasta 30 MB)</p>
+        <input id="favFileInput" type="file" accept="image/jpeg,image/png" multiple hidden />
+      </div>
+      <ul id="favFileList" class="file-list"></ul>
+      <button id="btnSubirFavoritas" type="button" class="btn-primary" style="margin-top:1rem;display:none">Subir favoritas</button>
+      <p id="favMsg" class="form-msg" aria-live="polite"></p>
+
+      {fotosFavoritas.length > 0 && (
+        <div class="thumb-grid" style="margin-top: 1.5rem">
+          {fotosFavoritas.map((foto) => (
+            <figure class="thumb">
+              <img src={fotoUrl(env, foto.r2_key)} alt={foto.original_filename ?? ''} loading="lazy" />
+              <figcaption>{foto.original_filename}</figcaption>
+              <div class="alt-controls">
+                <button type="button" class="btn-alt-upload btn-quitar-fav" data-foto-id={foto.id}>Quitar</button>
+              </div>
+            </figure>
+          ))}
+        </div>
+      )}
     </section>
 
     <section class="admin-block">
@@ -637,6 +666,125 @@ const estadoLabel: Record<string, string> = {
         boton.disabled = false;
         boton.textContent = 'Subir fotos preview';
         if (fail === 0) setTimeout(() => window.location.reload(), 1200);
+      });
+    })();
+
+    // ─── Favoritas de Pablo ───────────────────────────────────
+    (() => {
+      const dropzone = document.getElementById('favDropzone');
+      const input = document.getElementById('favFileInput');
+      const lista = document.getElementById('favFileList');
+      const boton = document.getElementById('btnSubirFavoritas');
+      const aviso = document.getElementById('favMsg');
+      if (!dropzone || !input || !lista || !boton || !aviso) return;
+      const ordenBase = parseInt(dropzone.dataset.ordenBase ?? '0', 10) || 0;
+      const cola = [];
+
+      const pintar = () => {
+        lista.innerHTML = '';
+        cola.forEach((f, i) => {
+          const li = document.createElement('li');
+          li.id = `fav-file-${i}`;
+          li.innerHTML = `<span>${f.name} · ${(f.size / 1024 / 1024).toFixed(1)} MB</span><span class="file-status">Pendiente</span>`;
+          lista.appendChild(li);
+        });
+        boton.style.display = cola.length > 0 ? '' : 'none';
+      };
+
+      const estado = (i, txt, cls = '') => {
+        const el = document.querySelector(`#fav-file-${i} .file-status`);
+        if (el) { el.textContent = txt; el.className = `file-status ${cls}`; }
+      };
+
+      const agregar = (files) => {
+        for (const f of files) {
+          if (!f.type.startsWith('image/')) continue;
+          if (cola.some((a) => a.name === f.name && a.size === f.size)) continue;
+          cola.push(f);
+        }
+        pintar();
+      };
+
+      dropzone.addEventListener('click', () => input.click());
+      dropzone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropzone.classList.add('drag-over');
+      });
+      dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
+      dropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('drag-over');
+        agregar(e.dataTransfer?.files ?? []);
+      });
+      input.addEventListener('change', () => agregar(input.files ?? []));
+
+      boton.addEventListener('click', async () => {
+        boton.disabled = true;
+        boton.textContent = 'Subiendo...';
+        aviso.textContent = '';
+        aviso.className = 'form-msg';
+        let ok = 0, fail = 0;
+
+        for (let i = 0; i < cola.length; i++) {
+          const file = cola[i];
+          try {
+            estado(i, 'Procesando...');
+            const web = await window.imageProcessor.generaFavoritaWeb(file);
+            const original = await window.imageProcessor.generaFavoritaOriginal(file);
+            const { width, height } = await window.imageProcessor.medir(web);
+            estado(i, 'Subiendo...');
+            const nombre = file.name.replace(/\.[^.]+$/, '') + '.jpg';
+            const fd = new FormData();
+            fd.set('codigo', codigo);
+            fd.set('tipo', 'favorita');
+            fd.set('orden', String(ordenBase + i + 1));
+            fd.set('width', String(width));
+            fd.set('height', String(height));
+            fd.set('file_web', new File([web], nombre, { type: 'image/jpeg' }));
+            fd.set('file_original', new File([original], nombre, { type: 'image/jpeg' }));
+            const res = await fetch('/admin/api/upload', { method: 'POST', body: fd });
+            if (!res.ok) {
+              const j = await res.json().catch(() => ({}));
+              throw new Error(j.error || `HTTP ${res.status}`);
+            }
+            estado(i, 'Listo', 'ok');
+            ok++;
+          } catch (err) {
+            estado(i, 'Error', 'error');
+            console.error(err);
+            fail++;
+          }
+        }
+
+        aviso.textContent = `${ok} subidas${fail ? `, ${fail} fallidas` : ''}.`;
+        aviso.className = `form-msg ${fail ? 'error' : 'ok'}`;
+        boton.disabled = false;
+        boton.textContent = 'Subir favoritas';
+        if (fail === 0) setTimeout(() => window.location.reload(), 1200);
+      });
+
+      document.querySelectorAll('.btn-quitar-fav').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          if (!confirm('¿Quitar esta favorita? Se borra también el original.')) return;
+          btn.disabled = true;
+          try {
+            const res = await fetch('/admin/api/borrar-favorita', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ codigo, fotoId: btn.dataset.fotoId }),
+            });
+            if (!res.ok) {
+              const j = await res.json().catch(() => ({}));
+              alert(j.error || 'Error quitando favorita');
+              btn.disabled = false;
+              return;
+            }
+            window.location.reload();
+          } catch (e) {
+            alert(String(e));
+            btn.disabled = false;
+          }
+        });
       });
     })();
 

@@ -92,6 +92,7 @@ export type SesionCompleta = {
   paquete: Paquete | null;
   fotosFinales: Foto[];
   fotosPreview: Foto[];
+  fotosFavoritas: Foto[];
   selecciones: Seleccion[];
 };
 
@@ -128,6 +129,7 @@ export async function getSesionByCodigo(
     paquete: paqueteRes.data ?? null,
     fotosFinales: fotos.filter((f) => f.tipo === 'final'),
     fotosPreview: fotos.filter((f) => f.tipo === 'preview'),
+    fotosFavoritas: fotos.filter((f) => f.tipo === 'favorita'),
     selecciones: seleccionesRes.data ?? [],
   };
 }
@@ -138,6 +140,15 @@ export async function toggleSeleccion(
   fotoId: string,
 ): Promise<{ seleccionada: boolean }> {
   const sb = admin(env);
+  const { data: foto } = await sb
+    .from('fotos')
+    .select('id')
+    .eq('id', fotoId)
+    .eq('sesion_id', sesionId)
+    .in('tipo', ['preview', 'final'])
+    .maybeSingle();
+  if (!foto) throw new Error('foto no seleccionable');
+
   const { data: existing } = await sb
     .from('selecciones')
     .select('id')

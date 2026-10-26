@@ -23,12 +23,13 @@ export async function archivarSesion(env: Env, sesionId: string): Promise<{ borr
 
   const { data: fotos } = await sb
     .from('fotos')
-    .select('id, r2_key')
+    .select('id, r2_key, r2_key_original')
     .eq('sesion_id', sesionId);
 
   let borradas = 0;
   if (fotos && fotos.length > 0) {
-    await Promise.allSettled(fotos.map((f) => r2Delete(env, f.r2_key)));
+    const keys = fotos.flatMap((f) => (f.r2_key_original ? [f.r2_key, f.r2_key_original] : [f.r2_key]));
+    await Promise.allSettled(keys.map((k) => r2Delete(env, k)));
     const { error: errDel } = await sb.from('fotos').delete().eq('sesion_id', sesionId);
     if (errDel) throw errDel;
     borradas = fotos.length;

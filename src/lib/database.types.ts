@@ -5,7 +5,7 @@ export type SesionEstado =
   | 'editando'
   | 'entregada'
   | 'archivada';
-export type FotoTipo = 'preview' | 'final';
+export type FotoTipo = 'preview' | 'final' | 'favorita';
 export type SesionOrigen = 'instagram' | 'referido' | 'web' | 'google' | 'tiktok' | 'otro';
 
 export interface Paquete {
@@ -60,6 +60,7 @@ export interface Foto {
   id: string;
   sesion_id: string;
   r2_key: string;
+  r2_key_original: string | null;
   tipo: FotoTipo;
   orden: number;
   original_filename: string | null;

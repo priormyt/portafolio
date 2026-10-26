@@ -43,6 +43,15 @@ export const POST: APIRoute = async ({ request }) => {
     return json({ error: 'sesion locked' }, 403);
   }
 
+  const { data: foto } = await sb
+    .from('fotos')
+    .select('id')
+    .eq('id', fotoId)
+    .eq('sesion_id', sesionId)
+    .in('tipo', ['preview', 'final'])
+    .maybeSingle();
+  if (!foto) return json({ error: 'foto no seleccionable' }, 400);
+
   const { data: existing } = await sb
     .from('selecciones')
     .select('id')
