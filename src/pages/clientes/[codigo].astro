@@ -38,6 +38,9 @@ const seleccionadasCount = selecciones.length;
 const extras = amigos ? 0 : Math.max(0, seleccionadasCount - limite);
 const costoExtras = amigos ? 0 : extras * Number(sesion.precio_extra ?? 0);
 const lbSelect = amigos && sesion.estado === 'seleccion';
+const favSeleccionables = lbSelect;
+const mostrarPerfil =
+  ['seleccion', 'pago_pendiente', 'editando', 'entregada'].includes(sesion.estado);
 const mostrarFavoritas =
   ['seleccion', 'pago_pendiente', 'editando', 'entregada'].includes(sesion.estado) &&
   fotosFavoritas.length > 0;
@@ -51,6 +54,12 @@ for (const f of fotosFinales) {
 }
 
 const fotosParaSeleccion = fotosPreview.length > 0 ? fotosPreview : fotosFinalesPrincipales;
+const fotoPerfil = mostrarPerfil
+  ? [...fotosParaSeleccion].sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0))[0]
+  : undefined;
+const fotosResumen = [...fotosParaSeleccion, ...(amigos ? fotosFavoritas : [])].filter((f) =>
+  seleccionadas.has(f.id),
+);
 
 const WHATSAPP = '525512388782';
 const waPagoUrl = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(
@@ -69,6 +78,22 @@ const mailArchivadaUrl = `mailto:contacto@ante.photo?subject=${encodeURIComponen
 >
   <main class="cliente-main">
     <section class="cliente-intro">
+      {fotoPerfil && (
+        <div class="perfil-muestra">
+          <div class="perfil-muestra-circulo">
+          <img
+            class="perfil-muestra-img"
+            src={fotoUrl(env, fotoPerfil.r2_key)}
+            alt={`Vista previa de ${sesion.nombre_cliente} como foto de perfil`}
+            width="140"
+            height="140"
+            loading="eager"
+            draggable="false"
+          />
+          </div>
+          <p class="perfil-muestra-texto">Así se vería como foto de perfil</p>
+        </div>
+      )}
       <p class="cliente-eyebrow">Galería privada</p>
       <h1 class="cliente-name">{sesion.nombre_cliente}</h1>
       {paquete && (
@@ -182,6 +207,11 @@ const mailArchivadaUrl = `mailto:contacto@ante.photo?subject=${encodeURIComponen
             )}
           </div>
         </div>
+
+        <p class="aviso-sin-editar">
+          Estas fotos están tal como salieron de la cámara, sin ningún tipo de edición.
+          Las que elijas pasan por mi proceso de retoque: color, luz, piel y detalles.
+        </p>
 
         <div class="galeria-grid galeria-grid-seleccion">
           {fotosParaSeleccion.map((foto, i) => (
@@ -308,8 +338,7 @@ const mailArchivadaUrl = `mailto:contacto@ante.photo?subject=${encodeURIComponen
         <details class="seleccion-resumen">
           <summary>Ver mi selección ({selecciones.length} foto{selecciones.length !== 1 ? 's' : ''})</summary>
           <div class="galeria-grid galeria-grid-readonly">
-            {fotosParaSeleccion
-              .filter((f) => seleccionadas.has(f.id))
+            {fotosResumen
               .map((foto, i) => (
                 <figure class="galeria-item">
                   <div class="galeria-frame">
@@ -332,8 +361,13 @@ const mailArchivadaUrl = `mailto:contacto@ante.photo?subject=${encodeURIComponen
         <p class="cliente-eyebrow">Un regalo de Pablo</p>
         <h2 class="fav-title">Mis favoritas de tu sesión</h2>
         <p class="fav-text">
-          Además de las fotos que tú eliges, aparté estas {fotosFavoritas.length} que son mis favoritas.
-          Son un extra: no cuentan en tu selección ni tienen costo. Descárgalas cuando quieras en JPG de alta calidad.
+          {amigos
+            ? `Además de las fotos que tú eliges, aparté estas ${fotosFavoritas.length} que son mis favoritas. Son un extra sin costo.`
+            : `Además de las fotos que tú eliges, aparté estas ${fotosFavoritas.length} que son mis favoritas. Son un extra: no cuentan en tu selección ni tienen costo.`}
+          {' '}Todavía no están retocadas, así que verás el color y la luz tal como salieron de la cámara.
+          {favSeleccionables
+            ? ' Si alguna te gustó mucho o quieres que le arregle algo, selecciónala y también la retoco.'
+            : ' Descárgalas cuando quieras en JPG de alta calidad.'}
         </p>
         {sesion.estado === 'entregada' && (
           <p class="fav-note">Disponibles hasta que se archive la galería, 30 días después de la entrega.</p>
@@ -346,7 +380,10 @@ const mailArchivadaUrl = `mailto:contacto@ante.photo?subject=${encodeURIComponen
         </div>
         <div class="fav-grid">
           {fotosFavoritas.map((foto, i) => (
-            <figure class="fav-item">
+            <figure
+              class={`fav-item ${favSeleccionables ? 'fav-selectable' : ''} ${favSeleccionables && seleccionadas.has(foto.id) ? 'selected' : ''}`}
+              data-foto-id={favSeleccionables ? foto.id : undefined}
+            >
               <div class="fav-frame">
                 <img
                   class="fav-img"
@@ -363,6 +400,14 @@ const mailArchivadaUrl = `mailto:contacto@ante.photo?subject=${encodeURIComponen
                   role="button"
                 />
                 <span class="fav-badge">Favorita de Pablo</span>
+                {favSeleccionables && (
+                  <button
+                    class="fav-select"
+                    type="button"
+                    aria-pressed={seleccionadas.has(foto.id) ? 'true' : 'false'}
+                    aria-label={`Seleccionar la favorita ${i + 1} para retoque`}
+                  >✓</button>
+                )}
               </div>
               <div class="fav-meta">
                 <a class="fav-dl fav-btn" href={favUrl(foto.id)}>Descargar</a>
@@ -422,6 +467,36 @@ const mailArchivadaUrl = `mailto:contacto@ante.photo?subject=${encodeURIComponen
       text-align: center;
     }
     .estado-entregada { padding: 0; }
+    .perfil-muestra {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.8rem;
+      margin-bottom: 1.8rem;
+    }
+    /* Encuadre tipo foto de perfil, sin zoom: en un retrato vertical la cara
+       está en el tercio superior, así que se sube el recorte para centrarla. */
+    .perfil-muestra-circulo {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 0.5px solid rgba(245,242,237,0.3);
+      background: var(--char);
+    }
+    .perfil-muestra-img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: 50% 6%;
+    }
+    .perfil-muestra-texto {
+      font-family: var(--f-mono);
+      font-size: var(--fs-micro);
+      letter-spacing: var(--ls-label);
+      color: var(--ash);
+    }
     .cliente-eyebrow {
       font-family: var(--f-mono);
       font-size: var(--fs-label);
@@ -609,6 +684,14 @@ const mailArchivadaUrl = `mailto:contacto@ante.photo?subject=${encodeURIComponen
       line-height: 1.6;
     }
     .seleccion-instructions strong { color: var(--paper); }
+    .aviso-sin-editar {
+      max-width: 44rem;
+      margin: 0 auto 1.5rem;
+      font-size: var(--fs-body);
+      line-height: 1.6;
+      color: var(--mist);
+      text-align: center;
+    }
     .contador-bar {
       display: flex;
       justify-content: space-between;
@@ -918,6 +1001,26 @@ const mailArchivadaUrl = `mailto:contacto@ante.photo?subject=${encodeURIComponen
       text-transform: uppercase;
       color: var(--paper);
     }
+    .fav-select {
+      position: absolute;
+      top: 0.7rem;
+      right: 0.7rem;
+      width: 2rem; height: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(13,13,11,0.65);
+      color: transparent;
+      border: 0.5px solid rgba(245,242,237,0.5);
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+    .fav-select:hover { border-color: var(--paper); }
+    .fav-select[aria-pressed="true"] { background: var(--paper); color: var(--ink); border-color: var(--paper); }
+    .fav-selectable.selected .fav-frame { outline: 2px solid var(--paper); outline-offset: 4px; }
+    .fav-selectable.selected .fav-img { filter: brightness(0.7); }
+    .lightbox[data-lb-select] .lightbox-download { left: auto; right: 5rem; }
     .fav-meta { display: flex; align-items: center; justify-content: space-between; gap: 0.8rem; margin-top: 0.8rem; flex-wrap: wrap; }
     .fav-dl { padding: 0.5rem 1rem; }
     .lightbox-download {
@@ -1033,6 +1136,7 @@ const mailArchivadaUrl = `mailto:contacto@ante.photo?subject=${encodeURIComponen
       .lightbox-next,
       .lightbox-select,
       .lightbox-download,
+      .fav-select,
       .fav-btn { cursor: none; }
     }
 
@@ -1044,6 +1148,7 @@ const mailArchivadaUrl = `mailto:contacto@ante.photo?subject=${encodeURIComponen
       .seleccion-status { padding: 1rem 1.5rem; }
       .contador-bar { font-size: var(--fs-micro); }
       .galeria-download, .galeria-zoom { opacity: 1; }
+      .perfil-muestra-circulo { width: 120px; height: 120px; }
     }
   </style>
 
@@ -1074,7 +1179,9 @@ const mailArchivadaUrl = `mailto:contacto@ante.photo?subject=${encodeURIComponen
       let toggleItem: ((item: HTMLElement) => void) | null = null;
 
       const currentItem = () =>
-        items[currentIdx]?.closest<HTMLElement>('.galeria-item-selectable') ?? null;
+        (favMode ? favItems[currentIdx] : items[currentIdx])?.closest<HTMLElement>(
+          '.galeria-item-selectable, .fav-selectable',
+        ) ?? null;
 
       const syncLbSelect = () => {
         if (!lbSelectBtn) return;
@@ -1105,7 +1212,6 @@ const mailArchivadaUrl = `mailto:contacto@ante.photo?subject=${encodeURIComponen
       const setMode = (fav: boolean) => {
         favMode = fav;
         if (lbDownload) lbDownload.hidden = !fav;
-        if (lbSelectBtn) lbSelectBtn.style.display = fav ? 'none' : '';
         if (fav || zoomBase) lightbox?.setAttribute('data-lb-zoom', '1');
         else lightbox?.removeAttribute('data-lb-zoom');
       };
@@ -1168,6 +1274,7 @@ const mailArchivadaUrl = `mailto:contacto@ante.photo?subject=${encodeURIComponen
         lbCounter.textContent = `Favorita de Pablo · ${String(i + 1).padStart(2, '0')} / ${String(favItems.length).padStart(2, '0')}`;
         setNavVisible(favItems.length > 1);
         lightbox.hidden = false;
+        syncLbSelect();
         preload(i);
         if (entering) lbClose?.focus();
       };
@@ -1241,7 +1348,7 @@ const mailArchivadaUrl = `mailto:contacto@ante.photo?subject=${encodeURIComponen
         if (e.key === 'Escape') closeLightbox();
         if (e.key === 'ArrowLeft') nav(-1);
         if (e.key === 'ArrowRight') nav(1);
-        if (lbSelectBtn && !favMode && (e.key === 's' || e.key === 'S') && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        if (lbSelectBtn && !inAltMode && (e.key === 's' || e.key === 'S') && !e.metaKey && !e.ctrlKey && !e.altKey) {
           e.preventDefault();
           const item = currentItem();
           if (item) toggleItem?.(item);
@@ -1378,7 +1485,7 @@ const mailArchivadaUrl = `mailto:contacto@ante.photo?subject=${encodeURIComponen
       const btnConfirmar = document.getElementById('btnConfirmar') as HTMLButtonElement;
 
       const refresh = () => {
-        const seleccionadas = document.querySelectorAll('.galeria-item-selectable.selected').length;
+        const seleccionadas = document.querySelectorAll('.galeria-item-selectable.selected, .fav-selectable.selected').length;
         contadorEl.textContent = String(seleccionadas);
 
         if (esAmigosPerfil) {
@@ -1407,7 +1514,11 @@ const mailArchivadaUrl = `mailto:contacto@ante.photo?subject=${encodeURIComponen
         if (item.dataset.busy === '1') return;
         item.dataset.busy = '1';
         const fotoId = item.dataset.fotoId!;
+        const marcar = () => {
+          item.querySelector('.fav-select')?.setAttribute('aria-pressed', String(item.classList.contains('selected')));
+        };
         item.classList.toggle('selected');
+        marcar();
         refresh();
         syncLbSelect();
 
@@ -1420,6 +1531,7 @@ const mailArchivadaUrl = `mailto:contacto@ante.photo?subject=${encodeURIComponen
           if (!res.ok) throw new Error('Error al guardar');
         } catch (err) {
           item.classList.toggle('selected');
+          marcar();
           console.error(err);
           alert('No se pudo guardar la selección. Intenta de nuevo.');
         } finally {
@@ -1435,6 +1547,10 @@ const mailArchivadaUrl = `mailto:contacto@ante.photo?subject=${encodeURIComponen
           e.preventDefault();
           toggleItem?.(item);
         });
+      });
+
+      document.querySelectorAll<HTMLElement>('.fav-selectable').forEach((item) => {
+        item.querySelector('.fav-select')?.addEventListener('click', () => toggleItem?.(item));
       });
 
       btnConfirmar?.addEventListener('click', async () => {

@@ -3,6 +3,7 @@ export const prerender = false;
 import type { APIRoute } from 'astro';
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '../../lib/database.types';
+import { esAmigos } from '../../lib/sesiones';
 
 export const POST: APIRoute = async ({ request }) => {
   let runtimeEnv: any = {};
@@ -34,7 +35,7 @@ export const POST: APIRoute = async ({ request }) => {
   // Validar que la sesión esté en estado 'seleccion'
   const { data: sesion } = await sb
     .from('sesiones')
-    .select('estado')
+    .select('estado, tipo_perfil')
     .eq('id', sesionId)
     .maybeSingle();
 
@@ -48,7 +49,7 @@ export const POST: APIRoute = async ({ request }) => {
     .select('id')
     .eq('id', fotoId)
     .eq('sesion_id', sesionId)
-    .in('tipo', ['preview', 'final'])
+    .in('tipo', esAmigos(sesion) ? ['preview', 'final', 'favorita'] : ['preview', 'final'])
     .maybeSingle();
   if (!foto) return json({ error: 'foto no seleccionable' }, 400);
 
