@@ -2,7 +2,7 @@
 export const prerender = false;
 
 import Layout from '../../../layouts/Layout.astro';
-import { getSesionByCodigo, fotoUrl, readEnv } from '../../../lib/sesiones';
+import { getSesionByCodigo, fotoUrl, readEnv, esAmigos } from '../../../lib/sesiones';
 import { requireAdmin } from '../../../lib/admin-auth';
 import { runDueArchives, diasParaArchivar } from '../../../lib/archivado';
 import '../../../styles/admin.css';
@@ -19,6 +19,7 @@ const data = codigoNorm ? await getSesionByCodigo(env, codigoNorm) : null;
 if (!data) return Astro.redirect('/admin?err=no-encontrado', 302);
 
 const { sesion, paquete, fotosFinales, fotosPreview, selecciones } = data;
+const amigos = esAmigos(sesion);
 const seleccionadas = new Set(selecciones.map((s) => s.foto_id));
 const limite = sesion.limite_fotos ?? paquete?.fotos_incluidas ?? 0;
 
@@ -56,7 +57,9 @@ const estadoLabel: Record<string, string> = {
         <h1 class="admin-h1">{sesion.nombre_cliente}</h1>
         <p class="admin-sub">
           Código <span class="mono">{sesion.codigo}</span>
-          {paquete && ` · Paquete ${paquete.nombre} · ${limite} fotos`}
+          {amigos && ' · '}
+          {amigos && <span class="badge badge-amigos">Amigos y familia</span>}
+          {!amigos && paquete && ` · Paquete ${paquete.nombre} · ${limite} fotos`}
         </p>
       </div>
       <div class="admin-actions">
@@ -72,14 +75,18 @@ const estadoLabel: Record<string, string> = {
       <div class="estado-controls">
         <select id="estadoSelect">
           <option value="seleccion" selected={sesion.estado === 'seleccion'}>Seleccionando</option>
-          <option value="pago_pendiente" selected={sesion.estado === 'pago_pendiente'}>Pago pendiente</option>
+          {(!amigos || sesion.estado === 'pago_pendiente') && (
+            <option value="pago_pendiente" selected={sesion.estado === 'pago_pendiente'}>Pago pendiente</option>
+          )}
           <option value="editando" selected={sesion.estado === 'editando'}>Editando</option>
           <option value="entregada" selected={sesion.estado === 'entregada'}>Entregada</option>
         </select>
         <button id="btnCambiarEstado" type="button" class="btn-ghost">Cambiar estado</button>
       </div>
       <p class="form-hint">
-        Recuerda: la página del cliente cambia según este estado. Pasa a "Editando" cuando recibas el pago de extras (si los hay), y a "Entregada" cuando subas las fotos finales.
+        {amigos
+          ? 'Recuerda: la página del cliente cambia según este estado. Pasa a "Entregada" cuando subas las fotos finales.'
+          : 'Recuerda: la página del cliente cambia según este estado. Pasa a "Editando" cuando recibas el pago de extras (si los hay), y a "Entregada" cuando subas las fotos finales.'}
       </p>
 
       {sesion.estado === 'entregada' && diasRestantes !== null && (
@@ -97,6 +104,7 @@ const estadoLabel: Record<string, string> = {
       )}
     </section>
 
+    {!amigos && (
     <section class="admin-block">
       <h2 class="admin-h2">Pago y precio</h2>
       <div class="precio-row">
@@ -164,14 +172,19 @@ const estadoLabel: Record<string, string> = {
         <p id="comprobanteMsg" class="form-msg" aria-live="polite"></p>
       </details>
     </section>
+    )}
 
     <section class="admin-block">
       <h2 class="admin-h2">Fotos preview ({fotosPreview.length})</h2>
-      <p class="form-hint">Las que el cliente ve para seleccionar. Con marca de agua, baja resolución.</p>
+      <p class="form-hint">
+        {amigos
+          ? 'Las que el cliente ve para seleccionar. 2000px sin marca de agua.'
+          : 'Las que el cliente ve para seleccionar. Con marca de agua, baja resolución.'}
+      </p>
 
       <div id="previewDropzone" class="dropzone" data-orden-base={maxOrdenPreview}>
         <p class="dropzone-text">Arrastra aquí más fotos para seleccionar</p>
-        <p class="dropzone-sub">Se procesan a 800px con marca de agua · se añaden al final de la galería</p>
+        <p class="dropzone-sub">{amigos ? 'Se procesan a 2000px sin marca de agua' : 'Se procesan a 800px con marca de agua'} · se añaden al final de la galería</p>
         <input id="previewFileInput" type="file" accept="image/jpeg,image/png" multiple hidden />
       </div>
       <ul id="previewFileList" class="file-list"></ul>
@@ -271,7 +284,7 @@ const estadoLabel: Record<string, string> = {
         </ul>
       )}
 
-      {selecciones.length > limite && limite > 0 && (
+      {!amigos && selecciones.length > limite && limite > 0 && (
         <p class="extras-info">
           {selecciones.length - limite} foto{selecciones.length - limite !== 1 ? 's' : ''} extra ·
           <strong> ${(selecciones.length - limite) * Number(sesion.precio_extra)} MXN</strong>
@@ -282,7 +295,7 @@ const estadoLabel: Record<string, string> = {
   </main>
 
   <script src="/js/image-processor.js" is:inline></script>
-  <script define:vars={{ codigo: sesion.codigo }}>
+  <script define:vars={{ codigo: sesion.codigo, esAmigos: amigos }}>
     // Precio final manual
     const precioFinalInput = document.getElementById('precioFinalInput');
     const btnPrecioFinal = document.getElementById('btnPrecioFinal');
@@ -597,7 +610,7 @@ const estadoLabel: Record<string, string> = {
           const file = cola[i];
           try {
             estado(i, 'Procesando...');
-            const blob = await window.imageProcessor.generaPreview(file);
+            const blob = await (esAmigos ? window.imageProcessor.generaPreviewHD(file) : window.imageProcessor.generaPreview(file));
             estado(i, 'Subiendo...');
             const fd = new FormData();
             fd.set('codigo', codigo);

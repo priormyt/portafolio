@@ -52,6 +52,14 @@ const { data: paquetes } = await sb
       </div>
 
       <div class="form-group">
+        <label for="tipoPerfil">Tipo de perfil</label>
+        <select id="tipoPerfil" name="tipo_perfil">
+          <option value="cliente" selected>Cliente</option>
+          <option value="amigos">Amigos y familia</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="paqueteGroup">
         <label for="paquete">Paquete</label>
         <select id="paquete" name="paquete">
           <option value="">— Selecciona —</option>
@@ -69,10 +77,10 @@ const { data: paquetes } = await sb
       </div>
 
       <div class="form-group form-group-full">
-        <label>Fotos para selección (preview con marca de agua)</label>
+        <label id="dropzoneLabel">Fotos para selección (preview con marca de agua)</label>
         <div id="dropzone" class="dropzone">
           <p class="dropzone-text">Arrastra las fotos aquí o haz click para elegir</p>
-          <p class="dropzone-sub">Las fotos se procesan en tu navegador antes de subir (resize + watermark)</p>
+          <p class="dropzone-sub" id="dropzoneSub">Las fotos se procesan en tu navegador antes de subir (resize + watermark)</p>
           <input id="fileInput" type="file" accept="image/jpeg,image/png" multiple hidden />
         </div>
         <ul id="fileList" class="file-list"></ul>
@@ -94,6 +102,35 @@ const { data: paquetes } = await sb
     const submitBtn = document.getElementById('submitBtn') as HTMLButtonElement;
     const formMsg = document.getElementById('formMsg') as HTMLParagraphElement;
     const codigoInput = document.getElementById('codigo') as HTMLInputElement;
+    const tipoPerfil = document.getElementById('tipoPerfil') as HTMLSelectElement;
+    const paqueteGroup = document.getElementById('paqueteGroup') as HTMLDivElement;
+    const paqueteSelect = document.getElementById('paquete') as HTMLSelectElement;
+    const dropzoneLabel = document.getElementById('dropzoneLabel') as HTMLLabelElement;
+    const dropzoneSub = document.getElementById('dropzoneSub') as HTMLParagraphElement;
+
+    const textos = {
+      cliente: {
+        label: 'Fotos para selección (preview con marca de agua)',
+        sub: 'Las fotos se procesan en tu navegador antes de subir (resize + watermark)',
+        boton: 'Crear cliente y subir fotos',
+      },
+      amigos: {
+        label: 'Fotos para selección (sin marca de agua, 2000px)',
+        sub: 'Las fotos se procesan en tu navegador antes de subir (sin marca de agua, 2000px)',
+        boton: 'Crear perfil y subir fotos',
+      },
+    };
+    const esAmigos = () => tipoPerfil.value === 'amigos';
+
+    function aplicarPerfil() {
+      const t = textos[esAmigos() ? 'amigos' : 'cliente'];
+      paqueteGroup.hidden = esAmigos();
+      if (esAmigos()) paqueteSelect.value = '';
+      dropzoneLabel.textContent = t.label;
+      dropzoneSub.textContent = t.sub;
+      submitBtn.textContent = t.boton;
+    }
+    tipoPerfil.addEventListener('change', aplicarPerfil);
 
     const archivos: File[] = [];
 
@@ -168,7 +205,8 @@ const { data: paquetes } = await sb
           codigo,
           nombre_cliente: nombre,
           email_cliente: String(fd.get('email') ?? '') || null,
-          paquete_id: String(fd.get('paquete') ?? '') || null,
+          tipo_perfil: tipoPerfil.value,
+          paquete_id: esAmigos() ? null : (String(fd.get('paquete') ?? '') || null),
           fecha_sesion: String(fd.get('fecha') ?? '') || null,
         }),
       });
@@ -176,7 +214,7 @@ const { data: paquetes } = await sb
       if (!resCrea.ok) {
         setMsg(jc.error ?? 'Error creando sesión', 'error');
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Crear cliente y subir fotos';
+        aplicarPerfil();
         return;
       }
 
@@ -187,7 +225,7 @@ const { data: paquetes } = await sb
         const file = archivos[i];
         try {
           setStatus(i, 'Procesando...');
-          const blob = await window.imageProcessor.generaPreview(file);
+          const blob = await (esAmigos() ? window.imageProcessor.generaPreviewHD(file) : window.imageProcessor.generaPreview(file));
           setStatus(i, 'Subiendo...');
 
           const upForm = new FormData();

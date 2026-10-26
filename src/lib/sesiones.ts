@@ -78,6 +78,10 @@ function admin(env: Env) {
   });
 }
 
+export function esAmigos(s: { tipo_perfil?: string | null } | null | undefined): boolean {
+  return (s?.tipo_perfil ?? 'cliente') === 'amigos';
+}
+
 export function fotoUrl(env: Env, r2Key: string): string {
   const base = (env.R2_PUBLIC_URL ?? env.PUBLIC_R2_PUBLIC_URL ?? '').replace(/\/$/, '');
   return `${base}/${r2Key}`;

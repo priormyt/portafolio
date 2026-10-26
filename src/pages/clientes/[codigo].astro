@@ -2,7 +2,7 @@
 export const prerender = false;
 
 import Layout from '../../layouts/Layout.astro';
-import { getSesionByCodigo, fotoUrl, readEnv } from '../../lib/sesiones';
+import { getSesionByCodigo, fotoUrl, readEnv, esAmigos } from '../../lib/sesiones';
 
 const { codigo } = Astro.params;
 const codigoNormalizado = (codigo ?? '').toUpperCase();
@@ -32,10 +32,12 @@ if (!data) {
 
 const { sesion, paquete, fotosFinales, fotosPreview, selecciones } = data;
 const seleccionadas = new Set(selecciones.map((s) => s.foto_id));
-const limite = sesion.limite_fotos ?? paquete?.fotos_incluidas ?? 0;
+const amigos = esAmigos(sesion);
+const limite = amigos ? 0 : (sesion.limite_fotos ?? paquete?.fotos_incluidas ?? 0);
 const seleccionadasCount = selecciones.length;
-const extras = Math.max(0, seleccionadasCount - limite);
-const costoExtras = extras * Number(sesion.precio_extra ?? 0);
+const extras = amigos ? 0 : Math.max(0, seleccionadasCount - limite);
+const costoExtras = amigos ? 0 : extras * Number(sesion.precio_extra ?? 0);
+const lbSelect = amigos && sesion.estado === 'seleccion';
 
 const fotosFinalesPrincipales = fotosFinales.filter((f) => !f.parent_foto_id);
 const altByParent: Record<string, typeof fotosFinales[number]> = {};
@@ -139,24 +141,40 @@ const mailArchivadaUrl = `mailto:contacto@ante.photo?subject=${encodeURIComponen
         data-sesion-id={sesion.id}
         data-limite={limite}
         data-precio-extra={sesion.precio_extra}
+        data-perfil={amigos ? 'amigos' : 'cliente'}
       >
         <div class="seleccion-status">
-          <p class="seleccion-instructions">
-            Elige tus fotos favoritas. Tu paquete incluye <strong>{limite}</strong>.
-            Si quieres más, cada foto extra cuesta <strong>${sesion.precio_extra} MXN</strong>.
-          </p>
+          {amigos ? (
+            <p class="seleccion-instructions">
+              Elige las fotos que más te gusten. Se guardan al momento.
+            </p>
+          ) : (
+            <p class="seleccion-instructions">
+              Elige tus fotos favoritas. Tu paquete incluye <strong>{limite}</strong>.
+              Si quieres más, cada foto extra cuesta <strong>${sesion.precio_extra} MXN</strong>.
+            </p>
+          )}
 
           <div class="contador-bar">
-            <div class="contador-label">
-              Seleccionadas:
-              <span id="contadorActual">{seleccionadasCount}</span>
-              /
-              <span>{limite}</span>
-            </div>
-            <div id="extrasInfo" class="contador-extras" style={extras > 0 ? '' : 'display:none'}>
-              <span id="extrasCount">{extras}</span> extra{extras !== 1 ? 's' : ''} ·
-              <strong>+$<span id="extrasMonto">{costoExtras}</span> MXN</strong>
-            </div>
+            {amigos ? (
+              <div class="contador-label">
+                Seleccionadas:
+                <span id="contadorActual">{seleccionadasCount}</span>
+              </div>
+            ) : (
+              <div class="contador-label">
+                Seleccionadas:
+                <span id="contadorActual">{seleccionadasCount}</span>
+                /
+                <span>{limite}</span>
+              </div>
+            )}
+            {!amigos && (
+              <div id="extrasInfo" class="contador-extras" style={extras > 0 ? '' : 'display:none'}>
+                <span id="extrasCount">{extras}</span> extra{extras !== 1 ? 's' : ''} ·
+                <strong>+$<span id="extrasMonto">{costoExtras}</span> MXN</strong>
+              </div>
+            )}
           </div>
         </div>
 
@@ -172,6 +190,7 @@ const mailArchivadaUrl = `mailto:contacto@ante.photo?subject=${encodeURIComponen
                   src={fotoUrl(env, foto.r2_key)}
                   alt={`Foto ${i + 1} de la sesión de ${sesion.nombre_cliente}`}
                   loading="lazy"
+                  decoding={amigos ? 'async' : undefined}
                   draggable="false"
                   data-full={fotoUrl(env, foto.r2_key)}
                 />
@@ -192,13 +211,13 @@ const mailArchivadaUrl = `mailto:contacto@ante.photo?subject=${encodeURIComponen
         <div class="confirmar-bar">
           <button id="btnConfirmar" class="btn-confirmar" type="button" disabled={seleccionadasCount === 0}>
             Confirmar selección
-            {extras > 0 && ` y pagar $${costoExtras} MXN`}
+            {!amigos && extras > 0 && ` y pagar $${costoExtras} MXN`}
           </button>
         </div>
       </section>
     )}
 
-    {sesion.estado === 'pago_pendiente' && (
+    {!amigos && sesion.estado === 'pago_pendiente' && (
       sesion.comprobante_50_url ? (
         <section class="estado-pendiente" data-codigo={sesion.codigo}>
           <p class="estado-eyebrow">Pago en revisión</p>
@@ -273,7 +292,7 @@ const mailArchivadaUrl = `mailto:contacto@ante.photo?subject=${encodeURIComponen
       </section>
     )}
 
-    {sesion.estado === 'editando' && (
+    {(sesion.estado === 'editando' || (amigos && sesion.estado === 'pago_pendiente')) && (
       <section class="estado-editando">
         <p class="estado-titulo">Estamos editando tus fotos</p>
         <p class="estado-texto">
@@ -311,8 +330,13 @@ const mailArchivadaUrl = `mailto:contacto@ante.photo?subject=${encodeURIComponen
     role="dialog"
     aria-modal="true"
     aria-label="Foto ampliada"
+    data-lb-select={lbSelect ? '1' : undefined}
+    data-lb-zoom={lbSelect ? '1' : undefined}
   >
     <button class="lightbox-close" aria-label="Cerrar">×</button>
+    {lbSelect && (
+      <button class="lightbox-select" type="button" aria-pressed="false">Seleccionar</button>
+    )}
     <button class="lightbox-prev" aria-label="Anterior">‹</button>
     <img id="lightboxImg" src="" alt="" />
     <button class="lightbox-next" aria-label="Siguiente">›</button>
@@ -786,7 +810,7 @@ const mailArchivadaUrl = `mailto:contacto@ante.photo?subject=${encodeURIComponen
       -webkit-user-drag: none;
       user-select: none;
     }
-    .lightbox-close, .lightbox-prev, .lightbox-next {
+    .lightbox-close, .lightbox-prev, .lightbox-next, .lightbox-select {
       position: absolute;
       background: transparent;
       border: 0.5px solid rgba(245,242,237,0.3);
@@ -797,13 +821,49 @@ const mailArchivadaUrl = `mailto:contacto@ante.photo?subject=${encodeURIComponen
       cursor: pointer;
       transition: background 0.2s, border-color 0.2s;
     }
-    .lightbox-close:hover, .lightbox-prev:hover, .lightbox-next:hover {
+    .lightbox-close:hover, .lightbox-prev:hover, .lightbox-next:hover, .lightbox-select:hover {
       background: rgba(245,242,237,0.1);
       border-color: var(--paper);
     }
     .lightbox-close { top: 1.5rem; right: 1.5rem; }
     .lightbox-prev  { left: 1.5rem;  top: 50%; transform: translateY(-50%); }
     .lightbox-next  { right: 1.5rem; top: 50%; transform: translateY(-50%); }
+    .lightbox-select {
+      top: 1.5rem; left: 1.5rem;
+      width: auto;
+      padding: 0 1.2rem;
+      font-family: var(--f-mono);
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-wide);
+      text-transform: uppercase;
+    }
+    .lightbox-select[aria-pressed="true"] {
+      background: var(--paper);
+      color: var(--ink);
+      border-color: var(--paper);
+    }
+    .lightbox[data-lb-select] img {
+      max-width: 96vw;
+      max-height: 90vh;
+    }
+    .lightbox[data-lb-zoom] img { cursor: zoom-in; }
+    .lightbox[data-lb-zoom] .lightbox-close,
+    .lightbox[data-lb-zoom] .lightbox-prev,
+    .lightbox[data-lb-zoom] .lightbox-next,
+    .lightbox[data-lb-zoom] .lightbox-select,
+    .lightbox[data-lb-zoom] .lightbox-counter { position: fixed; }
+    .lightbox.zoomed {
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .lightbox.zoomed img {
+      width: 200vw;
+      max-width: none;
+      max-height: none;
+      flex: none;
+      margin: auto;
+      cursor: zoom-out;
+    }
     .lightbox-counter {
       position: absolute;
       bottom: 1.5rem;
@@ -825,7 +885,8 @@ const mailArchivadaUrl = `mailto:contacto@ante.photo?subject=${encodeURIComponen
       .galeria-zoom,
       .lightbox-close,
       .lightbox-prev,
-      .lightbox-next { cursor: none; }
+      .lightbox-next,
+      .lightbox-select { cursor: none; }
     }
 
     @media (max-width: 768px) {
@@ -854,8 +915,39 @@ const mailArchivadaUrl = `mailto:contacto@ante.photo?subject=${encodeURIComponen
       const altItems = Array.from(
         document.querySelectorAll<HTMLImageElement>('.galeria-frame img.galeria-alt[data-full]'),
       );
+      const lbSelectBtn = document.querySelector<HTMLButtonElement>('.lightbox-select');
+      const lbZoomOn = !!lightbox?.hasAttribute('data-lb-zoom');
       let currentIdx = 0;
       let inAltMode = false;
+      let toggleItem: ((item: HTMLElement) => void) | null = null;
+
+      const currentItem = () =>
+        items[currentIdx]?.closest<HTMLElement>('.galeria-item-selectable') ?? null;
+
+      const syncLbSelect = () => {
+        if (!lbSelectBtn) return;
+        const sel = !!currentItem()?.classList.contains('selected');
+        lbSelectBtn.setAttribute('aria-pressed', String(sel));
+        lbSelectBtn.textContent = sel ? '✓ En mi selección' : 'Seleccionar';
+      };
+
+      const resetZoom = () => lightbox?.classList.remove('zoomed');
+      const toggleZoom = () => {
+        if (!lightbox) return;
+        const on = lightbox.classList.toggle('zoomed');
+        if (on) {
+          lightbox.scrollTo((lightbox.scrollWidth - lightbox.clientWidth) / 2, (lightbox.scrollHeight - lightbox.clientHeight) / 2);
+        }
+      };
+      const isZoomed = () => !!lightbox?.classList.contains('zoomed');
+
+      const preload = (i: number) => {
+        if (items.length < 2) return;
+        for (const d of [1, -1]) {
+          const src = items[(i + d + items.length) % items.length].dataset.full;
+          if (src) new Image().src = src;
+        }
+      };
 
       const setNavVisible = (visible: boolean) => {
         if (lbPrev) lbPrev.style.display = visible ? '' : 'none';
@@ -878,17 +970,21 @@ const mailArchivadaUrl = `mailto:contacto@ante.photo?subject=${encodeURIComponen
         if (entering) enterLightbox();
         inAltMode = false;
         currentIdx = i;
+        resetZoom();
         lbImg.src = items[i].dataset.full ?? items[i].src;
         lbImg.alt = items[i].alt;
         lbCounter.textContent = `${String(i + 1).padStart(2, '0')} / ${String(items.length).padStart(2, '0')}`;
         setNavVisible(items.length > 1);
         lightbox.hidden = false;
+        syncLbSelect();
+        preload(i);
         if (entering) lbClose?.focus();
       };
       const openAlt = (img: HTMLImageElement) => {
         if (!lightbox || !lbImg || !lbCounter) return;
         enterLightbox();
         inAltMode = true;
+        resetZoom();
         lbImg.src = img.dataset.full ?? img.src;
         lbImg.alt = img.alt;
         lbCounter.textContent = 'Versión alterna';
@@ -899,6 +995,7 @@ const mailArchivadaUrl = `mailto:contacto@ante.photo?subject=${encodeURIComponen
       const closeLightbox = () => {
         if (!lightbox || lightbox.hidden) return;
         lightbox.hidden = true;
+        resetZoom();
         document.documentElement.toggleAttribute('data-scroll-lock', false);
         // Sin esto el foco cae al principio del documento al cerrar.
         lastFocused?.focus();
@@ -930,6 +1027,22 @@ const mailArchivadaUrl = `mailto:contacto@ante.photo?subject=${encodeURIComponen
       });
 
       lbClose?.addEventListener('click', closeLightbox);
+      lbSelectBtn?.addEventListener('click', () => {
+        const item = currentItem();
+        if (item) toggleItem?.(item);
+      });
+      let lastTap = 0;
+      if (lbZoomOn) {
+        lbImg?.addEventListener('click', (e) => {
+          if ((e as PointerEvent).pointerType === 'touch') {
+            const now = Date.now();
+            const doble = now - lastTap < 350;
+            lastTap = doble ? 0 : now;
+            if (!doble) return;
+          }
+          toggleZoom();
+        });
+      }
       document.querySelector('.lightbox-prev')?.addEventListener('click', () => nav(-1));
       document.querySelector('.lightbox-next')?.addEventListener('click', () => nav(1));
       document.addEventListener('keydown', (e) => {
@@ -937,10 +1050,15 @@ const mailArchivadaUrl = `mailto:contacto@ante.photo?subject=${encodeURIComponen
         if (e.key === 'Escape') closeLightbox();
         if (e.key === 'ArrowLeft') nav(-1);
         if (e.key === 'ArrowRight') nav(1);
+        if (lbSelectBtn && (e.key === 's' || e.key === 'S') && !e.metaKey && !e.ctrlKey && !e.altKey) {
+          e.preventDefault();
+          const item = currentItem();
+          if (item) toggleItem?.(item);
+        }
         if (e.key !== 'Tab') return;
         // Trampa de foco: es un diálogo modal, tabular fuera te dejaba
         // recorriendo la galería de atrás sin poder ver dónde estabas.
-        const focusables = [lbClose, lbPrev, lbNext].filter(
+        const focusables = [lbClose, lbSelectBtn, lbPrev, lbNext].filter(
           (el): el is HTMLButtonElement => !!el && el.offsetParent !== null,
         );
         if (focusables.length === 0) return;
@@ -972,6 +1090,7 @@ const mailArchivadaUrl = `mailto:contacto@ante.photo?subject=${encodeURIComponen
         const dy = e.changedTouches[0].clientY - touchY;
         // Solo gestos claramente horizontales, para no robarle el toque a un
         // scroll vertical ni a un tap en el fondo para cerrar.
+        if (isZoomed()) return;
         if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) nav(dx < 0 ? 1 : -1);
       }, { passive: true });
 
@@ -1039,21 +1158,29 @@ const mailArchivadaUrl = `mailto:contacto@ante.photo?subject=${encodeURIComponen
       const limite = parseInt(seccion.dataset.limite ?? '0', 10);
       const precioExtra = parseFloat(seccion.dataset.precioExtra ?? '0');
 
+      const esAmigosPerfil = seccion.dataset.perfil === 'amigos';
+
       const contadorEl = document.getElementById('contadorActual')!;
-      const extrasInfo = document.getElementById('extrasInfo')!;
-      const extrasCount = document.getElementById('extrasCount')!;
-      const extrasMonto = document.getElementById('extrasMonto')!;
+      const extrasInfo = document.getElementById('extrasInfo');
+      const extrasCount = document.getElementById('extrasCount');
+      const extrasMonto = document.getElementById('extrasMonto');
       const btnConfirmar = document.getElementById('btnConfirmar') as HTMLButtonElement;
 
       const refresh = () => {
         const seleccionadas = document.querySelectorAll('.galeria-item-selectable.selected').length;
         contadorEl.textContent = String(seleccionadas);
 
+        if (esAmigosPerfil) {
+          btnConfirmar.disabled = seleccionadas === 0;
+          btnConfirmar.classList.toggle('completo', seleccionadas >= 1);
+          return;
+        }
+
         const extras = Math.max(0, seleccionadas - limite);
         const monto = extras * precioExtra;
-        extrasCount.textContent = String(extras);
-        extrasMonto.textContent = String(monto);
-        extrasInfo.style.display = extras > 0 ? '' : 'none';
+        if (extrasCount) extrasCount.textContent = String(extras);
+        if (extrasMonto) extrasMonto.textContent = String(monto);
+        if (extrasInfo) extrasInfo.style.display = extras > 0 ? '' : 'none';
 
         btnConfirmar.disabled = seleccionadas === 0;
         // Con limite 0 (sesión sin paquete) basta con haber elegido algo.
@@ -1063,29 +1190,39 @@ const mailArchivadaUrl = `mailto:contacto@ante.photo?subject=${encodeURIComponen
           : 'Confirmar selección';
       };
 
-      document.querySelectorAll<HTMLElement>('.galeria-item-selectable').forEach((item) => {
+      // El endpoint alterna (no es idempotente): un segundo toggle mientras el
+      // primero vuela dejaría la UI y la BD desincronizadas.
+      toggleItem = async (item) => {
+        if (item.dataset.busy === '1') return;
+        item.dataset.busy = '1';
         const fotoId = item.dataset.fotoId!;
-        const frame = item.querySelector('.galeria-frame');
-        // Click en la foto (excluyendo el download): toggle selección
-        frame?.addEventListener('click', async (e) => {
-          e.preventDefault();
-          item.classList.toggle('selected');
-          refresh();
+        item.classList.toggle('selected');
+        refresh();
+        syncLbSelect();
 
-          try {
-            const res = await fetch('/api/seleccionar', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ sesionId, fotoId }),
-            });
-            if (!res.ok) throw new Error('Error al guardar');
-          } catch (err) {
-            // Revertir UI
-            item.classList.toggle('selected');
-            refresh();
-            console.error(err);
-            alert('No se pudo guardar la selección. Intenta de nuevo.');
-          }
+        try {
+          const res = await fetch('/api/seleccionar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sesionId, fotoId }),
+          });
+          if (!res.ok) throw new Error('Error al guardar');
+        } catch (err) {
+          item.classList.toggle('selected');
+          console.error(err);
+          alert('No se pudo guardar la selección. Intenta de nuevo.');
+        } finally {
+          delete item.dataset.busy;
+          refresh();
+          syncLbSelect();
+        }
+      };
+
+      document.querySelectorAll<HTMLElement>('.galeria-item-selectable').forEach((item) => {
+        // Click en la foto (excluyendo el download): toggle selección
+        item.querySelector('.galeria-frame')?.addEventListener('click', (e) => {
+          e.preventDefault();
+          toggleItem?.(item);
         });
       });
 

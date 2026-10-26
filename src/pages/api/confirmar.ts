@@ -3,7 +3,7 @@ export const prerender = false;
 import type { APIRoute } from 'astro';
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '../../lib/database.types';
-import { readEnv } from '../../lib/sesiones';
+import { readEnv, esAmigos } from '../../lib/sesiones';
 import { syncSesionToNotionBackground } from '../../lib/notion';
 import { notifyAdminConfirmacion, notifyClienteCambioEstado } from '../../lib/mail';
 import { notifyAdminWAConfirmacion } from '../../lib/whatsapp';
@@ -46,6 +46,26 @@ export const POST: APIRoute = async ({ request }) => {
 
   if (!numSelecciones || numSelecciones === 0) {
     return json({ error: 'no selections' }, 400);
+  }
+
+  if (esAmigos(sesion)) {
+    await sb
+      .from('sesiones')
+      .update({ estado: 'editando', fecha_confirmacion: new Date().toISOString() })
+      .eq('id', sesionId);
+
+    await syncSesionToNotionBackground(env, sesionId);
+    const adminArgs = {
+      codigo: sesion.codigo ?? sesionId,
+      nombre: sesion.nombre_cliente,
+      seleccionadas: numSelecciones,
+      extras: 0,
+      monto: 0,
+      perfil: 'amigos' as const,
+    };
+    await notifyAdminConfirmacion(env, adminArgs);
+    await notifyAdminWAConfirmacion(env, adminArgs);
+    return json({ ok: true, redirect: `/clientes/${sesion.codigo}` });
   }
 
   const limite = sesion.limite_fotos ?? sesion.paquete?.fotos_incluidas ?? 0;

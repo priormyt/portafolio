@@ -1,4 +1,5 @@
 import type { Env } from './sesiones';
+import type { TipoPerfil } from './database.types';
 
 const RESEND_URL = 'https://api.resend.com/emails';
 
@@ -158,14 +159,19 @@ function codigoBlockRow(codigo: string): string {
   </tr>`;
 }
 
-function timelineRow(estadoActual: 'seleccion' | 'pago_pendiente' | 'editando' | 'entregada'): string {
+function timelineRow(
+  estadoActual: 'seleccion' | 'pago_pendiente' | 'editando' | 'entregada',
+  perfil: TipoPerfil = 'cliente',
+): string {
   const labels: Record<string, string> = {
     seleccion: 'Selección',
     pago_pendiente: 'Pago de extras',
     editando: 'Edición',
     entregada: 'Entrega',
   };
-  const orden: Array<keyof typeof labels> = ['seleccion', 'pago_pendiente', 'editando', 'entregada'];
+  const orden: Array<keyof typeof labels> = perfil === 'amigos'
+    ? ['seleccion', 'editando', 'entregada']
+    : ['seleccion', 'pago_pendiente', 'editando', 'entregada'];
   const idx = orden.indexOf(estadoActual);
 
   const rows = orden.map((est, i) => {
@@ -327,11 +333,32 @@ const ETAPAS: Record<Etapa, {
   },
 };
 
+const ETAPAS_AMIGOS: Record<Exclude<Etapa, 'pago_pendiente'>, (typeof ETAPAS)[Etapa]> = {
+  seleccion: {
+    titulo: 'Ya puedes elegir tus fotos',
+    eyebrow: 'Tu sesión privada · Selección',
+    resumen: 'Tus fotos están listas en tu galería privada. Entra cuando quieras y marca las que más te gusten; tu selección se guarda al momento.',
+    tiempo: 'Sin prisa; tu selección se guarda al momento.',
+    siguiente: 'Cuando confirmes, empezamos a editar tus fotos.',
+  },
+  editando: {
+    titulo: 'Empezamos a editar tus fotos',
+    eyebrow: 'Tu sesión privada · Edición',
+    resumen: 'Tu selección entró al flujo de edición. Cada foto pasa por revisión cromática, retoque y revisión final.',
+    tiempo: 'Te avisamos en cuanto estén listas.',
+    siguiente: 'Te avisamos por este mismo correo en cuanto tu galería esté lista para descargar.',
+  },
+  entregada: ETAPAS.entregada,
+};
+
 export function buildClienteCambioEstadoEmail(
   env: Env,
-  args: { nombre: string; codigo: string; estado: Etapa },
+  args: { nombre: string; codigo: string; estado: Etapa; perfil?: TipoPerfil },
 ): { subject: string; html: string } {
-  const etapa = ETAPAS[args.estado];
+  const perfil = args.perfil ?? 'cliente';
+  const etapa = perfil === 'amigos' && args.estado !== 'pago_pendiente'
+    ? ETAPAS_AMIGOS[args.estado]
+    : ETAPAS[args.estado];
   const galeriaUrl = `${(env.PUBLIC_SITE_URL ?? '').replace(/\/$/, '')}/clientes/${args.codigo}`;
   const firstName = args.nombre.split(' ')[0] ?? args.nombre;
 
@@ -349,7 +376,7 @@ export function buildClienteCambioEstadoEmail(
     paragraphRow(`Hola <strong>${escapeHtml(firstName)}</strong>,`),
     paragraphRow(etapa.resumen),
     eyebrowRow('Etapa actual'),
-    timelineRow(args.estado),
+    timelineRow(args.estado, perfil),
     paragraphRow(`<strong style="color:${C.text};">Tiempo estimado.</strong> <span style="color:${C.textDim};">${escapeHtml(etapa.tiempo)}</span>`, { size: 'sm', topPad: 16 }),
     etapa.siguiente
       ? paragraphRow(`<strong style="color:${C.text};">Siguiente paso.</strong> <span style="color:${C.textDim};">${escapeHtml(etapa.siguiente)}</span>`, { size: 'sm', topPad: 6 })
@@ -370,7 +397,7 @@ export function buildClienteCambioEstadoEmail(
 
 export async function notifyClienteCambioEstado(
   env: Env,
-  args: { email: string; nombre: string; codigo: string; estado: Etapa },
+  args: { email: string; nombre: string; codigo: string; estado: Etapa; perfil?: TipoPerfil },
 ): Promise<void> {
   if (!args.email) return;
   const { subject, html } = buildClienteCambioEstadoEmail(env, args);
@@ -501,11 +528,14 @@ export async function notifyAdminLeadNuevo(
 
 export async function notifyAdminConfirmacion(
   env: Env,
-  args: { codigo: string; nombre: string; seleccionadas: number; extras: number; monto: number },
+  args: { codigo: string; nombre: string; seleccionadas: number; extras: number; monto: number; perfil?: TipoPerfil },
 ): Promise<void> {
   if (!env.ADMIN_EMAIL) return;
-  const conExtras = args.extras > 0;
-  const subject = conExtras
+  const amigos = args.perfil === 'amigos';
+  const conExtras = !amigos && args.extras > 0;
+  const subject = amigos
+    ? `${args.codigo} confirmó · ${args.seleccionadas} foto${args.seleccionadas !== 1 ? 's' : ''}`
+    : conExtras
     ? `${args.codigo} confirmó · ${args.extras} extras · $${args.monto} MXN`
     : `${args.codigo} confirmó · sin extras`;
 
@@ -519,7 +549,9 @@ export async function notifyAdminConfirmacion(
     items.push({ label: 'A cobrar', value: `<strong>$${args.monto} MXN</strong>` });
   }
 
-  const accion = conExtras
+  const accion = amigos
+    ? 'La sesión ya está en <strong>Editando</strong>. Márcala como <strong>Entregada</strong> cuando subas las finales.'
+    : conExtras
     ? 'Marca la sesión como <strong>Editando</strong> cuando recibas el pago de extras.'
     : 'Sin extras. Pasa a <strong>Editando</strong> cuando empieces a editar.';
 

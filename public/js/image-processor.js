@@ -1,6 +1,7 @@
 /**
  * Procesa imágenes en el navegador usando Canvas:
  * - generaPreview(file): redimensiona a 800px y aplica watermark "A" centrada
+ * - generaPreviewHD(file): 2000px sin watermark (perfil amigos)
  * - generaFinal(file):   redimensiona a 2400px sin watermark, calidad alta
  *
  * Devuelve un Blob (JPEG) listo para subir.
@@ -8,6 +9,9 @@
 window.imageProcessor = {
   async generaPreview(file) {
     return procesar(file, { maxDim: 800, quality: 0.78, watermark: true });
+  },
+  async generaPreviewHD(file) {
+    return procesar(file, { maxDim: 2000, quality: 0.84, watermark: false });
   },
   async generaFinal(file) {
     return procesar(file, { maxDim: 2400, quality: 0.92, watermark: false });

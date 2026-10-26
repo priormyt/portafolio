@@ -2,7 +2,7 @@ export const prerender = false;
 
 import type { APIRoute } from 'astro';
 import { createClient } from '@supabase/supabase-js';
-import type { Database } from '../../../lib/database.types';
+import type { Database, TipoPerfil } from '../../../lib/database.types';
 import { readEnv } from '../../../lib/sesiones';
 import { requireAdmin } from '../../../lib/admin-auth';
 import { syncSesionToNotionBackground } from '../../../lib/notion';
@@ -20,6 +20,7 @@ export const POST: APIRoute = async ({ request }) => {
     paquete_id?: string;
     limite_fotos?: number;
     fecha_sesion?: string;
+    tipo_perfil?: TipoPerfil;
   };
   try {
     body = await request.json();
@@ -32,6 +33,10 @@ export const POST: APIRoute = async ({ request }) => {
   if (!codigo || !nombre) return json({ error: 'codigo y nombre son requeridos' }, 400);
   if (!/^[A-Z0-9]+$/.test(codigo)) return json({ error: 'el código solo puede tener A-Z y 0-9' }, 400);
 
+  const perfil = body.tipo_perfil ?? 'cliente';
+  if (perfil !== 'cliente' && perfil !== 'amigos') return json({ error: 'tipo_perfil inválido' }, 400);
+  const amigos = perfil === 'amigos';
+
   const sb = createClient<Database>(env.PUBLIC_SUPABASE_URL!, env.SUPABASE_SERVICE_ROLE_KEY!, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
@@ -41,8 +46,8 @@ export const POST: APIRoute = async ({ request }) => {
   if (existing) return json({ error: `Ya existe un cliente con código ${codigo}` }, 409);
 
   // Resolver paquete (necesario para limite_fotos default)
-  let limite = body.limite_fotos ?? null;
-  if (body.paquete_id && limite == null) {
+  let limite = amigos ? null : (body.limite_fotos ?? null);
+  if (!amigos && body.paquete_id && limite == null) {
     const { data: pq } = await sb
       .from('paquetes')
       .select('fotos_incluidas')
@@ -57,8 +62,9 @@ export const POST: APIRoute = async ({ request }) => {
       codigo,
       nombre_cliente: nombre,
       email_cliente: body.email_cliente?.trim() || null,
-      paquete_id: body.paquete_id || null,
+      paquete_id: amigos ? null : (body.paquete_id || null),
       limite_fotos: limite,
+      ...(amigos ? { tipo_perfil: 'amigos' as const, precio_extra: 0 } : {}),
       fecha_sesion: body.fecha_sesion || null,
       estado: 'seleccion',
     })
@@ -78,6 +84,7 @@ export const POST: APIRoute = async ({ request }) => {
       nombre: sesion.nombre_cliente,
       codigo: sesion.codigo ?? '',
       estado: 'seleccion',
+      perfil,
     });
   }
 

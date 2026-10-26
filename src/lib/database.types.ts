@@ -20,6 +20,8 @@ export interface Paquete {
   created_at: string;
 }
 
+export type TipoPerfil = 'cliente' | 'amigos';
+
 export interface Sesion {
   id: string;
   codigo: string | null;
@@ -35,6 +37,7 @@ export interface Sesion {
   limite_fotos: number | null;
   precio_extra: number;
   estado: SesionEstado;
+  tipo_perfil: TipoPerfil;
   fecha_sesion: string | null;
   fecha_confirmacion: string | null;
   fecha_pago: string | null;
