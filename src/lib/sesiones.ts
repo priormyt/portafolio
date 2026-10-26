@@ -140,12 +140,17 @@ export async function toggleSeleccion(
   fotoId: string,
 ): Promise<{ seleccionada: boolean }> {
   const sb = admin(env);
+  const { data: sesion } = await sb
+    .from('sesiones')
+    .select('tipo_perfil')
+    .eq('id', sesionId)
+    .maybeSingle();
   const { data: foto } = await sb
     .from('fotos')
     .select('id')
     .eq('id', fotoId)
     .eq('sesion_id', sesionId)
-    .in('tipo', ['preview', 'final'])
+    .in('tipo', esAmigos(sesion) ? ['preview', 'final', 'favorita'] : ['preview', 'final'])
     .maybeSingle();
   if (!foto) throw new Error('foto no seleccionable');
 

@@ -462,6 +462,13 @@
   display: flex;
   gap: 1rem;
 }
+.selection-list .fav-tag {
+  color: var(--accent);
+  border: 0.5px solid var(--accent);
+  padding: 0 0.5rem;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
 .selection-list .nota {
   color: var(--accent);
   font-style: italic;
