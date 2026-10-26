@@ -175,7 +175,8 @@ const mailArchivadaUrl = `mailto:contacto@ante.photo?subject=${encodeURIComponen
         <div class="seleccion-status">
           {amigos ? (
             <p class="seleccion-instructions">
-              Elige las fotos que más te gusten. Se guardan al momento.
+              Elige todas las fotos que quieras, sin límite. Se guardan al momento;
+              cuando termines, presiona <strong>Ya terminé</strong>.
             </p>
           ) : (
             <p class="seleccion-instructions">
@@ -245,7 +246,7 @@ const mailArchivadaUrl = `mailto:contacto@ante.photo?subject=${encodeURIComponen
 
         <div class="confirmar-bar">
           <button id="btnConfirmar" class="btn-confirmar" type="button" disabled={seleccionadasCount === 0}>
-            Confirmar selección
+            {amigos ? `Ya terminé · ${seleccionadasCount} ${seleccionadasCount === 1 ? 'foto' : 'fotos'}` : 'Confirmar selección'}
             {!amigos && extras > 0 && ` y pagar $${costoExtras} MXN`}
           </button>
         </div>
@@ -1484,6 +1485,7 @@ const mailArchivadaUrl = `mailto:contacto@ante.photo?subject=${encodeURIComponen
         if (esAmigosPerfil) {
           btnConfirmar.disabled = seleccionadas === 0;
           btnConfirmar.classList.toggle('completo', seleccionadas >= 1);
+          btnConfirmar.textContent = `Ya terminé · ${seleccionadas} ${seleccionadas === 1 ? 'foto' : 'fotos'}`;
           return;
         }
 
@@ -1547,7 +1549,13 @@ const mailArchivadaUrl = `mailto:contacto@ante.photo?subject=${encodeURIComponen
       });
 
       btnConfirmar?.addEventListener('click', async () => {
-        if (!confirm('¿Confirmar tu selección? Después de esto ya no podrás cambiarla.')) return;
+        // En amigos no hay límite: el aviso dice cuántas lleva para que nadie
+        // cierre la selección creyendo que solo podía elegir una.
+        const n = document.querySelectorAll('.galeria-item-selectable.selected, .fav-selectable.selected').length;
+        const msg = esAmigosPerfil
+          ? `Elegiste ${n} ${n === 1 ? 'foto' : 'fotos'}. Puedes elegir todas las que quieras.\n\n¿Ya terminaste? Después de confirmar ya no podrás cambiar tu selección.`
+          : '¿Confirmar tu selección? Después de esto ya no podrás cambiarla.';
+        if (!confirm(msg)) return;
         btnConfirmar.disabled = true;
         btnConfirmar.textContent = 'Procesando...';
         try {
